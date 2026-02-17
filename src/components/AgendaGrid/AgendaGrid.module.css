@@ -1,0 +1,87 @@
+.grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+/* — Esqueleto de carga — */
+.loadingWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.skeleton {
+    height: 260px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(90deg,
+            var(--color-border-light) 25%,
+            var(--color-border) 50%,
+            var(--color-border-light) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* — Estado vacío — */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-16) var(--space-6);
+    text-align: center;
+    animation: fadeIn 0.3s ease both;
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-4);
+}
+
+.emptyTitle {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+}
+
+.emptySubtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    max-width: 360px;
+}
+
+/* — Conteo de sesiones — */
+.countBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    background-color: rgba(13, 43, 78, 0.06);
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-4);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
