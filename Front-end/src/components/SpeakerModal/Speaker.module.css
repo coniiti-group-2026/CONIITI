@@ -1,0 +1,212 @@
+/* ===================================================
+   Speaker.module.css
+   Estilos del modal de perfil de ponente
+   Paleta: Azul CONIITI + Dorado de acento
+   =================================================== */
+
+/* Capa oscura semitransparente que cubre toda la pantalla al abrir el modal */
+/* Agregamos padding para asegurar que el modal nunca toque los bordes de la ventana */
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    /* Espacio de seguridad para que el modal no se pegue a los bordes */
+    animation: fadeIn 0.2s ease;
+    overflow-y: auto;
+    /* Permite scroll en la capa de fondo si el modal es muy grande */
+}
+
+/* Caja principal del modal: fondo azul profundo con gradiente descendente */
+/* Ahora el scroll se aplica a TODA la tarjeta */
+.modal {
+    background: linear-gradient(170deg, var(--color-primary-dark) 0%, #0f2744 60%, #102035 100%);
+    border: 1px solid rgba(212, 160, 23, 0.2);
+    border-radius: 16px;
+    width: 100%;
+    /* Ancho aumentado según solicitud del usuario */
+    max-width: 950px;
+    /* Limitamos la altura para que la barra de scroll aparezca cuando sea necesario */
+    max-height: 90vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* CAMBIO CLAVE: Scroll vertical para toda la tarjeta */
+    overflow-y: auto;
+    overflow-x: hidden;
+    animation: slideUp 0.25s ease;
+}
+
+/* Personalización de la barra de scroll para toda la tarjeta */
+.modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal::-webkit-scrollbar-track {
+    background: rgba(9, 29, 54, 0.5);
+    border-radius: 0 16px 16px 0;
+}
+
+.modal::-webkit-scrollbar-thumb {
+    background: var(--color-accent-dark);
+    border-radius: 10px;
+    border: 2px solid var(--color-primary-dark);
+}
+
+.modal::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
+}
+
+/* Botón X para cerrar el modal — ahora FIJO en la ventana para que siempre sea accesible */
+.closeBtn {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    z-index: 300;
+    /* Por encima de todo */
+    background: var(--color-primary-dark);
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent-light);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Al pasar el cursor, el botón gira y cambia a dorado sólido */
+.closeBtn:hover {
+    background: var(--color-accent);
+    color: var(--color-primary-dark);
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* Sección superior con foto, nombre, cargo, universidad y país */
+.header {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    padding: 2rem;
+    /* Línea divisora sutil en color dorado para separar del contenido biográfico */
+    border-bottom: 1px solid rgba(212, 160, 23, 0.15);
+}
+
+/* Foto circular del ponente con borde dorado de acento */
+.photo {
+    width: 120px;
+    /* Un poco más grande para el nuevo ancho de tarjeta */
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--color-accent);
+    flex-shrink: 0;
+}
+
+/* Contenedor del texto (nombre, cargo, universidad, país) */
+.headerInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.name {
+    font-size: 1.5rem;
+    /* Un poco más grande */
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0;
+}
+
+.role {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+}
+
+.affiliation {
+    font-size: 1rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    margin: 0;
+}
+
+.country {
+    font-size: 0.85rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+}
+
+/* Sección inferior con la biografía — ahora fluye con el scroll de la tarjeta */
+.body {
+    padding: 2rem;
+}
+
+.bioTitle {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--color-accent-dark);
+    margin: 0 0 1rem;
+}
+
+.bio {
+    font-size: 1.05rem;
+    /* Letra un poquito más grande para el ancho nuevo */
+    color: #cbd5e1;
+    line-height: 1.8;
+    margin: 0;
+}
+
+/* Aparición gradual del fondo oscuro */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* El modal sube suavemente al abrirse */
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .modal {
+        max-width: 95%;
+        max-height: 95vh;
+    }
+}
