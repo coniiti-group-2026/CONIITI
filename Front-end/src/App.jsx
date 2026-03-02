@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import styles from './App.module.css';
-import Navbar from './components/Navbar/Navbar';
-import Footer from './components/Footer/Footer';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import styles from './styles/App.module.css';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Agenda from './pages/Agenda';
 import Memories from './pages/Memories';
@@ -9,10 +10,9 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Pages from './pages/Paginas';
 import MyConferences from './pages/MyConferences';
+import Login from './pages/Login'; // Importamos la nueva vista de Login
 
 export default function App() {
-    const [currentPage, setCurrentPage] = useState('Agenda');
-
     // Estado global de sesiones pre-inscritas: Set de IDs
     const [registeredIds, setRegisteredIds] = useState(new Set());
 
@@ -29,30 +29,26 @@ export default function App() {
         });
     };
 
-    const renderPage = () => {
-        switch (currentPage) {
-            case 'Inicio': return <Home />;
-            case 'Agenda': return <Agenda registeredIds={registeredIds} onToggleRegister={toggleRegistered} />;
-            case 'Mis Conferencias': return <MyConferences registeredIds={registeredIds} onToggleRegister={toggleRegistered} />;
-            case 'Memorias': return <Memories />;
-            case 'Acerca de': return <About />;
-            case 'Contacto': return <Contact />;
-            case 'Páginas': return <Pages />;
-            default: return <Agenda registeredIds={registeredIds} onToggleRegister={toggleRegistered} />;
-        }
-    };
-
     return (
-        <div className={styles.app}>
-            <Navbar
-                onNavigate={setCurrentPage}
-                activePage={currentPage}
-                registeredCount={registeredIds.size}
-            />
-            <main className={styles.main}>
-                {renderPage()}
-            </main>
-            <Footer />
-        </div>
+        <BrowserRouter>
+            <div className={styles.app}>
+                <Navbar registeredCount={registeredIds.size} />
+                <main className={styles.main}>
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/agenda" element={<Agenda registeredIds={registeredIds} onToggleRegister={toggleRegistered} />} />
+                        <Route path="/mis-conferencias" element={<MyConferences registeredIds={registeredIds} onToggleRegister={toggleRegistered} />} />
+                        <Route path="/memorias" element={<Memories />} />
+                        <Route path="/acerca-de" element={<About />} />
+                        <Route path="/contacto" element={<Contact />} />
+                        <Route path="/paginas" element={<Pages />} />
+                        <Route path="/login" element={<Login />} />
+                        {/* Ruta por defecto (404 o fallback) */}
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </main>
+                <Footer />
+            </div>
+        </BrowserRouter>
     );
 }

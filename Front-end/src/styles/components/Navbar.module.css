@@ -1,0 +1,397 @@
+/* ══════════════════════════════════════════
+   NAVBAR — Identidad Visual CONIITI
+   ══════════════════════════════════════════ */
+
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0 2rem;
+    height: 72px;
+    background: linear-gradient(135deg,
+            var(--color-primary-dark) 0%,
+            var(--color-primary) 100%);
+    border-bottom: 2px solid var(--color-accent-dark);
+    box-shadow: 0 4px 24px rgba(9, 29, 54, 0.5);
+}
+
+/* ── Marca ── */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.logoImg {
+    height: 46px;
+    width: 46px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 3px;
+    transition: transform 0.2s ease;
+}
+
+.brand:hover .logoImg {
+    transform: scale(1.07);
+}
+
+.brandText {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1;
+}
+
+.brandName {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.04em;
+}
+
+.accent {
+    color: var(--color-accent);
+}
+
+.brandEdition {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: rgba(212, 160, 23, 0.75);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 3px;
+}
+
+/* ── Separador visual ── */
+.navbar::after {
+    content: '';
+    display: block;
+}
+
+/* ── Links de navegación ── */
+.links {
+    display: flex;
+    list-style: none;
+    margin: 0 0 0 auto;
+    /* Mueve los links a la derecha */
+    padding: 0;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+/* ── Dropdown ── */
+.dropdownItem {
+    position: relative;
+}
+
+.chevron {
+    transition: transform 0.2s ease;
+    margin-left: 3px;
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-primary-dark);
+    border: 1px solid var(--color-accent-dark);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 24px rgba(9, 29, 54, 0.6);
+    list-style: none;
+    padding: 0.35rem 0;
+    margin: 0;
+    min-width: 190px;
+    z-index: 200;
+    animation: dropIn 0.15s ease;
+}
+
+@keyframes dropIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.dropdownLink {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.55rem 1rem;
+    background: none;
+    border: none;
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.dropdownLink:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.dropdownLinkActive {
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: var(--color-accent);
+    color: var(--color-primary-dark);
+    border-radius: 99px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.link {
+    position: relative;
+    background: none;
+    border: none;
+    padding: 0.45rem 0.85rem;
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: color 0.2s ease, background 0.2s ease;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Estado activo */
+.link.active {
+    color: var(--color-accent);
+    font-weight: 700;
+    background: rgba(212, 160, 23, 0.1);
+}
+
+.activeDot {
+    display: block;
+    width: 20px;
+    height: 2px;
+    border-radius: 99px;
+    background: var(--color-accent);
+}
+
+/* ── Buscador ── */
+.searchWrapper {
+    position: relative;
+    margin-left: 1rem;
+    width: 240px;
+    flex-shrink: 0;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.45);
+    pointer-events: none;
+    font-size: 0.95rem;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 8px 12px 8px 38px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    color: #fff;
+    transition: all 0.2s ease;
+    outline: none;
+    font-family: var(--font-family);
+    box-sizing: border-box;
+}
+
+.searchInput::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.searchInput:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.15);
+}
+
+/* ── Hamburguesa (móvil) ── */
+.hamburger {
+    display: none;
+    background: none;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: var(--radius-md);
+    padding: 6px 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.hamburger:hover,
+.hamburgerOpen {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: rgba(212, 160, 23, 0.08);
+}
+
+/* ── Responsivo ── */
+@media (max-width: 768px) {
+    .navbar {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 0.75rem 1rem;
+    }
+
+    .hamburger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .searchWrapper {
+        display: none;
+    }
+
+    .links {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.25rem;
+        padding: 0.5rem 0 0.75rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 0.5rem;
+    }
+
+    .linksOpen {
+        display: flex;
+    }
+
+    .link {
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 0.65rem 1rem;
+        border-radius: var(--radius-md);
+    }
+
+    .activeDot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
+}
+
+
+/* AUTH */
+/* ---- AGREGADO PARA AUTH ---- */
+.rightControls {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.authWrapper {
+    display: flex;
+    align-items: center;
+}
+
+.loginBtn {
+    background-color: transparent;
+    color: var(--color-accent);
+    border: 2px solid var(--color-accent);
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.loginBtn:hover {
+    background-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+}
+
+.userProfile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.userName {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.logoutBtn {
+    background-color: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logoutBtn:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+
+@media (max-width: 768px) {
+    .rightControls {
+        gap: 0.8rem;
+    }
+
+    .userName {
+        display: none;
+    }
+}

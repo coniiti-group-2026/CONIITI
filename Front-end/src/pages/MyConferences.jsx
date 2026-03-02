@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import AgendaGrid from '../components/AgendaGrid/AgendaGrid';
-import SpeakerModal from '../components/SpeakerModal/SpeakerModal';
+import AgendaGrid from '../components/AgendaGrid';
+import SpeakerModal from '../components/SpeakerModal';
 import { getSpeakerById, getAllSessions } from '../services/agendaService';
 import { FiBookmark } from 'react-icons/fi';
-import styles from './MyConferences.module.css';
+import styles from '../styles/pages/MyConferences.module.css';
 
 /**
  * MyConferences — muestra las sesiones en las que el usuario se pre-inscribió.

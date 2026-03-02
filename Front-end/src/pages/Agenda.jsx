@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import LiveFilter from '../components/LiveFilter/LiveFilter';
-import AgendaGrid from '../components/AgendaGrid/AgendaGrid';
-import SpeakerModal from '../components/SpeakerModal/SpeakerModal';
+import LiveFilter from '../components/LiveFilter';
+import AgendaGrid from '../components/AgendaGrid';
+import SpeakerModal from '../components/SpeakerModal';
 import { useAgenda } from '../hooks/useAgenda';
 import { usePolling } from '../hooks/usePolling';
 import { getSpeakerById } from '../services/agendaService';
-import styles from '../App.module.css';
+import styles from '../styles/App.module.css';
 
 /**
  * Agenda — página de agenda del congreso.

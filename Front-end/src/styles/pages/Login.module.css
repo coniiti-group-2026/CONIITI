@@ -1,0 +1,138 @@
+/* estilos formulario login */
+
+.loginContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 72px);
+    /* Restar la altura del header */
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+}
+
+.loginCard {
+    background: white;
+    width: 100%;
+    max-width: 450px;
+    /* En un iPad y PC no pasará de este ancho */
+    padding: 3rem 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(9, 29, 54, 0.08);
+    border: 1px solid rgba(31, 105, 182, 0.1);
+    animation: slideUp 0.4s ease-out forwards;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.title {
+    color: var(--color-primary-dark, #091D36);
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.subtitle {
+    color: var(--text-muted, #666);
+    font-size: 0.95rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.inputGroup label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary, #1F69B6);
+}
+
+.inputGroup input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.inputGroup input:focus {
+    border-color: var(--color-accent, #D4A017);
+    box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.15);
+}
+
+.submitBtn {
+    width: 100%;
+    background-color: var(--color-primary, #1F69B6);
+    color: white;
+    border: none;
+    padding: 0.9rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.submitBtn:hover {
+    background-color: var(--color-primary-dark, #091D36);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(31, 105, 182, 0.3);
+}
+
+.registerLink {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted, #666);
+}
+
+.linkBtn {
+    background: none;
+    border: none;
+    color: var(--color-accent, #D4A017);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.linkBtn:hover {
+    text-decoration: underline;
+}
+
+/* Responsividad extra para móviles pequeños */
+@media (max-width: 480px) {
+    .loginCard {
+        padding: 2rem 1.5rem;
+        /* Menos relleno a los lados en móvil */
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+}
