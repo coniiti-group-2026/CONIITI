@@ -51,7 +51,7 @@ export default function Navbar({ registeredCount = 0 }) {
                     <span className={styles.brandName}>
                         <span className={styles.accent}>C</span>ONIITI
                     </span>
-                    <span className={styles.brandEdition}>XI Edición · 2025</span>
+                    <span className={styles.brandEdition}>XI Edición · 2026 v1</span>
                 </div>
             </Link>
 
@@ -138,6 +138,11 @@ export default function Navbar({ registeredCount = 0 }) {
                 <div className={styles.authWrapper}>
                     {user.isLoggedIn ? (
                         <div className={styles.userProfile}>
+                            {user.role === 'staff' && (
+                                <Link to="/staff" className={styles.staffLink} onClick={closeMenu}>
+                                    Panel Staff
+                                </Link>
+                            )}
                             <span className={styles.userName}>{user.data?.name}</span>
                             <button className={styles.logoutBtn} onClick={() => { logout(); navigate('/'); }}>
                                 Cerrar Sesión

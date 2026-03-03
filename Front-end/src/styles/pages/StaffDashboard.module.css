@@ -1,0 +1,308 @@
+/* ══════════════════════════════════════
+   STAFF DASHBOARD — Panel de Administración
+   ══════════════════════════════════════ */
+
+.page {
+    padding: 0;
+    min-height: calc(100vh - 76px);
+    width: 100%;
+}
+
+/* ── Encabezado del panel ── */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(31, 105, 182, 0.15);
+}
+
+.headerLeft h1 {
+    font-size: 1.75rem;
+    color: var(--color-primary-dark);
+    margin-bottom: 0.25rem;
+}
+
+.headerLeft p {
+    font-size: 0.9rem;
+    color: var(--color-text-muted, #888);
+}
+
+.newBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.4rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+    white-space: nowrap;
+}
+
+.newBtn:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+}
+
+/* ── Tarjeta / Tabla ── */
+.card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(9, 29, 54, 0.07);
+    border: 1px solid rgba(31, 105, 182, 0.08);
+    /* Sin overflow: el tableWrapper maneja el scroll horizontal */
+}
+
+.tableWrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+}
+
+.table {
+    width: 100%;
+    min-width: 720px;
+    /* scroll solo en pantallas muy pequeñas */
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.table thead {
+    background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+    color: white;
+}
+
+/* Redondear las esquinas del header para que coincidan con la tarjeta */
+.table thead tr th:first-child {
+    border-radius: 16px 0 0 0;
+}
+
+.table thead tr th:last-child {
+    border-radius: 0 16px 0 0;
+}
+
+.table thead th {
+    padding: 0.75rem 0.85rem;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+    font-size: 0.78rem;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid rgba(31, 105, 182, 0.07);
+    transition: background 0.15s;
+}
+
+.table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: rgba(31, 105, 182, 0.04);
+}
+
+.table tbody td {
+    padding: 0.65rem 0.75rem;
+    color: var(--color-text, #333);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Solo el título puede romper línea */
+.table tbody td:first-child {
+    white-space: normal;
+    min-width: 140px;
+    max-width: 190px;
+}
+
+/* ── Badges de estado ── */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badgeNormal {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+}
+
+.badgeCambio {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+}
+
+.badgeRetrasado {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+}
+
+.badgePresencial {
+    background: rgba(31, 105, 182, 0.12);
+    color: var(--color-primary);
+}
+
+.badgeVirtual {
+    background: rgba(139, 92, 246, 0.12);
+    color: #7c3aed;
+}
+
+.badgeHibrido {
+    background: rgba(20, 184, 166, 0.12);
+    color: #0d9488;
+}
+
+/* ── Acciones por fila ── */
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.editBtn {
+    background: rgba(31, 105, 182, 0.1);
+    color: var(--color-primary);
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.editBtn:hover {
+    background: rgba(31, 105, 182, 0.2);
+}
+
+.deleteBtn {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.deleteBtn:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+/* ── Celda de Enlace Virtual ── */
+.linkCell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.verifiedBtn,
+.unverifiedBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.verifiedBtn {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+}
+
+.verifiedBtn:hover {
+    background: rgba(16, 185, 129, 0.25);
+}
+
+.unverifiedBtn {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+
+.unverifiedBtn:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.linkUrl {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-style: dotted;
+}
+
+.linkUrl:hover {
+    text-decoration-style: solid;
+}
+
+.noLink {
+    font-size: 0.78rem;
+    color: var(--color-text-muted, #aaa);
+    font-style: italic;
+}
+
+.presencialBadge {
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #aaa);
+}
+
+
+/* ── Estado vacío ── */
+.empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--color-text-muted, #888);
+}
+
+.empty p {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+}
+
+/* ── Contador ── */
+.count {
+    font-size: 0.85rem;
+    color: var(--color-text-muted, #888);
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid rgba(31, 105, 182, 0.07);
+    text-align: right;
+}
+
+/* ── Responsivo ── */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .newBtn {
+        width: 100%;
+        justify-content: center;
+    }
+}

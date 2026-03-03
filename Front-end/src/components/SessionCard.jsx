@@ -4,24 +4,60 @@ import {
     FiUser,
     FiMonitor,
     FiRefreshCw,
+    FiCalendar,
+    FiCheckCircle,
+    FiUsers,
+    FiAlertTriangle,
 } from 'react-icons/fi';
 import StatusBadge from './StatusBadge';
 import VirtualGatekeeper from './VirtualGatekeeper';
 import styles from '../styles/components/SessionCard.module.css';
-import { FiCalendar, FiCheckCircle } from 'react-icons/fi';
-import { useState } from 'react';
+
+/** Colores de track: mapea el valor del enum a una clase CSS */
+const TRACK_CLASS = {
+    'Inteligencia Artificial': styles.trackIA,
+    'Ciberseguridad': styles.trackCiber,
+    'Internet de las Cosas': styles.trackIOT,
+    'Desarrollo de Software': styles.trackDev,
+    'Ciencia de Datos': styles.trackDatos,
+    'Innovación y Tendencias': styles.trackInnova,
+};
+
+/** Clases para el badge de tipo de evento */
+const EVENT_CLASS = {
+    'Conferencia': styles.etConferencia,
+    'Taller': styles.etTaller,
+    'Simposio': styles.etSimposio,
+    'Panel': styles.etPanel,
+};
+
+/** Calcula el % de ocupación y devuelve el estado visual */
+function cuposInfo(totales = 0, inscritos = 0) {
+    const disponibles = totales - inscritos;
+    const pct = totales > 0 ? Math.round((inscritos / totales) * 100) : 0;
+    let estado = 'disponible'; // verde
+    if (pct >= 100) estado = 'lleno';
+    else if (pct >= 80) estado = 'casi-lleno';
+    return { disponibles, pct, estado };
+}
 
 /**
  * SessionCard — renderiza una sesión de agenda con todos los detalles.
- *
- * @param {{ session: import('../types/session').Session, index: number, onSpeakerClick: Function }} props
  */
-export default function SessionCard({ session, index, onSpeakerClick, isRegistered = false, onToggleRegister, mode = 'agenda' }) {
+export default function SessionCard({
+    session,
+    index,
+    onSpeakerClick,
+    isRegistered = false,
+    onToggleRegister,
+    mode = 'agenda',
+}) {
     const {
         titulo,
         ponente,
         afiliacion,
         track,
+        event_type,
         hora_inicio,
         hora_fin,
         salon,
@@ -32,6 +68,8 @@ export default function SessionCard({ session, index, onSpeakerClick, isRegister
         link_virtual,
         timestamp_actualizacion,
         descripcion,
+        cupos_totales = 0,
+        inscritos = 0,
     } = session;
 
     const lastUpdated = new Date(timestamp_actualizacion).toLocaleTimeString(
@@ -39,19 +77,30 @@ export default function SessionCard({ session, index, onSpeakerClick, isRegister
         { hour: '2-digit', minute: '2-digit' }
     );
 
-    // Estado controlado externamente desde App.jsx
+    const { disponibles, pct, estado } = cuposInfo(cupos_totales, inscritos);
+    const agotado = estado === 'lleno';
 
     return (
         <article
-            className={styles.card}
+            className={`${styles.card} ${agotado ? styles.cardFull : ''}`}
             style={{ animationDelay: `${index * 80}ms` }}
         >
-            <div className={styles.accentBar} />
+            {/* Barra de acento superior coloreada por track */}
+            <div className={`${styles.accentBar} ${TRACK_CLASS[track] ?? ''}`} />
 
             <div className={styles.body}>
-                {/* Track + Estado */}
+                {/* Track + Tipo de Evento + Estado logístico */}
                 <div className={styles.topRow}>
-                    <span className={styles.track}>{track}</span>
+                    <div className={styles.topLeft}>
+                        <span className={`${styles.track} ${TRACK_CLASS[track] ?? ''}`}>
+                            {track}
+                        </span>
+                        {event_type && (
+                            <span className={`${styles.eventType} ${EVENT_CLASS[event_type] ?? ''}`}>
+                                {event_type}
+                            </span>
+                        )}
+                    </div>
                     <StatusBadge
                         status={status_logistico}
                         timestamp={timestamp_actualizacion}
@@ -65,15 +114,37 @@ export default function SessionCard({ session, index, onSpeakerClick, isRegister
                 {/* Descripción */}
                 <p className={styles.description}>{descripcion}</p>
 
-                {/* Información meta */}
+                {/* Barra de cupos */}
+                {cupos_totales > 0 && (
+                    <div className={styles.cuposWrapper}>
+                        <div className={styles.cuposHeader}>
+                            <span className={styles.cuposLabel}>
+                                <FiUsers size={13} />
+                                Cupos
+                            </span>
+                            <span className={`${styles.cuposCount} ${styles[`cupos_${estado.replace('-', '')}`]}`}>
+                                {agotado
+                                    ? '⚠ Cupos agotados'
+                                    : `${disponibles} de ${cupos_totales} disponibles`
+                                }
+                            </span>
+                        </div>
+                        <div className={styles.cuposBarBg}>
+                            <div
+                                className={`${styles.cuposBarFill} ${styles[`cuposFill_${estado.replace('-', '')}`]}`}
+                                style={{ width: `${Math.min(pct, 100)}%` }}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Grid de meta-datos */}
                 <div className={styles.metaGrid}>
                     <div className={styles.metaItem}>
                         <FiClock className={styles.metaIcon} />
                         <div>
                             <div className={styles.metaLabel}>Horario</div>
-                            <div className={styles.metaValue}>
-                                {hora_inicio} – {hora_fin}
-                            </div>
+                            <div className={styles.metaValue}>{hora_inicio} – {hora_fin}</div>
                         </div>
                     </div>
 
@@ -96,10 +167,9 @@ export default function SessionCard({ session, index, onSpeakerClick, isRegister
                             >
                                 {ponente}
                             </button>
-                            <div className={styles.timestamp}>{afiliacion}</div>
+                            <div className={styles.metaSubLabel}>{afiliacion}</div>
                         </div>
                     </div>
-
 
                     <div className={styles.metaItem}>
                         <FiMonitor className={styles.metaIcon} />
@@ -110,14 +180,14 @@ export default function SessionCard({ session, index, onSpeakerClick, isRegister
                     </div>
                 </div>
 
-                {/* Pie: Enlace virtual + marca de tiempo */}
+                {/* Pie: Enlace virtual + timestamp */}
                 <div className={styles.footer}>
                     <VirtualGatekeeper
                         modalidad={modalidad}
                         linkVirtual={link_virtual}
                         linkVerificado={link_verificado}
+                        isRegistered={isRegistered}
                     />
-
                     <span className={styles.timestamp}>
                         <FiRefreshCw size={12} />
                         Actualizado: {lastUpdated}
@@ -127,17 +197,34 @@ export default function SessionCard({ session, index, onSpeakerClick, isRegister
 
             {/* Botón pre-inscripción / validar asistencia */}
             {mode === 'mis-conferencias' ? (
-                <button className={styles.validateBtn}>
-                    <FiCheckCircle /> Validar asistencia
-                </button>
+                <div className={styles.myConfActions}>
+                    <button className={`${styles.actionBtn} ${styles.validateBtn}`}>
+                        <FiCheckCircle /> Validar asistencia
+                    </button>
+                    <button
+                        className={`${styles.cancelBtn}`}
+                        onClick={() => onToggleRegister && onToggleRegister(session.id)}
+                        title="Cancelar pre-inscripción"
+                    >
+                        Cancelar inscripción
+                    </button>
+                </div>
             ) : (
                 <button
-                    className={isRegistered ? styles.registeredBtn : styles.registerBtn}
-                    onClick={() => onToggleRegister && onToggleRegister(session.id)}
+                    className={`${styles.actionBtn} ${agotado
+                        ? styles.fullBtn
+                        : isRegistered
+                            ? styles.registeredBtn
+                            : styles.registerBtn
+                        }`}
+                    onClick={() => !agotado && onToggleRegister && onToggleRegister(session.id)}
+                    disabled={agotado && !isRegistered}
                 >
-                    {isRegistered
-                        ? <><FiCheckCircle /> Pre-inscrito</>
-                        : <><FiCalendar /> Pre-inscribirse</>
+                    {agotado && !isRegistered
+                        ? <><FiAlertTriangle /> Sin cupos</>
+                        : isRegistered
+                            ? <><FiCheckCircle /> Pre-inscrito</>
+                            : <><FiCalendar /> Pre-inscribirse</>
                     }
                 </button>
             )}

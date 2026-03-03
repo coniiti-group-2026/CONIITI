@@ -1,3 +1,7 @@
+/* ══════════════════════════════════════
+   SESSION CARD
+   ══════════════════════════════════════ */
+
 .card {
     display: flex;
     flex-direction: column;
@@ -7,28 +11,35 @@
     overflow: hidden;
     transition: all var(--transition-base);
     animation: fadeInUp 0.4s ease both;
+    border: 1px solid transparent;
 }
 
 .card:hover {
     box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    border-color: rgba(31, 105, 182, 0.12);
 }
 
-/* — Barra de acento superior — */
+.cardFull {
+    opacity: 0.85;
+}
+
+/* ── Barra de acento superior (por track) ── */
 .accentBar {
-    height: 4px;
+    height: 5px;
     background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
 }
 
-/* — Cuerpo de la tarjeta — */
+/* ── Cuerpo ── */
 .body {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
     padding: var(--space-5) var(--space-6);
+    flex: 1;
 }
 
-/* — Fila superior: track + estado — */
+/* ── Fila superior ── */
 .topRow {
     display: flex;
     justify-content: space-between;
@@ -37,21 +48,89 @@
     flex-wrap: wrap;
 }
 
+.topLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* ── Track badge ── */
 .track {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
-    background-color: rgba(13, 43, 78, 0.06);
-    color: var(--color-primary);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
+    background: rgba(31, 105, 182, 0.1);
+    color: var(--color-primary);
 }
 
-/* — Título — */
+.track.trackIA {
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+}
+
+.track.trackCiber {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+}
+
+.track.trackIOT {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+}
+
+.track.trackDev {
+    background: rgba(96, 165, 250, 0.15);
+    color: #2563eb;
+}
+
+.track.trackDatos {
+    background: rgba(139, 92, 246, 0.12);
+    color: #7c3aed;
+}
+
+.track.trackInnova {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+}
+
+/* ── Tipo de Evento badge ── */
+.eventType {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.etConferencia {
+    background: rgba(31, 105, 182, 0.08);
+    color: var(--color-primary);
+}
+
+.etTaller {
+    background: rgba(14, 165, 233, 0.12);
+    color: #0284c7;
+}
+
+.etSimposio {
+    background: rgba(168, 85, 247, 0.12);
+    color: #9333ea;
+}
+
+.etPanel {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+}
+
+/* ── Título ── */
 .title {
     font-family: var(--font-display);
     font-size: var(--font-size-lg);
@@ -60,14 +139,84 @@
     line-height: var(--line-height-tight);
 }
 
-/* — Descripción — */
+/* ── Descripción ── */
 .description {
     font-size: var(--font-size-sm);
     color: var(--color-text-secondary);
     line-height: var(--line-height-relaxed);
 }
 
-/* — Fila meta: hora, salón, ponente, modalidad — */
+/* ══ BARRA DE CUPOS ══ */
+.cuposWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.cuposHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cuposLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.cuposCount {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Colores del texto según estado */
+.cupos_disponible {
+    color: #059669;
+}
+
+.cupos_casilleno {
+    color: #d97706;
+}
+
+.cupos_lleno {
+    color: #dc2626;
+}
+
+.cuposBarBg {
+    width: 100%;
+    height: 7px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.cuposBarFill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.6s ease;
+}
+
+/* Colores de la barra según estado */
+.cuposFill_disponible {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.cuposFill_casilleno {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.cuposFill_lleno {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+/* ── Grid de meta-datos ── */
 .metaGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -76,7 +225,7 @@
 
 .metaItem {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--space-2);
     font-size: var(--font-size-sm);
     color: var(--color-text);
@@ -86,6 +235,7 @@
     color: var(--color-accent);
     font-size: var(--font-size-base);
     flex-shrink: 0;
+    margin-top: 2px;
 }
 
 .metaLabel {
@@ -100,7 +250,13 @@
     font-weight: var(--font-weight-medium);
 }
 
-/* — Área del pie — */
+.metaSubLabel {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    margin-top: 1px;
+}
+
+/* ── Pie ── */
 .footer {
     display: flex;
     justify-content: space-between;
@@ -111,7 +267,6 @@
     border-top: 1px solid var(--color-border-light);
 }
 
-/* — Marca de tiempo actualizada — */
 .timestamp {
     display: flex;
     align-items: center;
@@ -120,6 +275,7 @@
     color: var(--color-text-muted);
 }
 
+/* ── Link del ponente ── */
 .speakerLink {
     background: none;
     border: none;
@@ -134,65 +290,102 @@
     outline: none;
 }
 
-.speakerLink:hover,
-.speakerLink:active,
-.speakerLink:focus-visible {
+.speakerLink:hover {
     color: var(--color-accent);
     text-decoration-style: solid;
 }
 
-.registerBtn,
-.registeredBtn {
+/* ── Botones de acción ── */
+.actionBtn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    margin-top: 12px;
-    padding: 8px 16px;
+    padding: 0.7rem 1.25rem;
+    margin: 0 var(--space-6) var(--space-5);
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     border: none;
+    width: calc(100% - 2 * var(--space-6));
 }
 
 .registerBtn {
     background: var(--color-primary);
-    color: var(--color-accent-light);
-    border: 1px solid var(--color-primary-light);
-    outline: none;
+    color: white;
 }
 
 .registerBtn:hover {
-    background: var(--color-primary-light);
-    color: var(--color-accent);
-    border-color: var(--color-primary-light);
+    background: var(--color-primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(9, 29, 54, 0.35);
+    box-shadow: 0 4px 14px rgba(31, 105, 182, 0.35);
 }
 
 .registeredBtn {
-    background: rgba(212, 160, 23, 0.12);
+    background: rgba(212, 160, 23, 0.1);
     color: var(--color-accent);
-    border: 1px solid rgba(212, 160, 23, 0.4);
+    border: 1.5px solid rgba(212, 160, 23, 0.5) !important;
+}
+
+.registeredBtn:hover {
+    background: rgba(212, 160, 23, 0.2);
+}
+
+.fullBtn {
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626;
+    cursor: not-allowed;
+    border: 1.5px solid rgba(239, 68, 68, 0.3) !important;
 }
 
 .validateBtn {
     background: linear-gradient(135deg, var(--color-accent-dark) 0%, var(--color-accent) 100%);
     color: var(--color-primary-dark);
-    border: none;
-    font-weight: 700;
-    letter-spacing: 0.03em;
 }
 
 .validateBtn:hover {
-    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
     transform: translateY(-1px);
     box-shadow: 0 4px 16px rgba(212, 160, 23, 0.35);
 }
 
+/* ── Mis Conferencias: contenedor de acciones ── */
+.myConfActions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0 var(--space-6) var(--space-5);
+}
 
-/* — Animación escalonada — */
+.myConfActions .actionBtn {
+    flex: 1;
+    margin: 0;
+    width: auto;
+}
+
+.cancelBtn {
+    background: transparent;
+    border: 1.5px solid rgba(239, 68, 68, 0.5);
+    color: #dc2626;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.6rem 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.15s;
+    flex-shrink: 0;
+}
+
+.cancelBtn:hover {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: #dc2626;
+    transform: translateY(-1px);
+}
+
+
+/* ── Animación ── */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -205,7 +398,7 @@
     }
 }
 
-/* — Responsivo — */
+/* ── Responsivo ── */
 @media (max-width: 640px) {
     .body {
         padding: var(--space-4);
@@ -218,5 +411,10 @@
     .footer {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .actionBtn {
+        margin: 0 var(--space-4) var(--space-4);
+        width: calc(100% - 2 * var(--space-4));
     }
 }

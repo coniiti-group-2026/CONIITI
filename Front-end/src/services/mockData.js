@@ -1,7 +1,7 @@
 import { SESSION_STATUS, SESSION_MODALITY, SESSION_TRACK, SESSION_EVENT_TYPE } from '../types/session';
 
 /**
- * Datos simulados de sesiones para el XI Congreso CONIITI (Oct 1–3, 2025).
+ * Datos simulados de sesiones para el XI Congreso CONIITI (Oct 1–3, 2026).
  * Incluye casos de borde: cambios de salón, enlaces no verificados, retrasos.
  *
  * @type {import('../types/session').Session[]}
@@ -22,7 +22,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.CONFERENCE,
         afiliacion: 'Universidad Nacional de Colombia',
         track: SESSION_TRACK.IA,
-        dia: '2025-10-01',
+        dia: '2026-10-01',
         hora_inicio: '09:00',
         hora_fin: '10:00',
         salon: 'Auditorio Principal',
@@ -33,6 +33,8 @@ export const MOCK_SESSIONS = [
         link_virtual: 'https://zoom.us/j/123456789',
         timestamp_actualizacion: oldChange,
         descripcion: 'Conferencia magistral sobre el impacto de la IA generativa en la transformación digital de América Latina.',
+        cupos_totales: 300,
+        inscritos: 287,
     },
     {
         id: 's1-002',
@@ -42,7 +44,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.CONFERENCE,
         afiliacion: 'Universidad Católica de Colombia',
         track: SESSION_TRACK.DESARROLLO,
-        dia: '2025-10-01',
+        dia: '2026-10-01',
         hora_inicio: '10:30',
         hora_fin: '12:00',
         salon: 'Sala B2',
@@ -53,6 +55,8 @@ export const MOCK_SESSIONS = [
         link_virtual: null,
         timestamp_actualizacion: recentChange,
         descripcion: 'Taller práctico de construcción de APIs RESTful con FastAPI, autenticación JWT y documentación automática.',
+        cupos_totales: 40,
+        inscritos: 38,
     },
     {
         id: 's1-003',
@@ -62,7 +66,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.CONFERENCE,
         afiliacion: 'Universidad de los Andes',
         track: SESSION_TRACK.CIBERSEGURIDAD,
-        dia: '2025-10-01',
+        dia: '2026-10-01',
         hora_inicio: '10:30',
         hora_fin: '11:30',
         salon: 'Sala C3',
@@ -73,6 +77,8 @@ export const MOCK_SESSIONS = [
         link_virtual: 'https://teams.microsoft.com/l/meetup/abc',
         timestamp_actualizacion: now,
         descripcion: 'Uso de modelos de aprendizaje automático para identificar patrones de ataques cibernéticos en tiempo real.',
+        cupos_totales: 80,
+        inscritos: 45,
     },
     {
         id: 's1-004',
@@ -82,7 +88,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.CONFERENCE,
         afiliacion: 'Siemens Colombia',
         track: SESSION_TRACK.IOT,
-        dia: '2025-10-01',
+        dia: '2026-10-01',
         hora_inicio: '14:00',
         hora_fin: '15:00',
         salon: 'Sala A1',
@@ -93,6 +99,8 @@ export const MOCK_SESSIONS = [
         link_virtual: null,
         timestamp_actualizacion: recentChange,
         descripcion: 'Implementaciones exitosas de IoT industrial en plantas de manufactura y logística en Colombia.',
+        cupos_totales: 60,
+        inscritos: 21,
     },
 
     // ─── DÍA 2: Octubre 2 ───
@@ -104,7 +112,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.WORKSHOP,
         afiliacion: 'MinTIC Colombia',
         track: SESSION_TRACK.DATOS,
-        dia: '2025-10-02',
+        dia: '2026-10-02',
         hora_inicio: '09:00',
         hora_fin: '10:00',
         salon: 'Auditorio Principal',
@@ -115,6 +123,8 @@ export const MOCK_SESSIONS = [
         link_virtual: 'https://zoom.us/j/987654321',
         timestamp_actualizacion: oldChange,
         descripcion: 'Marco regulatorio colombiano para protección de datos personales y gobernanza de IA.',
+        cupos_totales: 250,
+        inscritos: 198,
     },
     {
         id: 's2-002',
@@ -124,7 +134,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.SYMPOSIUM,
         afiliacion: 'Globant',
         track: SESSION_TRACK.DESARROLLO,
-        dia: '2025-10-02',
+        dia: '2026-10-02',
         hora_inicio: '10:30',
         hora_fin: '12:00',
         salon: 'Sala D4',
@@ -135,6 +145,8 @@ export const MOCK_SESSIONS = [
         link_virtual: null,
         timestamp_actualizacion: recentChange,
         descripcion: 'Patrones avanzados de React: Compound Components, Context optimization, y Server Components.',
+        cupos_totales: 50,
+        inscritos: 50,
     },
     {
         id: 's2-003',
@@ -144,7 +156,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.SYMPOSIUM,
         afiliacion: 'Universidad Javeriana',
         track: SESSION_TRACK.IA,
-        dia: '2025-10-02',
+        dia: '2026-10-02',
         hora_inicio: '10:30',
         hora_fin: '11:30',
         salon: 'Sala C3',
@@ -155,6 +167,8 @@ export const MOCK_SESSIONS = [
         link_virtual: 'https://meet.google.com/abc-defg-hij',
         timestamp_actualizacion: oldChange,
         descripcion: 'Aplicaciones de NLP con transformers para análisis de sentimiento en español.',
+        cupos_totales: 90,
+        inscritos: 67,
     },
     {
         id: 's2-004',
@@ -164,7 +178,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.SYMPOSIUM,
         afiliacion: 'IBM Research',
         track: SESSION_TRACK.CIBERSEGURIDAD,
-        dia: '2025-10-02',
+        dia: '2026-10-02',
         hora_inicio: '14:00',
         hora_fin: '15:00',
         salon: 'Sala A1',
@@ -175,6 +189,8 @@ export const MOCK_SESSIONS = [
         link_virtual: 'https://zoom.us/j/111222333',
         timestamp_actualizacion: oldChange,
         descripcion: 'Cómo la tecnología blockchain puede fortalecer la seguridad de la infraestructura digital.',
+        cupos_totales: 120,
+        inscritos: 88,
     },
 
     // ─── DÍA 3: Octubre 3 ───
@@ -186,7 +202,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.SYMPOSIUM,
         afiliacion: 'Google DeepMind',
         track: SESSION_TRACK.INNOVACION,
-        dia: '2025-10-03',
+        dia: '2026-10-03',
         hora_inicio: '09:00',
         hora_fin: '10:00',
         salon: 'Auditorio Principal',
@@ -197,6 +213,8 @@ export const MOCK_SESSIONS = [
         link_virtual: 'https://zoom.us/j/444555666',
         timestamp_actualizacion: oldChange,
         descripcion: 'Estado actual y perspectivas de la computación cuántica para la industria tecnológica.',
+        cupos_totales: 300,
+        inscritos: 241,
     },
     {
         id: 's3-002',
@@ -206,7 +224,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.SYMPOSIUM,
         afiliacion: 'Cisco Systems',
         track: SESSION_TRACK.IOT,
-        dia: '2025-10-03',
+        dia: '2026-10-03',
         hora_inicio: '10:30',
         hora_fin: '11:30',
         salon: 'Sala B2',
@@ -217,6 +235,8 @@ export const MOCK_SESSIONS = [
         link_virtual: null,
         timestamp_actualizacion: oldChange,
         descripcion: 'Arquitecturas de edge computing para ciudades inteligentes y movilidad urbana.',
+        cupos_totales: 70,
+        inscritos: 33,
     },
     {
         id: 's3-003',
@@ -226,7 +246,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.SYMPOSIUM,
         afiliacion: 'AWS Colombia',
         track: SESSION_TRACK.DATOS,
-        dia: '2025-10-03',
+        dia: '2026-10-03',
         hora_inicio: '10:30',
         hora_fin: '12:00',
         salon: 'Sala A1',
@@ -237,6 +257,8 @@ export const MOCK_SESSIONS = [
         link_virtual: 'https://chime.aws/meeting/xyz',
         timestamp_actualizacion: recentChange,
         descripcion: 'Estrategias de gobernanza de datos en entornos multi-cloud con herramientas de AWS.',
+        cupos_totales: 100,
+        inscritos: 99,
     },
     {
         id: 's3-004',
@@ -246,7 +268,7 @@ export const MOCK_SESSIONS = [
         event_type: SESSION_EVENT_TYPE.SYMPOSIUM,
         afiliacion: 'CONIITI',
         track: SESSION_TRACK.INNOVACION,
-        dia: '2025-10-03',
+        dia: '2026-10-03',
         hora_inicio: '15:00',
         hora_fin: '16:30',
         salon: 'Auditorio Principal',
@@ -257,14 +279,16 @@ export const MOCK_SESSIONS = [
         link_virtual: 'https://zoom.us/j/777888999',
         timestamp_actualizacion: oldChange,
         descripcion: 'Panel de cierre con representantes de academia, industria y gobierno discutiendo el futuro de la innovación.',
+        cupos_totales: 300,
+        inscritos: 156,
     },
 ];
 
 /** Días de conferencia disponibles para la interfaz de filtro */
 export const CONFERENCE_DAYS = [
-    { value: '2025-10-01', label: 'Oct 1' },
-    { value: '2025-10-02', label: 'Oct 2' },
-    { value: '2025-10-03', label: 'Oct 3' },
+    { value: '2026-10-01', label: 'Oct 1' },
+    { value: '2026-10-02', label: 'Oct 2' },
+    { value: '2026-10-03', label: 'Oct 3' },
 ];
 
 

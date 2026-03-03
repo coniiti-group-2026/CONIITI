@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import styles from './styles/App.module.css';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -10,13 +10,14 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Pages from './pages/Paginas';
 import MyConferences from './pages/MyConferences';
-import Login from './pages/Login'; // Importamos la nueva vista de Login
+import Login from './pages/Login';
+import Register from './pages/Register';
+import StaffDashboard from './pages/StaffDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
-    // Estado global de sesiones pre-inscritas: Set de IDs
     const [registeredIds, setRegisteredIds] = useState(new Set());
 
-    // Toggle: agrega o quita una sesión de "Mis Conferencias"
     const toggleRegistered = (sessionId) => {
         setRegisteredIds((prev) => {
             const next = new Set(prev);
@@ -31,8 +32,34 @@ export default function App() {
 
     return (
         <BrowserRouter>
-            <div className={styles.app}>
-                <Navbar registeredCount={registeredIds.size} />
+            <AppLayout registeredIds={registeredIds} toggleRegistered={toggleRegistered} />
+        </BrowserRouter>
+    );
+}
+
+/** Layout interno con acceso a useLocation para saber si estamos en /staff */
+function AppLayout({ registeredIds, toggleRegistered }) {
+    const location = useLocation();
+    const isStaff = location.pathname === '/staff';
+
+    return (
+        <div className={styles.app}>
+            <Navbar registeredCount={registeredIds.size} />
+            {isStaff ? (
+                // El panel de staff ocupa el ancho completo sin restricción de max-width
+                <div className={styles.staffWrapper}>
+                    <Routes>
+                        <Route
+                            path="/staff"
+                            element={
+                                <ProtectedRoute role="staff">
+                                    <StaffDashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+                    </Routes>
+                </div>
+            ) : (
                 <main className={styles.main}>
                     <Routes>
                         <Route path="/" element={<Home />} />
@@ -43,12 +70,12 @@ export default function App() {
                         <Route path="/contacto" element={<Contact />} />
                         <Route path="/paginas" element={<Pages />} />
                         <Route path="/login" element={<Login />} />
-                        {/* Ruta por defecto (404 o fallback) */}
+                        <Route path="/register" element={<Register />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </main>
-                <Footer />
-            </div>
-        </BrowserRouter>
+            )}
+            <Footer />
+        </div>
     );
 }

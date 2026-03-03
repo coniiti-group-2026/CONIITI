@@ -2,14 +2,34 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 .main {
     flex: 1;
+    width: 100%;
     max-width: var(--container-max);
     margin: 0 auto;
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-4) var(--space-4);
+}
+
+/* Contenedor para el panel de Staff — sin max-width, full-width */
+.staffWrapper {
+    flex: 1;
     width: 100%;
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+    .main {
+        padding: var(--space-8) var(--space-6);
+    }
+
+    .staffWrapper {
+        padding: 2rem 2.5rem;
+    }
 }
 
 /* — Indicador de polling — */
