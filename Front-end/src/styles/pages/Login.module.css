@@ -1,13 +1,35 @@
 /* estilos formulario login */
 
+.particlesBackground {
+    position: fixed;
+    /* fixed = relativo al viewport, no al contenedor */
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 0;
+}
+
+/* tsParticles genera un div + canvas internos, ambos deben llenar el 100% */
+.particlesBackground>div,
+.particlesBackground canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
 .loginContainer {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: calc(100vh - 72px);
-    /* Restar la altura del header */
     padding: 2rem 1rem;
     box-sizing: border-box;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    position: relative;
+    /* necesario para que el canvas absoluto se posicione aquí */
 }
 
 .loginCard {
@@ -20,6 +42,10 @@
     box-shadow: 0 10px 30px rgba(9, 29, 54, 0.08);
     border: 1px solid rgba(31, 105, 182, 0.1);
     animation: slideUp 0.4s ease-out forwards;
+    position: relative;
+    /* Asegura el apilamiento (stacking context) */
+    z-index: 10;
+    /* La tarjeta está por encima de las partículas */
 }
 
 @keyframes slideUp {
@@ -129,10 +155,19 @@
 @media (max-width: 480px) {
     .loginCard {
         padding: 2rem 1.5rem;
-        /* Menos relleno a los lados en móvil */
+        width: 100%;
+        max-width: 90vw;
+        /* Ajuste para que no ocupe todo el ancho en móviles */
     }
 
     .title {
         font-size: 1.5rem;
+    }
+}
+
+/* Responsividad extra para tablets */
+@media (max-width: 768px) and (min-width: 481px) {
+    .loginCard {
+        max-width: 400px;
     }
 }
