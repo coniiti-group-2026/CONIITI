@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import styles from '../styles/pages/Login.module.css';
 
 // tsParticles v3: se inicializa con initParticlesEngine (no es un prop)
@@ -9,6 +10,7 @@ import { loginParticlesConfig } from '../utils/particlesConfig';
 
 export default function Login() {
     const { login } = useContext(AuthContext);
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     // Flag: el motor solo se carga una vez
@@ -24,10 +26,10 @@ export default function Login() {
         e.preventDefault();
         if (email === 'admin@coniiti.edu.co') {
             login('staff');
-            alert("¡Bienvenido, miembro del Staff!");
+            navigate('/staff'); // Redirige al panel de administración
         } else {
             login('normal');
-            alert("Bienvenido, usuario.");
+            navigate('/');     // Redirige a la página de inicio
         }
     };
 
@@ -76,7 +78,7 @@ export default function Login() {
 
                 <div className={styles.registerLink}>
                     <span>¿No tienes cuenta? </span>
-                    <button type="button" className={styles.linkBtn}>Regístrate acá</button>
+                    <button type="button" className={styles.linkBtn} onClick={() => navigate('/register')}>Regístrate acá</button>
                 </div>
             </div>
         </div>

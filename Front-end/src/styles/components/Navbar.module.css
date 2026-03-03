@@ -9,15 +9,16 @@
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    padding: 0 2rem;
-    height: 72px;
+    padding: 0 2.5rem;
+    height: 76px;
     width: 100%;
     box-sizing: border-box;
     background: linear-gradient(135deg,
             var(--color-primary-dark) 0%,
             var(--color-primary) 100%);
-    border-bottom: 2px solid var(--color-accent-dark);
-    box-shadow: 0 4px 24px rgba(9, 29, 54, 0.5);
+    border-bottom: 2px solid rgba(212, 160, 23, 0.4);
+    box-shadow: 0 4px 32px rgba(9, 29, 54, 0.55);
+    backdrop-filter: blur(8px);
 }
 
 /* ── Marca ── */
@@ -34,17 +35,19 @@
 }
 
 .logoImg {
-    height: 46px;
-    width: 46px;
+    height: 48px;
+    width: 48px;
     object-fit: contain;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    padding: 3px;
-    transition: transform 0.2s ease;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .brand:hover .logoImg {
-    transform: scale(1.07);
+    transform: scale(1.09);
+    box-shadow: 0 4px 16px rgba(212, 160, 23, 0.35);
 }
 
 .brandText {
@@ -182,31 +185,33 @@
     position: relative;
     background: none;
     border: none;
-    padding: 0.45rem 0.85rem;
+    padding: 0.45rem 0.9rem;
     font-family: var(--font-family);
     font-size: var(--font-size-sm);
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
-    border-radius: var(--radius-md);
+    border-radius: 8px;
     transition: color 0.2s ease, background 0.2s ease;
     white-space: nowrap;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 3px;
+    letter-spacing: 0.01em;
 }
 
 .link:hover {
     color: #fff;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 /* Estado activo */
 .link.active {
     color: var(--color-accent);
     font-weight: 700;
-    background: rgba(212, 160, 23, 0.1);
+    background: rgba(212, 160, 23, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(212, 160, 23, 0.25);
 }
 
 .activeDot {
@@ -369,21 +374,23 @@
 }
 
 .loginBtn {
-    background-color: transparent;
-    color: var(--color-accent);
-    border: 2px solid var(--color-accent);
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    font-weight: 600;
+    background: linear-gradient(135deg, var(--color-accent) 0%, #b8860b 100%);
+    color: var(--color-primary-dark);
+    border: none;
+    padding: 0.55rem 1.4rem;
+    border-radius: 99px;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
     font-size: 0.9rem;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 12px rgba(212, 160, 23, 0.35);
 }
 
 .loginBtn:hover {
-    background-color: var(--accent-color);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+    box-shadow: 0 6px 20px rgba(212, 160, 23, 0.5);
+    filter: brightness(1.08);
 }
 
 .userProfile {
@@ -392,16 +399,36 @@
     gap: 1rem;
 }
 
+.staffLink {
+    background: rgba(212, 160, 23, 0.15);
+    color: var(--color-accent);
+    border: 1.5px solid var(--color-accent);
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+}
+
+.staffLink:hover {
+    background: rgba(212, 160, 23, 0.3);
+    transform: translateY(-1px);
+}
+
+
 .userName {
     font-size: 0.9rem;
-    color: var(--text-color);
+    color: var(--color-accent);
+    /* cambiar user de prueba */
     font-weight: 500;
 }
 
 .logoutBtn {
     background-color: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--border-color);
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
     padding: 0.4rem 0.8rem;
     border-radius: 6px;
     font-size: 0.8rem;
@@ -410,8 +437,8 @@
 }
 
 .logoutBtn:hover {
-    color: var(--primary-color);
-    border-color: var(--primary-color);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
 }
 
 

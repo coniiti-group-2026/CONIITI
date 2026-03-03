@@ -21,7 +21,7 @@ export default function Header() {
                     </span>
                     <span className={styles.topBarItem}>
                         <FiCalendar size={12} />
-                        Octubre 1 – 3, 2025
+                        Octubre 1 – 3, 2026
                     </span>
                     <span className={styles.topBarItem}>
                         <FiGlobe size={12} />
@@ -46,7 +46,7 @@ export default function Header() {
                 <div className={styles.heroContent}>
                     <h1 className={styles.heroTitle}>
                         Agenda{' '}
-                        <span className={styles.heroHighlight}>CONIITI 2025</span>
+                        <span className={styles.heroHighlight}>CONIITI 2026 v1</span>
                     </h1>
                     <p className={styles.heroSubtitle}>
                         Décimo Primer Congreso Internacional de Innovación y Tendencias en

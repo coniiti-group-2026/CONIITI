@@ -14,10 +14,10 @@ export default function Footer() {
                 <p className={styles.info}>
                     XI Congreso Internacional de Innovación y Tendencias en Ingeniería
                     <br />
-                    Bogotá, Colombia · Octubre 1 – 3, 2025
+                    Bogotá, Colombia · Octubre 1 – 3, 2026
                 </p>
                 <p className={styles.copy}>
-                    © 2025 CONIITI — Universidad Católica de Colombia. Módulo de Agenda Reactiva v1.0
+                    © 2026 CONIITI — Universidad Católica de Colombia. Módulo de Agenda Reactiva v1.0
                 </p>
             </div>
         </footer>

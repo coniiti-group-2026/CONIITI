@@ -1,18 +1,23 @@
-import { FiExternalLink, FiAlertCircle, FiMapPin } from 'react-icons/fi';
+import { FiExternalLink, FiAlertCircle, FiMapPin, FiLock } from 'react-icons/fi';
 import { SESSION_MODALITY } from '../types/session';
 import styles from '../styles/components/VirtualGatekeeper.module.css';
 
 /**
- * VirtualGatekeeper — controla el acceso al botón "Unirse" basado en la verificación del enlace.
+ * VirtualGatekeeper — controla el acceso al botón "Unirse".
  *
- * - Solo presencial                   → muestra etiqueta "Presencial", sin botón.
- * - Virtual / Híbrido verificado      → botón habilitado
- * - Virtual / Híbrido no verificado   → botón deshabilitado + advertencia
- *
- * @param {{ modalidad: string, linkVirtual: string|null, linkVerificado: boolean }} props
+ * Reglas:
+ * - Solo presencial         → etiqueta "Presencial", sin botón de unirse.
+ * - Virtual/Híbrido + NO pre-inscrito → botón desactivado + mensaje "Pre-inscríbete primero"
+ * - Virtual/Híbrido + pre-inscrito + enlace NO verificado → botón desactivado + advertencia de validación
+ * - Virtual/Híbrido + pre-inscrito + enlace verificado    → botón habilitado
  */
-export default function VirtualGatekeeper({ modalidad, linkVirtual, linkVerificado }) {
-    // Sesiones solo presenciales no necesitan enlace virtual
+export default function VirtualGatekeeper({
+    modalidad,
+    linkVirtual,
+    linkVerificado,
+    isRegistered = false,
+}) {
+    // Sesiones presenciales no tienen enlace virtual
     if (modalidad === SESSION_MODALITY.PRESENCIAL) {
         return (
             <div className={styles.presencialNote}>
@@ -22,7 +27,23 @@ export default function VirtualGatekeeper({ modalidad, linkVirtual, linkVerifica
         );
     }
 
-    // Virtual / Híbrido con enlace verificado
+    // Virtual/Híbrido pero el usuario NO está pre-inscrito
+    if (!isRegistered) {
+        return (
+            <div className={styles.wrapper}>
+                <button className={styles.disabledButton} disabled>
+                    <FiLock size={14} />
+                    Unirse a la sesión
+                </button>
+                <div className={styles.warning}>
+                    <FiAlertCircle className={styles.warningIcon} />
+                    <span>Pre-inscríbete para acceder al enlace</span>
+                </div>
+            </div>
+        );
+    }
+
+    // Pre-inscrito + enlace verificado → acceso habilitado
     if (linkVerificado && linkVirtual) {
         return (
             <div className={styles.wrapper}>
@@ -39,7 +60,7 @@ export default function VirtualGatekeeper({ modalidad, linkVirtual, linkVerifica
         );
     }
 
-    // Virtual / Híbrido con enlace no verificado o faltante
+    // Pre-inscrito pero enlace aún no verificado
     return (
         <div className={styles.wrapper}>
             <button className={styles.disabledButton} disabled>
