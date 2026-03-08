@@ -1,65 +1,34 @@
-/* estilos formulario login */
+/* ============================================================
+   Estilos — Página de Login — CONIITI
+   Usa composes para reutilizar estilos del módulo compartido.
+   ============================================================ */
 
+/* ── Fondo de partículas ── */
 .particlesBackground {
-    position: fixed;
-    /* fixed = relativo al viewport, no al contenedor */
-    top: 0;
-    left: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-    z-index: 0;
+    composes: auth-particles from './auth-shared.module.css';
 }
 
-/* tsParticles genera un div + canvas internos, ambos deben llenar el 100% */
-.particlesBackground>div,
-.particlesBackground canvas {
-    width: 100% !important;
-    height: 100% !important;
-}
-
-
+/* ── Contenedor ── */
 .loginContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 72px);
-    padding: 2rem 1rem;
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden;
-    position: relative;
-    /* necesario para que el canvas absoluto se posicione aquí */
+    composes: auth-container from './auth-shared.module.css';
 }
 
+/* ── Tarjeta ── */
 .loginCard {
-    background: white;
-    width: 100%;
-    max-width: 450px;
-    /* En un iPad y PC no pasará de este ancho */
-    padding: 3rem 2.5rem;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(9, 29, 54, 0.08);
-    border: 1px solid rgba(31, 105, 182, 0.1);
-    animation: slideUp 0.4s ease-out forwards;
-    position: relative;
-    /* Asegura el apilamiento (stacking context) */
-    z-index: 10;
-    /* La tarjeta está por encima de las partículas */
+    composes: auth-card from './auth-shared.module.css';
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* ── Divisor ── */
+.divider {
+    composes: auth-divider from './auth-shared.module.css';
 }
 
+/* ── Pie del formulario ── */
+.registerLink {
+    composes: auth-footer-link from './auth-shared.module.css';
+}
+
+/* ── Textos ── */
 .title {
     color: var(--color-primary-dark, #091D36);
     font-size: 1.8rem;
@@ -75,6 +44,7 @@
     margin-bottom: 2rem;
 }
 
+/* ── Formulario ── */
 .form {
     display: flex;
     flex-direction: column;
@@ -90,7 +60,7 @@
 .inputGroup label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--color-primary, #1F69B6);
+    color: var(--color-primary, #0D2B4E);
 }
 
 .inputGroup input {
@@ -109,9 +79,10 @@
     box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.15);
 }
 
+/* ── Botón principal ── */
 .submitBtn {
     width: 100%;
-    background-color: var(--color-primary, #1F69B6);
+    background-color: var(--color-primary, #0D2B4E);
     color: white;
     border: none;
     padding: 0.9rem;
@@ -126,48 +97,105 @@
 .submitBtn:hover {
     background-color: var(--color-primary-dark, #091D36);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(31, 105, 182, 0.3);
+    box-shadow: 0 4px 12px rgba(13, 43, 78, 0.3);
 }
 
-.registerLink {
-    margin-top: 1.5rem;
-    text-align: center;
-    font-size: 0.9rem;
-    color: var(--text-muted, #666);
+.submitBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
 }
 
+/* ── Error ── */
+.errorMessage {
+    color: #dc2626;
+    font-size: 0.85rem;
+    background: rgba(220, 38, 38, 0.08);
+    border-left: 3px solid #dc2626;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+}
+
+/* ── Enlace ── */
 .linkBtn {
-    background: none;
-    border: none;
     color: var(--color-accent, #D4A017);
     font-weight: 600;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 0.5rem;
+    text-decoration: none;
+    margin-left: 0.25rem;
+}
+
+.linkBtn:hover { text-decoration: underline; }
+
+/* ── Botones OAuth ── */
+.oauthSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-bottom: 1.25rem;
+}
+
+.microsoftBtn,
+.googleBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
     font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid;
+    background: #fff;
+    transition: opacity 0.2s, transform 0.15s;
 }
 
-.linkBtn:hover {
-    text-decoration: underline;
+.microsoftBtn { border-color: #2563eb; color: #2563eb; }
+.googleBtn    { border-color: #dc2626; color: #dc2626; }
+
+.microsoftBtn:hover,
+.googleBtn:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
 }
 
-/* Responsividad extra para móviles pequeños */
+/* ── Fila recordar + olvidé contraseña ── */
+.rememberRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: -0.25rem;
+}
+
+.rememberLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--color-primary, #0D2B4E);
+    cursor: pointer;
+    user-select: none;
+}
+
+.rememberCheck {
+    accent-color: var(--color-primary, #0D2B4E);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
+
+.forgotLink {
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--color-accent, #D4A017);
+    text-decoration: none;
+}
+
+.forgotLink:hover { text-decoration: underline; }
+
+/* ── Responsive ── */
 @media (max-width: 480px) {
-    .loginCard {
-        padding: 2rem 1.5rem;
-        width: 100%;
-        max-width: 90vw;
-        /* Ajuste para que no ocupe todo el ancho en móviles */
-    }
-
-    .title {
-        font-size: 1.5rem;
-    }
-}
-
-/* Responsividad extra para tablets */
-@media (max-width: 768px) and (min-width: 481px) {
-    .loginCard {
-        max-width: 400px;
-    }
+    .loginCard { padding: 2rem 1.5rem; max-width: 90vw; }
+    .title     { font-size: 1.5rem; }
 }

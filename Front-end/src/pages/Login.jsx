@@ -1,41 +1,77 @@
-import React, { useState, useContext, useEffect } from 'react';
+// ============================================================
+// Página de Inicio de Sesión — CONIITI Front-end
+// Flujo en dos pasos:
+//   1. Ingreso de email y contraseña (o botones OAuth)
+//   2. Redirección a /verificar-otp para ingresar el código
+// ============================================================
+
+import { useState, useEffect, useContext } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import Particles, { initParticlesEngine } from '@tsparticles/react';
+import { loadSlim } from '@tsparticles/slim';
+import { FaMicrosoft, FaGoogle } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { login, loginWithMicrosoft, loginWithGoogle } from '../services/authService';
+import { loginParticlesConfig } from '../utils/particlesConfig';
 import styles from '../styles/pages/Login.module.css';
 
-// tsParticles v3: se inicializa con initParticlesEngine (no es un prop)
-import Particles, { initParticlesEngine } from "@tsparticles/react";
-import { loadSlim } from "@tsparticles/slim";
-import { loginParticlesConfig } from '../utils/particlesConfig';
-
 export default function Login() {
-    const { login } = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
     const navigate = useNavigate();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    // Flag: el motor solo se carga una vez
+
+    const [email, setEmail]         = useState('');
+    const [password, setPassword]   = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
+    const [error, setError]         = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const [engineReady, setEngineReady] = useState(false);
 
+    // Recuperar email guardado si existe
+    useEffect(() => {
+        const saved = localStorage.getItem('coniiti_saved_email');
+        if (saved) {
+            setEmail(saved);
+            setRememberMe(true);
+        }
+    }, []);
+
+    // Inicializa el motor de partículas una sola vez
     useEffect(() => {
         initParticlesEngine(async (engine) => {
             await loadSlim(engine);
         }).then(() => setEngineReady(true));
     }, []);
 
-    const handleSubmit = (e) => {
+    // Redirige si el usuario ya está autenticado
+    useEffect(() => {
+        if (user) {
+            const destination = user.role === 'superuser' ? '/superusuario' : '/';
+            navigate(destination, { replace: true });
+        }
+    }, [user, navigate]);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (email === 'admin@coniiti.edu.co') {
-            login('staff');
-            navigate('/staff'); // Redirige al panel de administración
+        setError('');
+        setIsLoading(true);
+        // Guardar o borrar email según el checkbox
+        if (rememberMe) {
+            localStorage.setItem('coniiti_saved_email', email);
         } else {
-            login('normal');
-            navigate('/');     // Redirige a la página de inicio
+            localStorage.removeItem('coniiti_saved_email');
+        }
+        try {
+            await login({ email, password });
+            navigate(`/verificar-otp?email=${encodeURIComponent(email)}&purpose=login`);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
         <div className={styles.loginContainer}>
-            {/* Fondo de partículas — solo monta cuando el motor ya está listo */}
             {engineReady && (
                 <Particles
                     id="tsparticles"
@@ -48,40 +84,88 @@ export default function Login() {
                 <h2 className={styles.title}>Iniciar Sesión</h2>
                 <p className={styles.subtitle}>Ingresa a la plataforma CONIITI</p>
 
+                {/* Botones OAuth */}
+                <div className={styles.oauthSection}>
+                    <button
+                        type="button"
+                        className={styles.microsoftBtn}
+                        onClick={loginWithMicrosoft}
+                    >
+                        <FaMicrosoft />
+                        Continuar con Microsoft
+                    </button>
+                    <button
+                        type="button"
+                        className={styles.googleBtn}
+                        onClick={loginWithGoogle}
+                    >
+                        <FaGoogle />
+                        Continuar con Google
+                    </button>
+                </div>
+
+                <div className={styles.divider}>
+                    <span>o con email y contraseña</span>
+                </div>
+
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.inputGroup}>
-                        <label htmlFor="email">Correo Electrónico</label>
+                        <label htmlFor="login-email">Correo Electrónico</label>
                         <input
                             type="email"
-                            id="email"
+                            id="login-email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="tu@correo.com"
                             required
+                            autoComplete="email"
                         />
                     </div>
                     <div className={styles.inputGroup}>
-                        <label htmlFor="password">Contraseña</label>
+                        <label htmlFor="login-password">Contraseña</label>
                         <input
                             type="password"
-                            id="password"
+                            id="login-password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="********"
+                            placeholder="Tu contraseña"
                             required
+                            autoComplete="current-password"
                         />
                     </div>
-                    <button type="submit" className={styles.submitBtn}>
-                        Entrar
+
+                    {/* Recordar datos + Olvidé contraseña */}
+                    <div className={styles.rememberRow}>
+                        <label className={styles.rememberLabel}>
+                            <input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className={styles.rememberCheck}
+                            />
+                            Recordar mis datos
+                        </label>
+                        <Link to="/recuperar-contrasena" className={styles.forgotLink}>
+                            ¿Olvidaste tu contraseña?
+                        </Link>
+                    </div>
+
+                    {error && <p className={styles.errorMessage}>{error}</p>}
+
+                    <button
+                        type="submit"
+                        className={styles.submitBtn}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Verificando...' : 'Entrar'}
                     </button>
                 </form>
 
                 <div className={styles.registerLink}>
                     <span>¿No tienes cuenta? </span>
-                    <button type="button" className={styles.linkBtn} onClick={() => navigate('/register')}>Regístrate acá</button>
+                    <Link to="/register" className={styles.linkBtn}>Regístrate acá</Link>
                 </div>
             </div>
         </div>
     );
 }
-

@@ -1,0 +1,15 @@
+# ============================================================
+# Paquete de Modelos — CONIITI API
+# Importa todos los modelos para que Alembic los detecte
+# automáticamente al generar las migraciones.
+# ============================================================
+
+from app.models.user import User, UserRole, AuthProvider
+from app.models.session import Session, SessionStatus, SessionModality, SessionTrack, SessionEventType
+from app.models.otp import OTPCode, OTPPurpose
+
+__all__ = [
+    "User", "UserRole", "AuthProvider",
+    "Session", "SessionStatus", "SessionModality", "SessionTrack", "SessionEventType",
+    "OTPCode", "OTPPurpose",
+]

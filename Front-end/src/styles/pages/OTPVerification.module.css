@@ -1,0 +1,166 @@
+/* ============================================================
+   Estilos — Página de Verificación OTP — CONIITI
+   ============================================================ */
+@import '../variables.css';
+
+/* Fondo que cubre toda la pantalla, incluyendo el navbar */
+.otpContainer {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 60%, var(--color-primary-light) 100%);
+    z-index: 1000;
+    padding: 2rem;
+}
+
+.particlesBackground {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+/* ── Tarjeta central ── */
+.otpCard {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 440px;
+    text-align: center;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Icono superior ── */
+.iconWrapper {
+    margin-bottom: 1.25rem;
+}
+
+.icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    color: var(--color-primary);
+    display: block;
+    margin: 0 auto;
+}
+
+/* ── Textos ── */
+.title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0 0 0.5rem;
+}
+
+.subtitle {
+    font-size: 0.92rem;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.subtitle strong {
+    color: var(--color-primary);
+}
+
+/* ── Formulario ── */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    text-align: left;
+}
+
+.inputGroup label {
+    font-size: 0.82rem;
+    color: #444;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* ── Input de código ── */
+.codeInput {
+    padding: 0.9rem 1rem;
+    border-radius: 10px;
+    border: 2px solid #d0d7e3;
+    background: #f5f7fa;
+    color: var(--color-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.6rem;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    transition: border-color 0.2s, background 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.codeInput::placeholder {
+    color: #b0bec5;
+    letter-spacing: 0.5rem;
+}
+
+.codeInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    background: #fdf9f0;
+    box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.15);
+}
+
+/* ── Botón ── */
+.submitBtn {
+    padding: 0.9rem;
+    background: var(--color-accent);
+    color: var(--color-primary-dark);
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    letter-spacing: 0.5px;
+    width: 100%;
+}
+
+.submitBtn:hover:not(:disabled) {
+    background: var(--color-accent-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(212, 160, 23, 0.35);
+}
+
+.submitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Error ── */
+.errorMessage {
+    color: #c62828;
+    font-size: 0.85rem;
+    background: rgba(198, 40, 40, 0.08);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+    text-align: left;
+    border-left: 3px solid #c62828;
+}
+
+/* ── Hint ── */
+.hint {
+    margin-top: 1.25rem;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.hint strong {
+    color: var(--color-primary);
+}

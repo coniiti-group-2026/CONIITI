@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import AgendaGrid from '../components/AgendaGrid';
 import SpeakerModal from '../components/SpeakerModal';
-import { getSpeakerById, getAllSessions } from '../services/agendaService';
-import { FiBookmark } from 'react-icons/fi';
+import { useAgenda } from '../hooks/useAgenda';
+import { FiBookmark, FiLogIn } from 'react-icons/fi';
 import styles from '../styles/pages/MyConferences.module.css';
 
 /**
@@ -10,12 +12,41 @@ import styles from '../styles/pages/MyConferences.module.css';
  * El botón "Validar asistencia" reemplaza a "Pre-inscribirse".
  */
 export default function MyConferences({ registeredIds = new Set(), onToggleRegister }) {
-    const [selectedSpeakerId, setSelectedSpeakerId] = useState(null);
-    const speakerData = selectedSpeakerId ? getSpeakerById(selectedSpeakerId) : null;
+    const { user } = useContext(AuthContext);
+    const [selectedSpeaker, setSelectedSpeaker] = useState(null);
+    const { sessions } = useAgenda();
 
-    // Filtra todas las sesiones para mostrar solo las pre-inscritas
-    const allSessions = getAllSessions();
-    const mySessions = allSessions.filter((s) => registeredIds.has(s.id));
+    // Estado cuando no hay usuario autenticado
+    if (!user) {
+        return (
+            <div className={styles.page}>
+                <div className={styles.empty}>
+                    <FiLogIn size={48} className={styles.emptyIcon} style={{color: '#dc2626'}} />
+                    <h2 style={{color: 'var(--color-primary)', marginTop: '1rem'}}>Inicia sesión</h2>
+                    <p style={{margin: '1rem 0 1.5rem 0', color: 'var(--text-muted)'}}>
+                        Debes estar registrado e iniciar sesión para ver y gestionar tus pre-inscripciones.
+                    </p>
+                    <Link 
+                        to="/login" 
+                        style={{
+                            background: 'var(--color-primary)', 
+                            color: 'white', 
+                            padding: '0.8rem 1.5rem', 
+                            borderRadius: '8px',
+                            textDecoration: 'none',
+                            fontWeight: '600',
+                            transition: 'background 0.3s'
+                        }}
+                    >
+                        Ir al inicio de sesión
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    // Filtra todas las sesiones para mostrar solo las pre-inscritas (desde useAgenda)
+    const mySessions = sessions.filter((s) => registeredIds.has(s.id));
 
     return (
         <div className={styles.page}>
@@ -41,17 +72,17 @@ export default function MyConferences({ registeredIds = new Set(), onToggleRegis
                 <AgendaGrid
                     sessions={mySessions}
                     isLoading={false}
-                    onSpeakerClick={setSelectedSpeakerId}
+                    onSpeakerClick={setSelectedSpeaker}
                     registeredIds={registeredIds}
                     onToggleRegister={onToggleRegister}
                     mode="mis-conferencias"
                 />
             )}
 
-            {selectedSpeakerId && speakerData && (
+            {selectedSpeaker && (
                 <SpeakerModal
-                    speaker={speakerData}
-                    onClose={() => setSelectedSpeakerId(null)}
+                    speaker={selectedSpeaker}
+                    onClose={() => setSelectedSpeaker(null)}
                 />
             )}
         </div>

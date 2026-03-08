@@ -24,6 +24,7 @@ const EMPTY_FORM = {
     link_virtual: '',
     link_verificado: false,
     descripcion: '',
+    descripcion_ponente: '',
 };
 
 /**
@@ -78,7 +79,12 @@ export default function SessionFormModal({ session, onSave, onClose }) {
 
                             <div className={styles.fieldGroup}>
                                 <label>Afiliación</label>
-                                <input name="afiliacion" value={form.afiliacion} onChange={handleChange} placeholder="Universidad / Empresa" />
+                                <input name="afiliacion" value={form.afiliacion || ''} onChange={handleChange} placeholder="Universidad / Empresa" />
+                            </div>
+
+                            <div className={`${styles.fieldGroup} ${styles.fullWidth}`}>
+                                <label>Descripción del Ponente</label>
+                                <textarea name="descripcion_ponente" value={form.descripcion_ponente || ''} onChange={handleChange} placeholder="Pequeña biografía del ponente..." />
                             </div>
 
                             <div className={styles.fieldGroup}>

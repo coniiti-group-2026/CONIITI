@@ -1,39 +1,60 @@
-// Guardar info del usuario para identificarlo en toda la app y saber si es staff
-import React, { createContext, useState } from 'react';
+// ============================================================
+// Contexto de Autenticación — CONIITI Front-end
+// Provee el estado global de autenticación del usuario.
+// Al montar la aplicación, consulta /auth/me para restaurar
+// la sesión desde la cookie HttpOnly si ya existe.
+// ============================================================
 
-// Crear el contexto (la caja vacía)
-export const AuthContext = createContext();
+import React, { createContext, useState, useEffect, useCallback } from 'react';
+import { getMe, logout as logoutService } from '../services/authService';
 
-// Crear el "Provider" (el componente que repartirá la información)
+/**
+ * @typedef {Object} AuthUser
+ * @property {string}  id
+ * @property {string}  full_name
+ * @property {string}  email
+ * @property {string}  role       - 'superuser' | 'staff' | 'student' | 'external'
+ * @property {boolean} is_verified
+ * @property {boolean} is_active
+ */
+
+/** @type {React.Context<{ user: AuthUser|null, isLoading: boolean, setUser: Function, logout: Function }>} */
+export const AuthContext = createContext(null);
+
+/**
+ * AuthProvider — envuelve la aplicación y distribución el estado de sesión.
+ * Restaura automáticamente la sesión al recargar la página
+ * consultando el endpoint /auth/me con la cookie HttpOnly.
+ */
 export const AuthProvider = ({ children }) => {
-    // Estado inicial. Por defecto, nadie ha iniciado sesión.
-    const [user, setUser] = useState({
-        isLoggedIn: false,
-        role: null, // Más adelante será 'staff' o 'normal'
-        data: null  // Se guarda el nombre, email, etc.
-    });
+    const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Función para simular que iniciamos sesión (por ahora manual)
-    const login = (roleType) => {
-        setUser({
-            isLoggedIn: true,
-            role: roleType,
-            data: { name: 'Usuario de Prueba' }
-        });
-    };
+    // Restaura la sesión al montar el componente (ej: al recargar la página)
+    useEffect(() => {
+        const restoreSession = async () => {
+            const userData = await getMe();
+            setUser(userData);
+            setIsLoading(false);
+        };
+        restoreSession();
+    }, []);
 
-    // Función para cerrar sesión
-    const logout = () => {
-        setUser({
-            isLoggedIn: false,
-            role: null,
-            data: null
-        });
-    };
+    /**
+     * Cierra la sesión del usuario.
+     * Llama al endpoint del back-end para limpiar las cookies HttpOnly
+     * y luego borra el estado local.
+     */
+    const logout = useCallback(async () => {
+        try {
+            await logoutService();
+        } finally {
+            setUser(null);
+        }
+    }, []);
 
-    // retornan el proveedor con los datos y funciones que se quieren compartir
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, setUser, logout }}>
             {children}
         </AuthContext.Provider>
     );

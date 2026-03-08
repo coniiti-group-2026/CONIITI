@@ -21,28 +21,25 @@ export default function SpeakerModal({ speaker, onClose }) {
 
                 <div className={styles.header}>
                     <img
-                        src={speaker.photo_url}
-                        alt={speaker.name}
+                        src={'https://i.pravatar.cc/300?u=' + speaker.id}
+                        alt={speaker.ponente}
                         className={styles.photo}
                         onError={(e) => { e.target.src = 'https://i.pravatar.cc/300?u=fallback'; }}
                     />
 
                     <div className={styles.headerInfo}>
-                        <h2 className={styles.name}>{speaker.name}</h2>
+                        <h2 className={styles.name}>{speaker.ponente}</h2>
                         <p className={styles.role}>
-                            <FiBriefcase size={14} /> {speaker.role}
+                            <FiBriefcase size={14} /> Especialista
                         </p>
 
-                        <p className={styles.affiliation}>{speaker.affiliation}</p>
-                        <p className={styles.country}>
-                            <FiMapPin size={13} /> {speaker.country}
-                        </p>
+                        <p className={styles.affiliation}>{speaker.afiliacion || 'Ponente'}</p>
                     </div>
                 </div>
 
                 <div className={styles.body}>
                     <h3 className={styles.bioTitle}>Sobre el ponente</h3>
-                    <p className={styles.bio}>{speaker.bio}</p>
+                    <p className={styles.bio}>{speaker.descripcion_ponente || 'No hay descripción disponible para este ponente.'}</p>
                 </div>
             </div>
         </div>

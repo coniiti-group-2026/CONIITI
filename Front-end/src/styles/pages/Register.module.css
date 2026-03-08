@@ -1,61 +1,30 @@
-/* ══════════════════════════════════════
-   REGISTER PAGE — Página de Registro
-   ══════════════════════════════════════ */
+/* ============================================================
+   Estilos — Página de Registro — CONIITI
+   Usa composes para reutilizar estilos del módulo compartido.
+   ============================================================ */
 
-/* reusar la misma lógica de partículas del Login */
+/* ── Fondo de partículas ── */
 .particlesBackground {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-    z-index: 0;
+    composes: auth-particles from './auth-shared.module.css';
 }
 
-.particlesBackground>div,
-.particlesBackground canvas {
-    width: 100% !important;
-    height: 100% !important;
-}
-
+/* ── Contenedor ── */
 .registerContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 72px);
-    padding: 2rem 1rem;
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden;
-    position: relative;
+    composes: auth-container from './auth-shared.module.css';
 }
 
+/* ── Tarjeta (ligeramente más ancha por tener más campos) ── */
 .registerCard {
-    background: white;
-    width: 100%;
+    composes: auth-card from './auth-shared.module.css';
     max-width: 480px;
-    padding: 3rem 2.5rem;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(9, 29, 54, 0.08);
-    border: 1px solid rgba(31, 105, 182, 0.1);
-    animation: slideUp 0.4s ease-out forwards;
-    position: relative;
-    z-index: 10;
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* ── Pie del formulario ── */
+.loginLink {
+    composes: auth-footer-link from './auth-shared.module.css';
 }
 
+/* ── Textos ── */
 .title {
     color: var(--color-primary-dark, #091D36);
     font-size: 1.8rem;
@@ -71,12 +40,14 @@
     margin-bottom: 2rem;
 }
 
+/* ── Formulario ── */
 .form {
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
 }
 
+/* ── Grid de dos columnas ── */
 .row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -92,7 +63,7 @@
 .inputGroup label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--color-primary, #1F69B6);
+    color: var(--color-primary, #0D2B4E);
 }
 
 .inputGroup input,
@@ -116,9 +87,25 @@
     box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.15);
 }
 
+/* ── Checkbox política de datos ── */
+.checkboxGroup {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--color-text, #333);
+}
+
+.checkboxGroup input[type='checkbox'] {
+    width: auto;
+    margin-top: 2px;
+    accent-color: var(--color-primary);
+}
+
+/* ── Botón principal ── */
 .submitBtn {
     width: 100%;
-    background-color: var(--color-primary, #1F69B6);
+    background-color: var(--color-primary, #0D2B4E);
     color: white;
     border: none;
     padding: 0.9rem;
@@ -133,16 +120,26 @@
 .submitBtn:hover {
     background-color: var(--color-primary-dark, #091D36);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(31, 105, 182, 0.3);
+    box-shadow: 0 4px 12px rgba(13, 43, 78, 0.3);
 }
 
-.loginLink {
-    margin-top: 1.5rem;
-    text-align: center;
-    font-size: 0.9rem;
-    color: var(--text-muted, #666);
+.submitBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
 }
 
+/* ── Error ── */
+.errorMessage {
+    color: #dc2626;
+    font-size: 0.85rem;
+    background: rgba(220, 38, 38, 0.08);
+    border-left: 3px solid #dc2626;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+}
+
+/* ── Enlace ── */
 .linkBtn {
     background: none;
     border: none;
@@ -154,28 +151,15 @@
     font-size: 0.9rem;
 }
 
-.linkBtn:hover {
-    text-decoration: underline;
-}
+.linkBtn:hover { text-decoration: underline; }
 
 /* ── Responsive ── */
 @media (max-width: 520px) {
-    .row {
-        grid-template-columns: 1fr;
-    }
-
-    .registerCard {
-        padding: 2rem 1.5rem;
-        max-width: 90vw;
-    }
-
-    .title {
-        font-size: 1.5rem;
-    }
+    .row          { grid-template-columns: 1fr; }
+    .registerCard { padding: 2rem 1.5rem; max-width: 90vw; }
+    .title        { font-size: 1.5rem; }
 }
 
 @media (max-width: 768px) and (min-width: 521px) {
-    .registerCard {
-        max-width: 420px;
-    }
+    .registerCard { max-width: 420px; }
 }

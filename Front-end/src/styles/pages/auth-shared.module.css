@@ -1,0 +1,85 @@
+/* ============================================================
+   Estilos Compartidos — Páginas de Autenticación — CONIITI
+   Importado en global.css para que esté disponible en toda la app.
+   Las clases usan el prefijo .auth- para evitar colisiones.
+   ============================================================ */
+
+/* ── Fondo de partículas ── */
+.auth-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 0;
+}
+
+.auth-particles > div,
+.auth-particles canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ── Contenedor centrado ── */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 72px);
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* ── Tarjeta ── */
+.auth-card {
+    background: white;
+    width: 100%;
+    max-width: 450px;
+    padding: 3rem 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(9, 29, 54, 0.08);
+    border: 1px solid rgba(31, 105, 182, 0.1);
+    animation: auth-slideUp 0.4s ease-out forwards;
+    position: relative;
+    z-index: 10;
+}
+
+@keyframes auth-slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Divisor ── */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    color: #aaa;
+    font-size: 0.8rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+/* ── Pie de formulario ── */
+.auth-footer-link {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted, #666);
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+    .auth-card  { padding: 2rem 1.5rem; max-width: 90vw; }
+}

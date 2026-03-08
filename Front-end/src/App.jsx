@@ -1,8 +1,19 @@
-import { useState } from 'react';
+// ============================================================
+// App.jsx — Punto de Entrada de Rutas — CONIITI Front-end
+// Configura el enrutador, el AuthProvider y todas las rutas
+// de la aplicación incluyendo las nuevas rutas protegidas.
+// ============================================================
+
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+
+import { AuthProvider } from './context/AuthContext';
 import styles from './styles/App.module.css';
+
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
+
 import Home from './pages/Home';
 import Agenda from './pages/Agenda';
 import Memories from './pages/Memories';
@@ -12,8 +23,10 @@ import Pages from './pages/Paginas';
 import MyConferences from './pages/MyConferences';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import OTPVerification from './pages/OTPVerification';
 import StaffDashboard from './pages/StaffDashboard';
-import ProtectedRoute from './components/ProtectedRoute';
+import SuperuserDashboard from './pages/SuperuserDashboard';
+import ForgotPassword from './pages/ForgotPassword';
 
 export default function App() {
     const [registeredIds, setRegisteredIds] = useState(new Set());
@@ -31,29 +44,45 @@ export default function App() {
     };
 
     return (
-        <BrowserRouter>
-            <AppLayout registeredIds={registeredIds} toggleRegistered={toggleRegistered} />
-        </BrowserRouter>
+        <AuthProvider>
+            <BrowserRouter>
+                <AppLayout registeredIds={registeredIds} toggleRegistered={toggleRegistered} />
+            </BrowserRouter>
+        </AuthProvider>
     );
 }
 
-/** Layout interno con acceso a useLocation para saber si estamos en /staff */
+/**
+ * AppLayout — componente interno con acceso a useLocation.
+ * Gestiona el diseño condicional para rutas de dashboard (full width)
+ * versus rutas públicas con Navbar y Footer.
+ */
 function AppLayout({ registeredIds, toggleRegistered }) {
     const location = useLocation();
-    const isStaff = location.pathname === '/staff';
+
+    // Rutas de dashboard que ocupan ancho completo sin márgenes
+    const isDashboard = ['/staff', '/superusuario'].includes(location.pathname);
 
     return (
         <div className={styles.app}>
             <Navbar registeredCount={registeredIds.size} />
-            {isStaff ? (
-                // El panel de staff ocupa el ancho completo sin restricción de max-width
+
+            {isDashboard ? (
                 <div className={styles.staffWrapper}>
                     <Routes>
                         <Route
                             path="/staff"
                             element={
-                                <ProtectedRoute role="staff">
+                                <ProtectedRoute roles={['staff', 'superuser']}>
                                     <StaffDashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/superusuario"
+                            element={
+                                <ProtectedRoute roles={['superuser']}>
+                                    <SuperuserDashboard />
                                 </ProtectedRoute>
                             }
                         />
@@ -63,18 +92,37 @@ function AppLayout({ registeredIds, toggleRegistered }) {
                 <main className={styles.main}>
                     <Routes>
                         <Route path="/" element={<Home />} />
-                        <Route path="/agenda" element={<Agenda registeredIds={registeredIds} onToggleRegister={toggleRegistered} />} />
-                        <Route path="/mis-conferencias" element={<MyConferences registeredIds={registeredIds} onToggleRegister={toggleRegistered} />} />
+                        <Route
+                            path="/agenda"
+                            element={
+                                <Agenda
+                                    registeredIds={registeredIds}
+                                    onToggleRegister={toggleRegistered}
+                                />
+                            }
+                        />
+                        <Route
+                            path="/mis-conferencias"
+                            element={
+                                <MyConferences
+                                    registeredIds={registeredIds}
+                                    onToggleRegister={toggleRegistered}
+                                />
+                            }
+                        />
                         <Route path="/memorias" element={<Memories />} />
                         <Route path="/acerca-de" element={<About />} />
                         <Route path="/contacto" element={<Contact />} />
                         <Route path="/paginas" element={<Pages />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
+                        <Route path="/verificar-otp" element={<OTPVerification />} />
+                        <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </main>
             )}
+
             <Footer />
         </div>
     );
