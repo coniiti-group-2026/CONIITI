@@ -12,9 +12,12 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session as DBSession
 
 from app.db.session import get_db
-from app.dependencies.auth import require_staff
+from app.dependencies.auth import require_staff, get_current_user
 from app.models.user import User
-from app.schemas.session import SessionCreate, SessionRead, SessionUpdate, SessionListResponse
+from app.schemas.session import (
+    SessionCreate, SessionRead, SessionUpdate, SessionListResponse, 
+    SessionRegistrationResponse
+)
 from app.services import session_service
 
 router = APIRouter(prefix="/sessions", tags=["Sesiones del Congreso"])
@@ -36,12 +39,13 @@ def list_sessions(
     track: Optional[str] = Query(None, description="Filtrar por track"),
     event_type: Optional[str] = Query(None, description="Filtrar por tipo de evento"),
     search: Optional[str] = Query(None, description="Búsqueda por texto en título, ponente o descripción"),
+    room: Optional[str] = Query(None, description="Filtrar por sala"),
     db: DBSession = Depends(get_db),
 ):
     """Retorna la lista de sesiones filtrada y ordenada por día/hora."""
     sessions = session_service.list_sessions(
         db, day=day, modality=modality, track=track,
-        event_type=event_type, search=search,
+        event_type=event_type, room=room, search=search,
     )
     return SessionListResponse(total=len(sessions), sessions=sessions)
 
@@ -55,6 +59,41 @@ def list_sessions(
 def get_session(session_id: uuid.UUID, db: DBSession = Depends(get_db)):
     """Retorna los datos completos de una sesión específica por su ID."""
     return session_service.get_session_by_id_or_raise(session_id, db)
+
+
+# ==============================================================
+# Sección: Endpoints protegidos para Usuarios (Mis Conferencias)
+# ==============================================================
+
+@router.get(
+    "/me/registered",
+    response_model=List[SessionRead],
+    summary="Mis conferencias inscritas",
+    description="Retorna la lista de conferencias en las que el usuario actual se ha preinscrito.",
+)
+def get_my_registered_sessions(
+    db: DBSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Retorna las sesiones en las que el usuario está preinscrito."""
+    return session_service.get_user_registered_sessions(current_user, db)
+
+
+@router.post(
+    "/{session_id}/register",
+    response_model=SessionRegistrationResponse,
+    summary="Inscribirse o desinscribirse de una sesión",
+    description="Alterna el estado de inscripción del usuario autenticado en la sesión indicada.",
+)
+def toggle_session_registration(
+    session_id: uuid.UUID,
+    db: DBSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Alterna preinscripción en una sesión usando id."""
+    session = session_service.get_session_by_id_or_raise(session_id, db)
+    registered = session_service.toggle_registration(session, current_user, db)
+    return SessionRegistrationResponse(registered=registered, session_id=session.id)
 
 
 # ==============================================================

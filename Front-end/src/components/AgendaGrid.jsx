@@ -39,7 +39,13 @@ export default function AgendaGrid({ sessions, isLoading, onSpeakerClick, regist
             </div>
 
             <div className={styles.grid}>
-                {sessions.map((session, index) => (
+                {[...sessions]
+                    .sort((a, b) => {
+                        if (a.hora_inicio < b.hora_inicio) return -1;
+                        if (a.hora_inicio > b.hora_inicio) return 1;
+                        return 0;
+                    })
+                    .map((session, index) => (
                     <SessionCard
                         key={session.id}
                         session={session}

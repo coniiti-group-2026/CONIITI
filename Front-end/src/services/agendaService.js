@@ -86,11 +86,12 @@ export function getAllSessions() {
  * @param {{ day?: string, modality?: string, eventType?: string, search?: string }} filters
  * @returns {Promise<Array>}
  */
-export async function filterSessions({ day, modality, eventType, search } = {}) {
+export async function filterSessions({ day, modality, eventType, room, search } = {}) {
     const qs = buildQueryString({
         day,
         modality,
         event_type: eventType,
+        room,
         search,
     });
     const data = await apiFetch(`/sessions${qs}`);
@@ -119,6 +120,21 @@ export function getConferenceDays() {
         { value: '2026-10-02', label: 'Oct 2' },
         { value: '2026-10-03', label: 'Oct 3' },
     ];
+}
+
+
+// =============================================================
+// Sección: Preinscripciones (Mis Conferencias - Usuarios)
+// =============================================================
+
+export async function getRegisteredSessions() {
+    return apiFetch('/sessions/me/registered');    
+}
+
+export async function toggleRegistration(sessionId) {
+    return apiFetch(`/sessions/${sessionId}/register`, {
+        method: 'POST',
+    });
 }
 
 

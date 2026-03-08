@@ -22,6 +22,8 @@ export default function LiveFilter({
     onDayChange,
     onModalityChange,
     onEventTypeChange,
+    activeRoom,
+    onRoomChange,
     onSearchQueryChange,
 
 }) {
@@ -71,7 +73,7 @@ export default function LiveFilter({
             </div>
 
 
-            {/* Filtro por Tipo de eveto */}
+            {/* Filtro por Tipo de evento */}
             <div className={styles.selectWrapper}>
                 <label className={styles.selectLabel}>Tipo</label>
                 <select
@@ -86,6 +88,22 @@ export default function LiveFilter({
                 </select>
             </div>
 
+            {/* Filtro por Salas */}
+            <div className={styles.selectWrapper}>
+                <label className={styles.selectLabel}>Salas</label>
+                <select
+                    className={styles.select}
+                    value={activeRoom ?? ''}
+                    onChange={(e) => onRoomChange(e.target.value || null)}
+                >
+                    <option value="">Todas</option>
+                    <option value="Auditorio CE4">Auditorio CE4</option>
+                    <option value="Sala Múltiple">Sala Múltiple</option>
+                    <option value="Auditorio Principal">Auditorio Principal</option>
+                    <option value="Sala Virtual">Sala Virtual</option>
+                </select>
+            </div>
+
 
             {/* Filtro de búsqueda: buscador*/}
             <div className={styles.searchWrapper}>
@@ -93,7 +111,7 @@ export default function LiveFilter({
                 <input
                     type="text"
                     className={styles.searchInput}
-                    placeholder="Buscar tema..."
+                    placeholder="Tema..."
                     value={searchQuery}
                     onChange={(e) => onSearchQueryChange(e.target.value)}
                 />

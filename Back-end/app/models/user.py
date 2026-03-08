@@ -90,6 +90,9 @@ class User(Base):
     sessions = relationship(
         "Session", back_populates="created_by_user", foreign_keys="Session.created_by"
     )
+    registered_sessions = relationship(
+        "Session", secondary="session_registrations", back_populates="registered_users"
+    )
     otp_codes = relationship("OTPCode", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:

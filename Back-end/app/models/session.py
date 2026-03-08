@@ -9,7 +9,7 @@ import enum
 from datetime import datetime, timezone
 
 from sqlalchemy import (
-    Column, String, Boolean, DateTime, Enum, Integer, ForeignKey, Text
+    Column, String, Boolean, DateTime, Enum, Integer, ForeignKey, Text, Table
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -22,6 +22,16 @@ class SessionStatus(str, enum.Enum):
     NORMAL = "Normal"
     CAMBIO_SALON = "Cambio de Salón"
     RETRASADO = "Retrasado"
+
+
+# --- Tabla de asociación para inscripciones de usuarios ---
+session_registrations = Table(
+    "session_registrations",
+    Base.metadata,
+    Column("user_id", UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+    Column("session_id", UUID(as_uuid=True), ForeignKey("sessions.id", ondelete="CASCADE"), primary_key=True),
+    Column("registered_at", DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+)
 
 
 class SessionModality(str, enum.Enum):
@@ -110,6 +120,11 @@ class Session(Base):
 
     # --- Relaciones ---
     created_by_user = relationship("User", back_populates="sessions", foreign_keys=[created_by])
+    registered_users = relationship(
+        "User", 
+        secondary=session_registrations, 
+        back_populates="registered_sessions"
+    )
 
     def __repr__(self) -> str:
         return f"<Session id={self.id} titulo={self.titulo[:40]}>"

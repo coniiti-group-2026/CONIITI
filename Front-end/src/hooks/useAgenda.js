@@ -10,6 +10,7 @@ export function useAgenda() {
     const [activeDay, setActiveDay]             = useState(days[0].value);
     const [activeModality, setActiveModality]   = useState(null);
     const [activeEventType, setActiveEventType] = useState(null);
+    const [activeRoom, setActiveRoom]           = useState(null);
     const [searchQuery, setSearchQuery]         = useState('');
     const [sessions, setSessions]               = useState([]);
     const [isLoading, setIsLoading]             = useState(true);
@@ -21,6 +22,7 @@ export function useAgenda() {
                 day:       activeDay,
                 modality:  activeModality,
                 eventType: activeEventType,
+                room:      activeRoom,
                 search:    searchQuery,
             });
             setSessions(data);
@@ -30,7 +32,7 @@ export function useAgenda() {
         } finally {
             setIsLoading(false);
         }
-    }, [activeDay, activeModality, activeEventType, searchQuery]);
+    }, [activeDay, activeModality, activeEventType, activeRoom, searchQuery]);
 
     useEffect(() => {
         fetchSessions();
@@ -42,11 +44,13 @@ export function useAgenda() {
         activeDay,
         activeModality,
         activeEventType,
+        activeRoom,
         searchQuery,
         isLoading,
         setActiveDay,
         setActiveModality,
         setActiveEventType,
+        setActiveRoom,
         setSearchQuery,
         refresh: fetchSessions,
     };

@@ -92,3 +92,8 @@ class SessionListResponse(BaseModel):
     """Respuesta paginada de listado de sesiones."""
     total: int
     sessions: List[SessionRead]
+
+class SessionRegistrationResponse(BaseModel):
+    """Respuesta al alternar la preinscripción a una conferencia."""
+    registered: bool
+    session_id: uuid.UUID

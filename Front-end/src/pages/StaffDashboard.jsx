@@ -12,6 +12,7 @@ import {
 } from '../services/agendaService';
 import { SESSION_STATUS, SESSION_MODALITY } from '../types/session';
 import SessionFormModal from '../components/SessionFormModal';
+import CMSPanel from '../components/CMSPanel';
 import styles from '../styles/pages/StaffDashboard.module.css';
 
 /**
@@ -24,6 +25,7 @@ export default function StaffDashboard() {
     const [error, setError] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [sessionToEdit, setSessionToEdit] = useState(null);
+    const [activeTab, setActiveTab] = useState('agenda'); // 'agenda' o 'cms'
 
     const fetchSessions = useCallback(async () => {
         setIsLoading(true);
@@ -107,19 +109,37 @@ export default function StaffDashboard() {
 
     return (
         <div className={styles.page}>
-            {/* Encabezado */}
-            <div className={styles.header}>
-                <div className={styles.headerLeft}>
-                    <h1>Panel de Staff</h1>
-                    <p>Gestión de sesiones y conferencias — CONIITI 2026</p>
-                </div>
-                <button className={styles.newBtn} onClick={handleNew}>
-                    <FiPlus size={16} />
-                    Nueva Conferencia
+            <div className={styles.pageHeader}>
+                <h1>Panel de Administración</h1>
+                <p>Gestiona la agenda, sesiones del congreso y contenido de la web.</p>
+            </div>
+
+            <div className={styles.tabs} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '2px solid #eee' }}>
+                <button 
+                    onClick={() => setActiveTab('agenda')} 
+                    style={{ padding: '0.8rem 1.5rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, borderBottom: activeTab === 'agenda' ? '3px solid var(--color-primary)' : '3px solid transparent', color: activeTab === 'agenda' ? 'var(--color-primary)' : '#666' }}
+                >
+                    Gestión de Sesiones (Agenda)
+                </button>
+                <button 
+                    onClick={() => setActiveTab('cms')} 
+                    style={{ padding: '0.8rem 1.5rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, borderBottom: activeTab === 'cms' ? '3px solid var(--color-primary)' : '3px solid transparent', color: activeTab === 'cms' ? 'var(--color-primary)' : '#666' }}
+                >
+                    Gestor de Contenido (CMS)
                 </button>
             </div>
 
-            {error && <p className={styles.errorBanner}>{error}</p>}
+            {activeTab === 'cms' ? (
+                <CMSPanel />
+            ) : (
+                <>
+                    <div className={styles.actionBar}>
+                        <button className={styles.primaryBtn} onClick={handleNew}>
+                            <FiPlus size={16} /> Nueva Sesión
+                        </button>
+                    </div>
+
+                    {error && <div className={styles.error}>{error}</div>}
 
             {/* Tabla */}
             <div className={styles.card}>
@@ -225,6 +245,8 @@ export default function StaffDashboard() {
                     {sessions.length} {sessions.length === 1 ? 'sesión' : 'sesiones'} en total
                 </div>
             </div>
+            </>
+            )}
 
             {/* Modal */}
             {modalOpen && (

@@ -6,10 +6,19 @@
 
 from app.models.user import User, UserRole, AuthProvider
 from app.models.session import Session, SessionStatus, SessionModality, SessionTrack, SessionEventType
+from app.models.cms import ContentCard
 from app.models.otp import OTPCode, OTPPurpose
 
 __all__ = [
-    "User", "UserRole", "AuthProvider",
-    "Session", "SessionStatus", "SessionModality", "SessionTrack", "SessionEventType",
-    "OTPCode", "OTPPurpose",
+    "User",
+    "UserRole",
+    "AuthProvider",
+    "Session",
+    "ContentCard",
+    "SessionStatus",
+    "SessionModality",
+    "SessionTrack",
+    "SessionEventType",
+    "OTPCode",
+    "OTPPurpose",
 ]
