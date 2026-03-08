@@ -1,4 +1,6 @@
-/* estilos formulario login */
+/* ============================================================
+   Estilos — Página de Login — CONIITI
+   ============================================================ */
 
 .particlesBackground {
     position: fixed;
@@ -137,18 +139,92 @@
 }
 
 .linkBtn {
-    background: none;
-    border: none;
     color: var(--color-accent, #D4A017);
     font-weight: 600;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 0.5rem;
+    text-decoration: none;
+    margin-left: 0.25rem;
     font-size: 0.9rem;
 }
 
 .linkBtn:hover {
     text-decoration: underline;
+}
+
+/* ── Mensaje de error ── */
+.errorMessage {
+    color: #dc2626;
+    font-size: 0.85rem;
+    background: rgba(220, 38, 38, 0.08);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+}
+
+/* ── Sección OAuth ── */
+.oauthSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-bottom: 1.25rem;
+}
+
+.microsoftBtn,
+.googleBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid;
+    transition: opacity 0.2s, transform 0.15s;
+}
+
+.microsoftBtn {
+    background: #fff;
+    border-color: #2563eb;
+    color: #2563eb;
+}
+
+.googleBtn {
+    background: #fff;
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+.microsoftBtn:hover,
+.googleBtn:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+}
+
+/* ── Divisor ── */
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    color: #aaa;
+    font-size: 0.8rem;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+/* ── Botón submit deshabilitado ── */
+.submitBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* Responsividad extra para móviles pequeños */

@@ -1,0 +1,150 @@
+/* ============================================================
+   Estilos — Página de Verificación OTP — CONIITI
+   Comparte la estética del Login (fondo de partículas,
+   tarjeta centrada, gradiente institucional).
+   ============================================================ */
+
+.otpContainer {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0a0c1a 0%, #1a237e 60%, #283593 100%);
+    padding: 2rem;
+}
+
+.particlesBackground {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+/* ── Tarjeta central ── */
+.otpCard {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 440px;
+    text-align: center;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Icono superior ── */
+.iconWrapper {
+    margin-bottom: 1.25rem;
+}
+
+.icon {
+    font-size: 3rem;
+}
+
+/* ── Textos ── */
+.title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 0.5rem;
+}
+
+.subtitle {
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    margin-bottom: 2rem;
+}
+
+/* ── Formulario ── */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    text-align: left;
+}
+
+.inputGroup label {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* ── Input de código ── */
+.codeInput {
+    padding: 0.9rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.6rem;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.codeInput::placeholder {
+    color: rgba(255, 255, 255, 0.2);
+    letter-spacing: 0.5rem;
+}
+
+.codeInput:focus {
+    outline: none;
+    border-color: #7986cb;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+/* ── Botón ── */
+.submitBtn {
+    padding: 0.9rem;
+    background: linear-gradient(135deg, #3949ab, #1a237e);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.5px;
+}
+
+.submitBtn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.submitBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Error ── */
+.errorMessage {
+    color: #ef5350;
+    font-size: 0.85rem;
+    background: rgba(239, 83, 80, 0.12);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    margin: 0;
+    text-align: left;
+}
+
+/* ── Hint ── */
+.hint {
+    margin-top: 1.25rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}

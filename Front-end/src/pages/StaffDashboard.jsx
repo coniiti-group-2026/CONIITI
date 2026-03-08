@@ -1,25 +1,47 @@
-import { useState, useEffect } from 'react';
+// ============================================================
+// Panel del Staff — CONIITI Front-end
+// Permite al staff gestionar (CRUD) las sesiones del congreso.
+// Conectado al API real. Reemplaza la versión con mockData.
+// ============================================================
+
+import { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiCalendar, FiLink, FiCheckCircle, FiXCircle } from 'react-icons/fi';
-import styles from '../styles/pages/StaffDashboard.module.css';
-import SessionFormModal from '../components/SessionFormModal';
-import { getAllSessions } from '../services/agendaService';
+import {
+    getSessions, createSession, updateSession,
+    deleteSession, toggleLinkVerified,
+} from '../services/agendaService';
 import { SESSION_STATUS, SESSION_MODALITY } from '../types/session';
+import SessionFormModal from '../components/SessionFormModal';
+import styles from '../styles/pages/StaffDashboard.module.css';
 
 /**
- * StaffDashboard — Panel de administración de sesiones para el Staff.
- * CRUD completo con estado local (mock) hasta integrar el backend.
+ * StaffDashboard — panel de administración de sesiones del congreso.
+ * Solo accesible para usuarios con rol 'staff' o 'superuser'.
  */
 export default function StaffDashboard() {
     const [sessions, setSessions] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [sessionToEdit, setSessionToEdit] = useState(null);
 
-    // Cargar sesiones mock al montar
-    useEffect(() => {
-        setSessions(getAllSessions());
+    const fetchSessions = useCallback(async () => {
+        setIsLoading(true);
+        setError('');
+        try {
+            const data = await getSessions();
+            setSessions(data);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
 
-    // ── CRUD handlers ──
+    useEffect(() => {
+        fetchSessions();
+    }, [fetchSessions]);
+
     const handleNew = () => {
         setSessionToEdit(null);
         setModalOpen(true);
@@ -30,33 +52,40 @@ export default function StaffDashboard() {
         setModalOpen(true);
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (!window.confirm('¿Eliminar esta sesión? Esta acción no se puede deshacer.')) return;
-        setSessions(prev => prev.filter(s => s.id !== id));
+        try {
+            await deleteSession(id);
+            setSessions((prev) => prev.filter((s) => s.id !== id));
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        }
     };
 
-    const handleSave = (data) => {
-        setSessions(prev => {
-            const exists = prev.some(s => s.id === data.id);
-            return exists
-                ? prev.map(s => s.id === data.id ? data : s)
-                : [data, ...prev];
-        });
-        setModalOpen(false);
+    const handleSave = async (data) => {
+        try {
+            if (sessionToEdit) {
+                const updated = await updateSession(sessionToEdit.id, data);
+                setSessions((prev) => prev.map((s) => s.id === updated.id ? updated : s));
+            } else {
+                const created = await createSession(data);
+                setSessions((prev) => [created, ...prev]);
+            }
+            setModalOpen(false);
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        }
     };
 
-    // Verificar / desverificar el enlace virtual de una sesión
-    const handleToggleVerificado = (id) => {
-        setSessions(prev =>
-            prev.map(s =>
-                s.id === id
-                    ? { ...s, link_verificado: !s.link_verificado, timestamp_actualizacion: new Date().toISOString() }
-                    : s
-            )
-        );
+    const handleToggleVerificado = async (id) => {
+        try {
+            const updated = await toggleLinkVerified(id);
+            setSessions((prev) => prev.map((s) => s.id === updated.id ? updated : s));
+        } catch (err) {
+            alert(`Error: ${err.message}`);
+        }
     };
 
-    // ── Helpers de badge ──
     const statusClass = (status) => {
         if (status === SESSION_STATUS.CAMBIO_SALON) return styles.badgeCambio;
         if (status === SESSION_STATUS.RETRASADO) return styles.badgeRetrasado;
@@ -78,11 +107,11 @@ export default function StaffDashboard() {
 
     return (
         <div className={styles.page}>
-            {/* ── Encabezado ── */}
+            {/* Encabezado */}
             <div className={styles.header}>
                 <div className={styles.headerLeft}>
                     <h1>Panel de Staff</h1>
-                    <p>Gestión de sesiones y conferencias — CONIITI 2026 v1</p>
+                    <p>Gestión de sesiones y conferencias — CONIITI 2026</p>
                 </div>
                 <button className={styles.newBtn} onClick={handleNew}>
                     <FiPlus size={16} />
@@ -90,10 +119,14 @@ export default function StaffDashboard() {
                 </button>
             </div>
 
-            {/* ── Tabla ── */}
+            {error && <p className={styles.errorBanner}>{error}</p>}
+
+            {/* Tabla */}
             <div className={styles.card}>
                 <div className={styles.tableWrapper}>
-                    {sessions.length === 0 ? (
+                    {isLoading ? (
+                        <div className={styles.loading}>Cargando sesiones...</div>
+                    ) : sessions.length === 0 ? (
                         <div className={styles.empty}>
                             <FiCalendar size={40} opacity={0.3} />
                             <p>No hay sesiones registradas. ¡Crea la primera!</p>
@@ -114,7 +147,7 @@ export default function StaffDashboard() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {sessions.map(s => (
+                                {sessions.map((s) => (
                                     <tr key={s.id}>
                                         <td><strong>{s.titulo}</strong></td>
                                         <td>{s.ponente}</td>
@@ -132,7 +165,6 @@ export default function StaffDashboard() {
                                             </span>
                                         </td>
                                         <td>
-                                            {/* Celda de enlace virtual: solo aplica para virtual/híbrido */}
                                             {s.modalidad !== 'Presencial' ? (
                                                 <div className={styles.linkCell}>
                                                     {s.link_virtual ? (
@@ -194,7 +226,7 @@ export default function StaffDashboard() {
                 </div>
             </div>
 
-            {/* ── Modal ── */}
+            {/* Modal */}
             {modalOpen && (
                 <SessionFormModal
                     session={sessionToEdit}
