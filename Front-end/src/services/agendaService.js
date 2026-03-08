@@ -108,9 +108,8 @@ export async function getSessionById(sessionId) {
 }
 
 /**
- * Retorna los días del congreso disponibles.
- * Se conserva hardcodeado porque es un dato de configuración,
- * no de base de datos.
+ * Retorna los días del congreso (dato de configuración, no de BD).
+ * El congreso CONIITI 2026 se celebra los días 1, 2 y 3 de octubre.
  *
  * @returns {Array<{ value: string, label: string }>}
  */

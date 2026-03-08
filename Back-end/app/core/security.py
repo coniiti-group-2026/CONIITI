@@ -100,14 +100,16 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
     """
     is_production = settings.ENVIRONMENT == "production"
 
+    # access_token: cookie de sesión (sin max_age).
+    # El navegador la elimina automáticamente al cerrar la pestaña o el navegador.
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
         secure=is_production,
         samesite="lax",
-        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/",
+        # Sin max_age → cookie de sesión del navegador
     )
     response.set_cookie(
         key="refresh_token",

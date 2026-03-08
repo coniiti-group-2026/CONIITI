@@ -57,12 +57,12 @@ def create_superuser() -> None:
             print(f"❌  Ya existe una cuenta con el correo: {email}")
             sys.exit(1)
 
-        password = getpass.getpass("Contraseña (mínimo 8 caracteres): ")
+        password = input("Contraseña (mínimo 8 caracteres): ")
         if len(password) < 8:
             print("❌  La contraseña debe tener al menos 8 caracteres.")
             sys.exit(1)
 
-        confirm = getpass.getpass("Confirmar contraseña: ")
+        confirm = input("Confirmar contraseña: ")
         if password != confirm:
             print("❌  Las contraseñas no coinciden.")
             sys.exit(1)

@@ -35,8 +35,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    # En producción, reemplazar por el dominio real del front-end
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=[
+        settings.FRONTEND_URL,
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,  # Requerido para que el front-end pueda enviar cookies HttpOnly
     allow_methods=["*"],
     allow_headers=["*"],

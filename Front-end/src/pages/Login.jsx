@@ -19,11 +19,21 @@ export default function Login() {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [email, setEmail]         = useState('');
+    const [password, setPassword]   = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
+    const [error, setError]         = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [engineReady, setEngineReady] = useState(false);
+
+    // Recuperar email guardado si existe
+    useEffect(() => {
+        const saved = localStorage.getItem('coniiti_saved_email');
+        if (saved) {
+            setEmail(saved);
+            setRememberMe(true);
+        }
+    }, []);
 
     // Inicializa el motor de partículas una sola vez
     useEffect(() => {
@@ -44,9 +54,14 @@ export default function Login() {
         e.preventDefault();
         setError('');
         setIsLoading(true);
+        // Guardar o borrar email según el checkbox
+        if (rememberMe) {
+            localStorage.setItem('coniiti_saved_email', email);
+        } else {
+            localStorage.removeItem('coniiti_saved_email');
+        }
         try {
             await login({ email, password });
-            // El back-end enviará el OTP; redirige a la pantalla de verificación
             navigate(`/verificar-otp?email=${encodeURIComponent(email)}&purpose=login`);
         } catch (err) {
             setError(err.message);
@@ -117,6 +132,22 @@ export default function Login() {
                             required
                             autoComplete="current-password"
                         />
+                    </div>
+
+                    {/* Recordar datos + Olvidé contraseña */}
+                    <div className={styles.rememberRow}>
+                        <label className={styles.rememberLabel}>
+                            <input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className={styles.rememberCheck}
+                            />
+                            Recordar mis datos
+                        </label>
+                        <Link to="/recuperar-contrasena" className={styles.forgotLink}>
+                            ¿Olvidaste tu contraseña?
+                        </Link>
                     </div>
 
                     {error && <p className={styles.errorMessage}>{error}</p>}

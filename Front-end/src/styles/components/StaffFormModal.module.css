@@ -89,7 +89,8 @@
 
 .inputGroup input:focus {
     outline: none;
-    border-color: #7986cb;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.15);
 }
 
 .inputGroup input:disabled {
@@ -122,16 +123,17 @@
 
 .saveBtn {
     padding: 0.55rem 1.25rem;
-    background: linear-gradient(135deg, #3949ab, #1a237e);
+    background: var(--color-accent);
     border: none;
     border-radius: 8px;
-    color: #fff;
+    color: var(--color-primary-dark);
     font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: background 0.2s, box-shadow 0.2s;
 }
 
 .saveBtn:hover {
-    opacity: 0.88;
+    background: var(--color-accent-light);
+    box-shadow: 0 4px 16px rgba(212, 160, 23, 0.35);
 }

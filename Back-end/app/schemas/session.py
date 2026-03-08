@@ -21,6 +21,7 @@ class SessionCreate(BaseModel):
     descripcion: Optional[str] = None
     ponente: str = Field(..., min_length=2, max_length=255)
     afiliacion: Optional[str] = Field(None, max_length=255)
+    descripcion_ponente: Optional[str] = None
     track: SessionTrack
     event_type: SessionEventType
     dia: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", examples=["2026-10-01"])
@@ -42,6 +43,7 @@ class SessionUpdate(BaseModel):
     descripcion: Optional[str] = None
     ponente: Optional[str] = Field(None, min_length=2, max_length=255)
     afiliacion: Optional[str] = Field(None, max_length=255)
+    descripcion_ponente: Optional[str] = None
     track: Optional[SessionTrack] = None
     event_type: Optional[SessionEventType] = None
     dia: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -64,6 +66,7 @@ class SessionRead(BaseModel):
     descripcion: Optional[str]
     ponente: str
     afiliacion: Optional[str]
+    descripcion_ponente: Optional[str]
     speaker_id: Optional[str]
     track: SessionTrack
     event_type: SessionEventType

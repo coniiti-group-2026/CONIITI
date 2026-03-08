@@ -66,6 +66,7 @@ class Session(Base):
     # --- Ponente ---
     ponente = Column(String(255), nullable=False)
     afiliacion = Column(String(255), nullable=True)
+    descripcion_ponente = Column(Text, nullable=True)
     speaker_id = Column(String(50), nullable=True)  # Reservado para integración futura con modelo Speaker
 
     # --- Clasificación ---

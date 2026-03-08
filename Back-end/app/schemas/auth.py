@@ -47,3 +47,15 @@ class TokenResponse(BaseModel):
 class MessageResponse(BaseModel):
     """Respuesta genérica de éxito con un mensaje descriptivo."""
     message: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    """Datos para solicitar el restablecimiento de contraseña."""
+    email: EmailStr = Field(..., examples=["juan@ejemplo.com"])
+
+
+class ResetPasswordRequest(BaseModel):
+    """Datos para restablecer la contraseña con el código OTP recibido."""
+    email: EmailStr = Field(..., examples=["juan@ejemplo.com"])
+    code: str = Field(..., min_length=6, max_length=6, examples=["123456"])
+    new_password: str = Field(..., min_length=8, examples=["NuevaContraseña123"])

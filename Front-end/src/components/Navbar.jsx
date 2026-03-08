@@ -139,9 +139,14 @@ export default function Navbar({ registeredCount = 0 }) {
                     {user ? (
                         <div className={styles.userProfile}>
                             {user.role === 'superuser' && (
-                                <Link to="/superusuario" className={styles.staffLink} onClick={closeMenu}>
-                                    Panel Admin
-                                </Link>
+                                <>
+                                    <Link to="/superusuario" className={styles.staffLink} onClick={closeMenu}>
+                                        Panel Admin
+                                    </Link>
+                                    <Link to="/staff" className={styles.staffLink} onClick={closeMenu}>
+                                        Panel Staff
+                                    </Link>
+                                </>
                             )}
                             {user.role === 'staff' && (
                                 <Link to="/staff" className={styles.staffLink} onClick={closeMenu}>

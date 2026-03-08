@@ -146,3 +146,28 @@ export async function logout() {
 export async function refreshToken() {
     return apiFetch('/auth/refresh', { method: 'POST' });
 }
+
+/**
+ * Solicita el envío de un código OTP de recuperación de contraseña.
+ * Solo disponible para usuarios con rol student o external.
+ * @param {string} email - Correo del usuario
+ */
+export async function forgotPassword(email) {
+    return apiFetch('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+    });
+}
+
+/**
+ * Restablece la contraseña del usuario verificando el OTP recibido.
+ * @param {string} email - Correo del usuario
+ * @param {string} code - Código OTP de 6 dígitos
+ * @param {string} newPassword - Nueva contraseña (mínimo 8 caracteres)
+ */
+export async function resetPassword(email, code, newPassword) {
+    return apiFetch('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ email, code, new_password: newPassword }),
+    });
+}

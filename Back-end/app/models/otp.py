@@ -18,8 +18,9 @@ from app.db.base import Base
 
 class OTPPurpose(str, enum.Enum):
     """Propósito del código OTP generado."""
-    REGISTER = "register"    # Verificación al registrarse por primera vez
-    LOGIN = "login"          # Verificación al iniciar sesión con OAuth
+    REGISTER       = "register"        # Verificación al registrarse
+    LOGIN          = "login"           # Verificación al iniciar sesión
+    PASSWORD_RESET = "password_reset"  # Recuperación de contraseña
 
 
 class OTPCode(Base):

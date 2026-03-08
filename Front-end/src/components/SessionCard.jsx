@@ -8,7 +8,10 @@ import {
     FiCheckCircle,
     FiUsers,
     FiAlertTriangle,
+    FiLogIn,
 } from 'react-icons/fi';
+import { useContext, useState } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import StatusBadge from './StatusBadge';
 import VirtualGatekeeper from './VirtualGatekeeper';
 import styles from '../styles/components/SessionCard.module.css';
@@ -52,6 +55,9 @@ export default function SessionCard({
     onToggleRegister,
     mode = 'agenda',
 }) {
+    const { user } = useContext(AuthContext);
+    const [showAuthHint, setShowAuthHint] = useState(false);
+
     const {
         titulo,
         ponente,
@@ -79,6 +85,16 @@ export default function SessionCard({
 
     const { disponibles, pct, estado } = cuposInfo(cupos_totales, inscritos);
     const agotado = estado === 'lleno';
+
+    /** Maneja el clic en Pre-inscribirse: bloquea si no hay sesión */
+    const handleRegisterClick = () => {
+        if (!user) {
+            setShowAuthHint(true);
+            setTimeout(() => setShowAuthHint(false), 4000);
+            return;
+        }
+        if (!agotado && onToggleRegister) onToggleRegister(session.id);
+    };
 
     return (
         <article
@@ -162,7 +178,7 @@ export default function SessionCard({
                             <div className={styles.metaLabel}>Ponente</div>
                             <button
                                 className={styles.speakerLink}
-                                onClick={() => onSpeakerClick(session.speaker_id)}
+                                onClick={() => onSpeakerClick(session)}
                                 title="Ver perfil del ponente"
                             >
                                 {ponente}
@@ -211,20 +227,24 @@ export default function SessionCard({
                 </div>
             ) : (
                 <button
-                    className={`${styles.actionBtn} ${agotado
-                        ? styles.fullBtn
-                        : isRegistered
-                            ? styles.registeredBtn
-                            : styles.registerBtn
+                    className={`${styles.actionBtn} ${showAuthHint
+                        ? styles.fullBtn // Usamos el rojo de "Sin cupos" para el alerta
+                        : agotado
+                            ? styles.fullBtn
+                            : isRegistered
+                                ? styles.registeredBtn
+                                : styles.registerBtn
                         }`}
-                    onClick={() => !agotado && onToggleRegister && onToggleRegister(session.id)}
-                    disabled={agotado && !isRegistered}
+                    onClick={handleRegisterClick}
+                    disabled={(agotado && !isRegistered) || showAuthHint}
                 >
-                    {agotado && !isRegistered
-                        ? <><FiAlertTriangle /> Sin cupos</>
-                        : isRegistered
-                            ? <><FiCheckCircle /> Pre-inscrito</>
-                            : <><FiCalendar /> Pre-inscribirse</>
+                    {showAuthHint 
+                        ? <><FiLogIn /> Inicia sesión para inscribirte</>
+                        : agotado && !isRegistered
+                            ? <><FiAlertTriangle /> Sin cupos</>
+                            : isRegistered
+                                ? <><FiCheckCircle /> Pre-inscrito</>
+                                : <><FiCalendar /> Pre-inscribirse</>
                     }
                 </button>
             )}

@@ -22,6 +22,7 @@ from app.models.otp import OTPPurpose
 from app.schemas.auth import (
     RegisterRequest, LoginRequest,
     OTPVerifyRequest, TokenResponse, MessageResponse,
+    ForgotPasswordRequest, ResetPasswordRequest,
 )
 from app.services import user_service, otp_service, email_service
 from app.dependencies.auth import get_current_user
@@ -224,3 +225,57 @@ def refresh_token(request: Request, response: Response, db: DBSession = Depends(
 def get_me(current_user=Depends(get_current_user)):
     """Retorna el perfil del usuario que está actualmente autenticado."""
     return current_user
+
+
+# ==============================================================
+# Sección: Recuperación de contraseña
+# ==============================================================
+
+@router.post(
+    "/forgot-password",
+    response_model=MessageResponse,
+    summary="Solicitar recuperación de contraseña",
+    description="Envía un código OTP al correo para restablecer la contraseña. Solo disponible para roles student y external.",
+)
+async def forgot_password(data: ForgotPasswordRequest, db: DBSession = Depends(get_db)):
+    """Genera y envía un OTP de recuperación de contraseña. Solo para clientes (student/external)."""
+    user = user_service.get_user_by_email(data.email, db)
+
+    # Silencioso para no revelar si el email existe
+    if not user or not user.is_active:
+        return MessageResponse(message="Si el correo está registrado, recibirás un código de recuperación.")
+
+    # Staff y superusuario no pueden usar este flujo
+    from app.models.user import UserRole
+    if user.role not in (UserRole.STUDENT, UserRole.EXTERNAL):
+        return MessageResponse(message="Si el correo está registrado, recibirás un código de recuperación.")
+
+    code = otp_service.generate_otp(user, OTPPurpose.PASSWORD_RESET, db)
+    await email_service.send_otp_email(user.email, user.full_name, code, "password_reset")
+
+    return MessageResponse(message="Si el correo está registrado, recibirás un código de recuperación.")
+
+
+@router.post(
+    "/reset-password",
+    response_model=MessageResponse,
+    summary="Restablecer contraseña",
+    description="Verifica el código OTP y actualiza la contraseña del usuario.",
+)
+async def reset_password(data: ResetPasswordRequest, db: DBSession = Depends(get_db)):
+    """Verifica el OTP de recuperación y actualiza la contraseña del usuario."""
+    from app.core.security import hash_password
+
+    user = user_service.get_user_by_email(data.email, db)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se pudo restablecer la contraseña. Verifica el código e inténtalo de nuevo.",
+        )
+
+    otp_service.verify_otp(user, data.code, OTPPurpose.PASSWORD_RESET, db)
+
+    user.hashed_password = hash_password(data.new_password)
+    db.commit()
+
+    return MessageResponse(message="Contraseña actualizada exitosamente. Ya puedes iniciar sesión.")

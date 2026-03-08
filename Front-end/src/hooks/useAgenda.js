@@ -3,38 +3,25 @@ import { filterSessions, getConferenceDays } from '../services/agendaService';
 
 /**
  * useAgenda — encapsula todo el estado de la agenda y la lógica de filtrado.
- *
- * Mantiene el estado para: día activo, filtro de modalidad activo,
- * lista de sesiones filtradas y bandera de carga.
- *
- * @returns {{
- *   sessions:       import('../types/session').Session[],
- *   days:           { value: string, label: string }[],
- *   activeDay:      string,
- *   activeModality: string | null,
- *   isLoading:      boolean,
- *   setActiveDay:   (day: string) => void,
- *   setActiveModality: (mod: string | null) => void,
- *   refresh:        () => void,
- * }}
+ * Los días del congreso son fijos: Oct 1, 2 y 3 (2026-10-01/02/03).
  */
 export function useAgenda() {
     const days = getConferenceDays();
-    const [activeDay, setActiveDay] = useState(days[0].value);
-    const [activeModality, setActiveModality] = useState(null);
+    const [activeDay, setActiveDay]             = useState(days[0].value);
+    const [activeModality, setActiveModality]   = useState(null);
     const [activeEventType, setActiveEventType] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [sessions, setSessions] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery]         = useState('');
+    const [sessions, setSessions]               = useState([]);
+    const [isLoading, setIsLoading]             = useState(true);
 
     const fetchSessions = useCallback(async () => {
         setIsLoading(true);
         try {
             const data = await filterSessions({
-                day: activeDay,
-                modality: activeModality,
+                day:       activeDay,
+                modality:  activeModality,
                 eventType: activeEventType,
-                search: searchQuery,
+                search:    searchQuery,
             });
             setSessions(data);
         } catch (err) {
@@ -45,7 +32,6 @@ export function useAgenda() {
         }
     }, [activeDay, activeModality, activeEventType, searchQuery]);
 
-    // Volver a obtener cuando cambian los filtros
     useEffect(() => {
         fetchSessions();
     }, [fetchSessions]);

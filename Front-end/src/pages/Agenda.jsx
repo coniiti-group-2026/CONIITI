@@ -4,7 +4,7 @@ import AgendaGrid from '../components/AgendaGrid';
 import SpeakerModal from '../components/SpeakerModal';
 import { useAgenda } from '../hooks/useAgenda';
 import { usePolling } from '../hooks/usePolling';
-import { getSpeakerById } from '../services/agendaService';
+// No se requiere getSpeakerById
 import styles from '../styles/App.module.css';
 
 /**
@@ -12,8 +12,7 @@ import styles from '../styles/App.module.css';
  * Navbar y Footer son manejados por App.jsx.
  */
 export default function Agenda({ registeredIds = new Set(), onToggleRegister }) {
-    const [selectedSpeakerId, setSelectedSpeakerId] = useState(null);
-    const speakerData = selectedSpeakerId ? getSpeakerById(selectedSpeakerId) : null;
+    const [selectedSpeaker, setSelectedSpeaker] = useState(null);
 
     const {
         searchQuery, setSearchQuery,
@@ -48,15 +47,15 @@ export default function Agenda({ registeredIds = new Set(), onToggleRegister }) 
             <AgendaGrid
                 sessions={sessions}
                 isLoading={isLoading}
-                onSpeakerClick={setSelectedSpeakerId}
+                onSpeakerClick={setSelectedSpeaker}
                 registeredIds={registeredIds}
                 onToggleRegister={onToggleRegister}
             />
 
-            {selectedSpeakerId && speakerData && (
+            {selectedSpeaker && (
                 <SpeakerModal
-                    speaker={speakerData}
-                    onClose={() => setSelectedSpeakerId(null)}
+                    speaker={selectedSpeaker}
+                    onClose={() => setSelectedSpeaker(null)}
                 />
             )}
         </div>

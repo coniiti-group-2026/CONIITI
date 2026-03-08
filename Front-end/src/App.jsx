@@ -26,6 +26,7 @@ import Register from './pages/Register';
 import OTPVerification from './pages/OTPVerification';
 import StaffDashboard from './pages/StaffDashboard';
 import SuperuserDashboard from './pages/SuperuserDashboard';
+import ForgotPassword from './pages/ForgotPassword';
 
 export default function App() {
     const [registeredIds, setRegisteredIds] = useState(new Set());
@@ -116,6 +117,7 @@ function AppLayout({ registeredIds, toggleRegistered }) {
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/verificar-otp" element={<OTPVerification />} />
+                        <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </main>

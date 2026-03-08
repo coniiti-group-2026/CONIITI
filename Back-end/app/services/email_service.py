@@ -18,7 +18,12 @@ from app.core.config import settings
 
 def _build_otp_html(code: str, purpose: str, full_name: str) -> str:
     """Construye el cuerpo HTML del correo de verificación OTP."""
-    purpose_text = "registro en la plataforma" if purpose == "register" else "inicio de sesión"
+    purpose_texts = {
+        "register":       "registro en la plataforma",
+        "login":          "inicio de sesión",
+        "password_reset": "restablecimiento de contraseña",
+    }
+    purpose_text = purpose_texts.get(purpose, "verificación")
     return f"""
     <!DOCTYPE html>
     <html lang="es">
@@ -75,12 +80,31 @@ async def send_otp_email(to_email: str, full_name: str, code: str, purpose: str)
     """
     Envía un correo electrónico con el código OTP al destinatario indicado.
     Utiliza conexión SMTP con STARTTLS para asegurar la transmisión.
+
+    En modo 'development', si el SMTP no está configurado, imprime el código
+    en los logs del servidor en lugar de lanzar un error 500.
     """
     subject_map = {
         "register": "Código de verificación — Registro CONIITI",
         "login": "Código de verificación — Inicio de sesión CONIITI",
     }
     subject = subject_map.get(purpose, "Código de verificación — CONIITI")
+
+    # Si el SMTP no está configurado, usamos el modo de desarrollo
+    smtp_configured = bool(settings.SMTP_USER and settings.SMTP_PASSWORD
+                           and settings.SMTP_USER != "tu_correo@gmail.com"
+                           and settings.SMTP_PASSWORD != "TU_CONTRASEÑA_DE_APLICACION")
+
+    if not smtp_configured:
+        if settings.ENVIRONMENT == "development":
+            print("\n" + "=" * 55)
+            print("  📧  MODO DESARROLLO — SMTP no configurado")
+            print(f"  Para: {to_email}  ({purpose})")
+            print(f"  Código OTP: {code}")
+            print("=" * 55 + "\n")
+            return
+        else:
+            raise RuntimeError("SMTP no configurado en modo producción.")
 
     message = MIMEMultipart("alternative")
     message["From"] = f"{settings.EMAIL_FROM_NAME} <{settings.SMTP_USER}>"
@@ -90,11 +114,20 @@ async def send_otp_email(to_email: str, full_name: str, code: str, purpose: str)
     html_body = _build_otp_html(code, purpose, full_name)
     message.attach(MIMEText(html_body, "html"))
 
-    await aiosmtplib.send(
-        message,
-        hostname=settings.SMTP_HOST,
-        port=settings.SMTP_PORT,
-        username=settings.SMTP_USER,
-        password=settings.SMTP_PASSWORD,
-        start_tls=True,
-    )
+    try:
+        await aiosmtplib.send(
+            message,
+            hostname=settings.SMTP_HOST,
+            port=settings.SMTP_PORT,
+            username=settings.SMTP_USER,
+            password=settings.SMTP_PASSWORD,
+            start_tls=True,
+        )
+    except Exception as e:
+        if settings.ENVIRONMENT == "development":
+            print("\n" + "=" * 55)
+            print(f"  ⚠️   SMTP falló: {e}")
+            print(f"  📧  Código OTP para {to_email}: {code}")
+            print("=" * 55 + "\n")
+        else:
+            raise
