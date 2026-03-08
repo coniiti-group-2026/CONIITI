@@ -41,7 +41,14 @@ export const SESSION_EVENT_TYPE = Object.freeze({
   PANEL: 'Panel'
 });
 
-
+/** @enum {string} */
+export const SESSION_ROOMS = Object.freeze({
+  AUDITORIO_CE4: 'Auditorio CE4',
+  SALA_MULTIPLE: 'Sala Múltiple',
+  AUDITORIO_PPAL: 'Auditorio Principal',
+  SALA_VIRTUAL: 'Sala Virtual 1',
+  SALA_VIRTUAL_2: 'Sala Virtual 2'
+});
 
 /**
  * @typedef {Object} Speaker

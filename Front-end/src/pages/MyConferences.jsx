@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import AgendaGrid from '../components/AgendaGrid';
 import SpeakerModal from '../components/SpeakerModal';
+import LiveFilter from '../components/LiveFilter';
 import { useAgenda } from '../hooks/useAgenda';
 import { FiBookmark, FiLogIn } from 'react-icons/fi';
 import styles from '../styles/pages/MyConferences.module.css';
@@ -14,7 +15,10 @@ import styles from '../styles/pages/MyConferences.module.css';
 export default function MyConferences({ registeredIds = new Set(), onToggleRegister }) {
     const { user } = useContext(AuthContext);
     const [selectedSpeaker, setSelectedSpeaker] = useState(null);
-    const { sessions } = useAgenda();
+    const { 
+        sessions, days, activeDay, activeModality, activeEventType, activeRoom, searchQuery,
+        setActiveDay, setActiveModality, setActiveEventType, setActiveRoom, setSearchQuery
+    } = useAgenda();
 
     // Estado cuando no hay usuario autenticado
     if (!user) {
@@ -45,8 +49,15 @@ export default function MyConferences({ registeredIds = new Set(), onToggleRegis
         );
     }
 
-    // Filtra todas las sesiones para mostrar solo las pre-inscritas (desde useAgenda)
-    const mySessions = sessions.filter((s) => registeredIds.has(s.id));
+    // Filtra todas las sesiones pre-inscritas que devuelva el hook (que ya vienen filtradas por día/tipo/sala)
+    const mySessions = sessions
+        .filter((s) => registeredIds.has(s.id))
+        .sort((a, b) => {
+            // Ordenar por hora de inicio cronológicamente
+            if (a.hora_inicio < b.hora_inicio) return -1;
+            if (a.hora_inicio > b.hora_inicio) return 1;
+            return 0;
+        });
 
     return (
         <div className={styles.page}>
@@ -56,11 +67,28 @@ export default function MyConferences({ registeredIds = new Set(), onToggleRegis
                     <h1 className={styles.title}>Mis Conferencias</h1>
                     <p className={styles.subtitle}>
                         {mySessions.length === 0
-                            ? 'Aún no te has pre-inscrito a ninguna sesión.'
+                            ? 'Aún no te has pre-inscrito a ninguna sesión o no hay resultados.'
                             : `${mySessions.length} sesión${mySessions.length !== 1 ? 'es' : ''} pre-inscrita${mySessions.length !== 1 ? 's' : ''}`
                         }
                     </p>
                 </div>
+            </div>
+
+            {/* Inyectando el filtro global para poder elegir día y salas en Mis Conferencias */}
+            <div style={{ padding: '0 2rem 1.5rem 2rem' }}>
+                <LiveFilter
+                    days={days}
+                    activeDay={activeDay}
+                    activeModality={activeModality}
+                    activeEventType={activeEventType}
+                    activeRoom={activeRoom}
+                    searchQuery={searchQuery}
+                    onDayChange={setActiveDay}
+                    onModalityChange={setActiveModality}
+                    onEventTypeChange={setActiveEventType}
+                    onRoomChange={setActiveRoom}
+                    onSearchQueryChange={setSearchQuery}
+                />
             </div>
 
             {mySessions.length === 0 ? (

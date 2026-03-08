@@ -8,9 +8,26 @@ import { AuthContext } from '../context/AuthContext';
 
 const LINKS = [
     { name: 'Inicio', path: '/' },
-    { name: 'Agenda', path: '/agenda' },
+    { 
+        name: 'Agenda', 
+        path: '/agenda',
+        dropdown: [
+            { name: 'Agenda', path: '/agenda' },
+            { name: 'Mis Conferencias', path: '/mis-conferencias', icon: 'FiBookmark' }
+        ]
+    },
+    { 
+        name: 'Páginas', 
+        path: '#',
+        dropdown: [
+            { name: 'Cómite', path: '/comite' },
+            { name: 'Conferencista', path: '/conferencistas' },
+            { name: 'Autores', path: '/autores' },
+            { name: 'Galeria', path: '/galerias' }
+        ]
+    },
     { name: 'Memorias', path: '/memorias' },
-    { name: 'Acerca de', path: '/acerca-de' },
+    { name: 'Acerca De', path: '/acerca-de' },
     { name: 'Contacto', path: '/contacto' }
 ];
 
@@ -23,14 +40,14 @@ export default function Navbar({ registeredCount = 0 }) {
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [agendaDropdownOpen, setAgendaDropdownOpen] = useState(false);
-    const dropdownRef = useRef(null);
+    const [openDropdown, setOpenDropdown] = useState(null);
+    const navbarRef = useRef(null);
 
     // Cierra el dropdown al hacer clic fuera
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-                setAgendaDropdownOpen(false);
+            if (navbarRef.current && !navbarRef.current.contains(e.target)) {
+                setOpenDropdown(null);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -39,11 +56,11 @@ export default function Navbar({ registeredCount = 0 }) {
 
     const closeMenu = () => {
         setMenuOpen(false);
-        setAgendaDropdownOpen(false);
+        setOpenDropdown(null);
     };
 
     return (
-        <nav className={styles.navbar}>
+        <nav className={styles.navbar} ref={navbarRef}>
             {/* ── Logo + Nombre ── */}
             <Link to="/" className={styles.brand} onClick={closeMenu}>
                 <img src={logo} alt="Logo CONIITI" className={styles.logoImg} />
@@ -58,47 +75,44 @@ export default function Navbar({ registeredCount = 0 }) {
             {/* ── Links de navegación ── */}
             <ul className={`${styles.links} ${menuOpen ? styles.linksOpen : ''}`}>
                 {LINKS.map((link) => {
-                    // Link especial "Agenda" con dropdown
-                    if (link.name === 'Agenda') {
-                        const isAgendaActive = activePage === '/agenda' || activePage === '/mis-conferencias';
+                    if (link.dropdown) {
+                        const isActive = activePage === link.path || link.dropdown.some(sub => activePage === sub.path);
+                        const isOpen = openDropdown === link.name;
+                        
                         return (
-                            <li key={link.name} className={styles.dropdownItem} ref={dropdownRef}>
+                            <li key={link.name} className={styles.dropdownItem}>
                                 <button
-                                    className={`${styles.link} ${isAgendaActive ? styles.active : ''}`}
-                                    onClick={() => setAgendaDropdownOpen((o) => !o)}
+                                    className={`${styles.link} ${isActive ? styles.active : ''}`}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setOpenDropdown(isOpen ? null : link.name);
+                                    }}
                                 >
                                     {link.name}
                                     <FiChevronDown
-                                        className={`${styles.chevron} ${agendaDropdownOpen ? styles.chevronOpen : ''}`}
+                                        className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}
                                         size={13}
                                     />
-                                    {isAgendaActive && <span className={styles.activeDot} />}
+                                    {isActive && <span className={styles.activeDot} />}
                                 </button>
 
-                                {agendaDropdownOpen && (
+                                {isOpen && (
                                     <ul className={styles.dropdown}>
-                                        <li>
-                                            <Link
-                                                to="/agenda"
-                                                className={`${styles.dropdownLink} ${activePage === '/agenda' ? styles.dropdownLinkActive : ''}`}
-                                                onClick={closeMenu}
-                                            >
-                                                Agenda
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link
-                                                to="/mis-conferencias"
-                                                className={`${styles.dropdownLink} ${activePage === '/mis-conferencias' ? styles.dropdownLinkActive : ''}`}
-                                                onClick={closeMenu}
-                                            >
-                                                <FiBookmark size={13} />
-                                                Mis Conferencias
-                                                {registeredCount > 0 && (
-                                                    <span className={styles.badge}>{registeredCount}</span>
-                                                )}
-                                            </Link>
-                                        </li>
+                                        {link.dropdown.map(subLink => (
+                                            <li key={subLink.name}>
+                                                <Link
+                                                    to={subLink.path}
+                                                    className={`${styles.dropdownLink} ${activePage === subLink.path ? styles.dropdownLinkActive : ''}`}
+                                                    onClick={closeMenu}
+                                                >
+                                                    {subLink.icon === 'FiBookmark' && <FiBookmark size={13} />}
+                                                    {subLink.name}
+                                                    {subLink.icon === 'FiBookmark' && registeredCount > 0 && (
+                                                        <span className={styles.badge}>{registeredCount}</span>
+                                                    )}
+                                                </Link>
+                                            </li>
+                                        ))}
                                     </ul>
                                 )}
                             </li>

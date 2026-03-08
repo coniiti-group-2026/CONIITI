@@ -167,7 +167,7 @@ export default function SessionCard({
                     <div className={styles.metaItem}>
                         <FiMapPin className={styles.metaIcon} />
                         <div>
-                            <div className={styles.metaLabel}>Salón</div>
+                            <div className={styles.metaLabel}>Salas</div>
                             <div className={styles.metaValue}>{salon}</div>
                         </div>
                     </div>

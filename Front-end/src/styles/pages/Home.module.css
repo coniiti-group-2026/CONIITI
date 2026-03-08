@@ -1,0 +1,692 @@
+/* Home.module.css - Rediseño Corporativo Limpio (CONIITI 2026) */
+
+.home {
+    min-height: 100vh;
+    background-color: #ffffff;
+    color: #333333;
+    font-family: inherit;
+}
+
+/* ── HERO SECTION & VIDEO BACKGROUND ── */
+.hero {
+    position: relative;
+    width: 100%;
+    height: 85vh;
+    min-height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+}
+
+.heroBackground {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1;
+}
+
+.heroBackground img,
+.heroBackground video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.heroOverlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 31, 63, 0.75); 
+    z-index: 2;
+}
+
+.heroContent {
+    position: relative;
+    z-index: 3;
+    max-width: 900px;
+    padding: 0 1.5rem;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.4rem 1.2rem;
+    background: #ffc107;
+    color: #333;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    letter-spacing: 1px;
+}
+
+.heroContent h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1.1;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    color: #ffffff;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    display: inline-block;
+    letter-spacing: -1px;
+}
+
+.heroContent p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* CONTADOR REGRESIVO */
+.countdownContainer {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.countdownBox {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    min-width: 90px;
+}
+
+.countdownValue {
+    display: block;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.countdownLabel {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #cbd5e1;
+    margin-top: 0.2rem;
+}
+
+/* BOTONES GLOBALES HOME */
+.primaryBtn, .secondaryBtn, .linkAction, .linkBtn {
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+}
+
+.heroButtons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.primaryBtn {
+    background-color: #0d6efd;
+    color: white;
+    padding: 0.9rem 2rem;
+    border-radius: 50px; /* Diseño Premium redondo */
+    font-weight: 700;
+    font-size: 1.05rem;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.primaryBtn:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.5);
+}
+
+.secondaryBtn {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+    padding: 0.8rem 1.8rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.secondaryBtn:hover {
+    background-color: white;
+    color: #0f172a;
+}
+
+/* ── LAYOUT DE SECCIONES GENERAL ── */
+.sectionBlock {
+    padding: 5rem 2rem;
+    max-width: 1400px; /* Expandido para alojar grid x4 de Pagos */
+    margin: 0 auto;
+}
+
+/* ── SECCIONES DE COLOR (ELIMINADO GRIS PLANO) ── */
+
+.sectionBlock.darkBg {
+    background: linear-gradient(135deg, #002e5b 0%, #001f3f 100%);
+    max-width: 100% !important; /* Over-ride forzado para matar la restricción global de 1400px */
+    width: 100%; /* Expansión literal */
+    margin: 0; 
+    border-radius: 0;
+}
+
+.sectionBlock.darkBgInner {
+    max-width: 100%; /* Lado a lado como el usuario pidió */
+    padding: 0 1rem;
+    margin: 0 auto;
+}
+
+.sectionBlock.darkBg .sectionTitle,
+.sectionBlock.darkBg .impactNumber {
+    color: #ffffff;
+}
+
+.sectionBlock.darkBg .sectionSubtitle,
+.sectionBlock.darkBg .impactLabel {
+    color: #cbd5e1;
+}
+
+.sectionBlock.darkBg .impactIcon {
+    color: #ffc107; /* Acento amarillo corporativo resalta hermoso sobre azul oscuro */
+}
+
+.sectionBlock.lightBlueBg {
+    background: linear-gradient(135deg, #f0f4f8 0%, #f7f9fc 100%);
+    width: 100%;
+    border-top: 1px solid rgba(0,0,0,0.03);
+}
+
+.sectionBlock.lightBlueBg > * {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 2rem;
+}
+
+/* ── PASARELA DE PAGOS FONDO AZUL GLOBAL ── */
+.sectionBlock.blueBg {
+    background: linear-gradient(135deg, #001f3f 0%, var(--color-primary-dark) 100%);
+    max-width: 100% !important; /* Over-ride vital para matar restricciones parentales en 1920p */
+    width: 100%; 
+    margin: 0; /* Extracción de todo margen inferior/superior limitante */
+    padding: 6rem 0 10rem 0; /* Barriga extrema profunda */
+    margin-bottom: -7rem; /* Hundimiento feroz contra el margen positivo (space-12) del Footer */
+    position: relative;
+    z-index: 1; /* Footer tiene 10, blueBg queda por debajo en el choque */
+}
+
+.sectionBlock.blueBg .sectionTitle,
+.sectionBlock.blueBg .sectionSubtitle {
+    color: #ffffff;
+}
+
+.sectionBlock.blueBg > * {
+    max-width: 100%; /* Queremos que fluya casi hasta los bordes */
+    padding: 0 1rem;
+}
+
+.sectionTitle {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 1rem;
+}
+
+.sectionSubtitle {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #6c757d;
+    max-width: 650px;
+    margin: 0 auto 3rem auto;
+}
+
+/* ── SECCIÓN: POR QUÉ ASISTIR (REDISEÑO PREMIUM) ── */
+.whySection {
+    position: relative;
+    background-color: #fcfdfd; 
+    overflow: hidden;
+}
+
+.whySection::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    background-image: radial-gradient(var(--color-primary-light) 1px, transparent 1px);
+    background-size: 35px 35px;
+    opacity: 0.1;
+    z-index: 0;
+}
+
+.whyHeader {
+    text-align: center;
+    margin-bottom: 4rem;
+    position: relative;
+    z-index: 2;
+}
+
+.preTitle {
+    display: block;
+    font-size: 1.1rem;
+    color: #6c757d;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.mainTitleBlue {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800;
+    color: var(--color-primary);
+    max-width: 1000px;
+    margin: 0 auto;
+    line-height: 1.25;
+}
+
+.whyGridCenter {
+    display: grid;
+    grid-template-columns: 1fr 380px 1fr;
+    gap: 2rem;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+@media (max-width: 1100px) {
+    .whyGridCenter { grid-template-columns: 1fr 1fr; }
+    .whyColCenter { display: none !important; }
+}
+@media (max-width: 768px) {
+    .whyGridCenter { grid-template-columns: 1fr; }
+}
+
+.whyColLeft, .whyColRight {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.whyFeatureCard {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 16px;
+    padding: 2.2rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+    transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s;
+    text-align: center;
+    position: relative;
+}
+
+.whyFeatureCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 50px rgba(13, 110, 253, 0.1);
+    border-color: rgba(13, 110, 253, 0.3);
+}
+
+.featureIcon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 1.5rem auto;
+    background: rgba(13, 110, 253, 0.05);
+    border: 2px solid #0d6efd;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.6rem;
+    color: #0d6efd;
+    transition: all 0.4s ease;
+}
+
+.whyFeatureCard:hover .featureIcon {
+    background: #0d6efd;
+    color: #ffffff;
+    transform: scale(1.15) rotate(5deg);
+}
+
+.whyFeatureCard h3 {
+    font-size: 1.3rem;
+    color: var(--color-primary-dark);
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.whyFeatureCard p {
+    color: #555;
+    font-size: 0.98rem;
+    line-height: 1.65;
+}
+
+/* ── Gráfico Central con Animación tipo Orbe Tech ── */
+.whyColCenter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 0;
+}
+
+.centerGraphicPulse {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.coreOrb {
+    width: 90px;
+    height: 90px;
+    background: linear-gradient(135deg, #0d6efd 0%, var(--color-primary-dark) 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(13, 110, 253, 0.4);
+    z-index: 5;
+    animation: pulseOrb 3s infinite alternate ease-in-out;
+}
+
+.orbit {
+    position: absolute;
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: spinRotate linear infinite;
+}
+
+.orbit.orb1 { 
+    width: 180px; height: 180px; 
+    border: 2px dashed rgba(13, 110, 253, 0.3);
+    animation-duration: 25s; 
+}
+.orbit.orb2 { 
+    width: 260px; height: 260px; 
+    border: 1px solid rgba(13, 110, 253, 0.15); 
+    animation-duration: 35s; 
+    animation-direction: reverse; 
+}
+.orbit.orb3 { 
+    width: 350px; height: 350px; 
+    border: 2px dotted rgba(13, 110, 253, 0.2); 
+    animation-duration: 45s; 
+}
+
+@keyframes pulseOrb {
+    0% { transform: scale(1); box-shadow: 0 0 20px rgba(13, 110, 253, 0.4); }
+    100% { transform: scale(1.15); box-shadow: 0 0 45px rgba(13, 110, 253, 0.6); }
+}
+
+@keyframes spinRotate {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ── IMPACTO ── */
+.impactGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem; /* Gap reducido para mayor dispersión */
+    text-align: center;
+    max-width: 100%; /* Remueve el límite de 1000px, llenando la pantalla */
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.impactCard {
+    padding: 2rem;
+}
+
+.impactIcon {
+    font-size: 2.5rem;
+    color: #0d6efd;
+    margin-bottom: 1rem;
+}
+
+.impactNumber {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #212529;
+    margin-bottom: 0.5rem;
+}
+
+.impactLabel {
+    font-size: 1rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* ── DESTACADOS ── */
+.speakersGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 3rem;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 900px) {
+    .speakersGrid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+    .speakersGrid { grid-template-columns: 1fr; }
+}
+
+.speakerCard {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    overflow: hidden;
+    text-align: center;
+    padding-bottom: 1.5rem;
+}
+
+.speakerImg {
+    width: 100%;
+    height: 250px;
+    background: #e9ecef;
+    overflow: hidden;
+}
+
+.speakerImg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.speakerCard:hover .speakerImg img {
+    transform: scale(1.05); /* Efecto de zoom leve elegante */
+}
+
+.speakerName {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 1.2rem 1rem 0.5rem;
+    color: #212529;
+}
+
+.speakerRole {
+    font-size: 0.95rem;
+    color: #6c757d;
+    margin: 0 1rem;
+}
+
+.centerBtn { text-align: center; }
+
+/* ── PASARELA DE PAGOS / INSCRIPCIONES (4-Column Layout) ── */
+.sectionBlock.blueBg .pricingContainer {
+    max-width: 1400px; /* Compactando el ancho global para que las tarjetas no luzcan excesivas */
+    margin: 0 auto;
+}
+
+.pricingGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    max-width: 100%; 
+    margin: 0 auto;
+}
+
+@media (max-width: 1200px) {
+    .pricingGrid { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+}
+@media (max-width: 768px) {
+    .pricingGrid { grid-template-columns: 1fr; }
+}
+
+.pricingCard {
+    background: #002e5b; /* Todo Azul Institucional unificado */
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pricingCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+
+.pricingTitle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    min-height: 55px;
+    color: #ffffff; /* Letra blanca en fondo azul */
+}
+
+.pricingAmount {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+.pricingAmount span {
+    font-size: 1rem;
+    color: #cbd5e1;
+    font-weight: 400;
+}
+
+.pricingFeatures {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+    text-align: left;
+    color: #e2e8f0;
+    flex-grow: 1; /* Empuja el botón hacia abajo creando consistencia */
+}
+
+.pricingFeatures li {
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.pricingBtn {
+    width: 100%;
+    padding: 0.8rem;
+    background: #ffc107;
+    color: #000;
+    font-weight: 600;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    transition: all 0.2s;
+    margin-top: auto;
+}
+
+.pricingBtn:hover {
+    background: #e0a800;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+}
+
+/* ── TARJETAS OPCIONALES DE PAGOS (AMARILLO CORPORATIVO) ── */
+.optionalCard {
+    border-top: 4px solid #ffc107;
+    overflow: hidden;
+}
+
+.optionalBadge {
+    position: absolute;
+    top: 20px;
+    right: -40px;
+    background: #ffc107;
+    color: #000;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.35rem 3.5rem;
+    transform: rotate(45deg);
+    letter-spacing: 1px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+/* ── RESPONSIVE PARA DISPOSITIVOS MÓVILES EXCLUSIVO ── */
+@media (max-width: 600px) {
+    .heroContent h1 {
+        font-size: 2.2rem;
+    }
+    
+    .heroContent p {
+        font-size: 1.05rem;
+    }
+
+    .countdownContainer {
+        gap: 0.5rem;
+    }
+    
+    .countdownBox {
+        padding: 0.5rem;
+        min-width: 65px;
+    }
+    
+    .countdownValue {
+        font-size: 1.5rem;
+    }
+    
+    .heroButtons {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .primaryBtn, .secondaryBtn {
+        width: 100%;
+        padding: 0.8rem 1.2rem;
+        font-size: 1rem;
+    }
+    
+    .sectionBlock {
+        padding: 3rem 1.5rem;
+    }
+    
+    .whyRow {
+        gap: 2rem;
+    }
+}

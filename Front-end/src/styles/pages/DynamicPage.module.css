@@ -1,0 +1,198 @@
+/* DynamicPage.module.css - Rediseño Clásico/Corporativo */
+
+.page {
+    min-height: 100vh;
+    background: #f8f9fa; /* Gris muy claro web */
+    padding-bottom: 5rem;
+    font-family: inherit;
+    color: #333333;
+}
+
+/* ── HERO BANNER SUBPÁGINAS (PREMIUM) ── */
+.hero {
+    background: linear-gradient(135deg, #0d2b4e 0%, #001f3f 100%);
+    padding: 6rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 50% 120%, rgba(13, 110, 253, 0.2), transparent 60%);
+    pointer-events: none;
+}
+
+.heroContent {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.heroContent h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+.heroContent p {
+    font-size: 1.1rem;
+    color: #e2e8f0;
+    line-height: 1.6;
+}
+
+/* ── CONTENEDORES Y LISTAS FULL WIDTH ── */
+.container {
+    max-width: 95%; /* Pantalla Expandida */
+    margin: 2rem auto 0;
+    padding: 0 4rem; /* Margen respirable a los lados */
+}
+
+/* Layout de Info Cards (Para Acerca/Contacto) */
+.contactGrid, .aboutGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    border: 1px solid rgba(0,0,0,0.05);
+    text-align: left;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(13, 110, 253, 0.08); /* Glow de acento premium */
+}
+
+.iconWrapper {
+    width: 50px;
+    height: 50px;
+    background: #e9ecef;
+    color: #0d6efd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+}
+
+.card h2 {
+    font-size: 1.3rem;
+    color: #212529;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.card p, .card a {
+    color: #495057;
+    line-height: 1.6;
+    margin: 0.5rem 0;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.card a {
+    color: #0d6efd;
+}
+.card a:hover {
+    text-decoration: underline;
+}
+
+/* ── CMS GRID DE TARJETAS (Galerias, Conferencistas, etc.) ── */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    padding-top: 1rem;
+}
+
+.imgWrapper {
+    height: 200px;
+    width: 100%;
+    background: #e2e8f0;
+}
+
+.imgWrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cardBody {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.cardBody h3 {
+    margin: 0 0 0.8rem 0;
+    font-size: 1.25rem;
+    color: #212529;
+    font-weight: 700;
+}
+
+.cardBody p {
+    margin: 0 0 1.2rem 0;
+    color: #6c757d;
+    line-height: 1.5;
+    flex: 1;
+    font-size: 0.95rem;
+}
+
+.linkBtn {
+    margin-top: auto;
+    color: #0d6efd;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    align-self: flex-start;
+}
+
+.linkBtn:hover {
+    text-decoration: underline;
+}
+
+/* ── ESTADOS DE FALLBACK (Loading / Empty) ── */
+.loader {
+    text-align: center;
+    padding: 4rem 2rem;
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+.empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #ffffff;
+    border-radius: 6px;
+    border: 1px dashed #ced4da;
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+.empty h3 {
+    font-size: 1.5rem;
+    color: #495057;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+.empty p {
+    color: #6c757d;
+    font-size: 1rem;
+}

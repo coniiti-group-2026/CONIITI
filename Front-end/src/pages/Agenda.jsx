@@ -17,6 +17,7 @@ export default function Agenda({ registeredIds = new Set(), onToggleRegister }) 
     const {
         searchQuery, setSearchQuery,
         activeEventType, setActiveEventType,
+        activeRoom, setActiveRoom,
         sessions, days, activeDay, activeModality,
         isLoading, setActiveDay, setActiveModality, refresh,
     } = useAgenda();
@@ -37,10 +38,12 @@ export default function Agenda({ registeredIds = new Set(), onToggleRegister }) 
                 activeDay={activeDay}
                 activeModality={activeModality}
                 activeEventType={activeEventType}
+                activeRoom={activeRoom}
                 searchQuery={searchQuery}
                 onDayChange={setActiveDay}
                 onModalityChange={setActiveModality}
                 onEventTypeChange={setActiveEventType}
+                onRoomChange={setActiveRoom}
                 onSearchQueryChange={setSearchQuery}
             />
 

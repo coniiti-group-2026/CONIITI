@@ -9,9 +9,6 @@
 .main {
     flex: 1;
     width: 100%;
-    max-width: var(--container-max);
-    margin: 0 auto;
-    padding: var(--space-4) var(--space-4);
 }
 
 /* Contenedor para el panel de Staff — sin max-width, full-width */
@@ -23,8 +20,9 @@
 }
 
 @media (min-width: 768px) {
+    /* Mantenemos vacío .main o sólo ajustamos si se necesitara margen cero */
     .main {
-        padding: var(--space-8) var(--space-6);
+        padding: 0;
     }
 
     .staffWrapper {
@@ -61,5 +59,19 @@
 
     50% {
         opacity: 0.3;
+    }
+}
+
+/* ── WRAPPER EXCLUSIVO PARA AGENDA ── */
+.agendaProtectedWrapper {
+    width: 100%;
+    max-width: var(--container-max); /* Trae de vuelta los 1200px salvavidas */
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-4);
+}
+
+@media (min-width: 768px) {
+    .agendaProtectedWrapper {
+        padding: var(--space-8) var(--space-6);
     }
 }

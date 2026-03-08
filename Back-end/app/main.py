@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import auth, oauth, users, sessions
+from app.routers import auth, oauth, users, sessions, cms
 
 # ==============================================================
 # Sección: Creación de la aplicación
@@ -56,6 +56,7 @@ app.include_router(auth.router)
 app.include_router(oauth.router)
 app.include_router(users.router)
 app.include_router(sessions.router)
+app.include_router(cms.router)
 
 
 # ==============================================================
