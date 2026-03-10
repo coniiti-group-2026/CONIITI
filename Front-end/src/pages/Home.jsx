@@ -65,7 +65,7 @@ export default function Home() {
             <header className={styles.hero}>
                 <div className={styles.heroBackground}>
                     {/* Placeholder Colosseum Italy Video/Background */}
-                    <img src="/colosseum_italy_hero.png" alt="Colosseum Background Italy" />
+                    <img src="/colosseum_italy_hero.png" alt="Colosseum Background Italy" fetchpriority="high" width="1920" height="1080" />
                 </div>
                 <div className={styles.heroOverlay}></div>
                 
@@ -175,21 +175,21 @@ export default function Home() {
                 <div className={styles.speakersGrid}>
                     <div className={styles.speakerCard}>
                         <div className={styles.speakerImg}>
-                            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=350" alt="Dr. Alessandro Conti" />
+                            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=350" alt="Dr. Alessandro Conti" loading="lazy" width="350" height="350" />
                         </div>
                         <h4 className={styles.speakerName}>Dr. Alessandro Conti</h4>
                         <p className={styles.speakerRole}>Experto en Inteligencia Artificial, Milán</p>
                     </div>
                     <div className={styles.speakerCard}>
                         <div className={styles.speakerImg}>
-                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=350" alt="Dra. Sofía Restrepo" />
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=350" alt="Dra. Sofía Restrepo" loading="lazy" width="350" height="350" />
                         </div>
                         <h4 className={styles.speakerName}>Dra. Sofía Restrepo</h4>
                         <p className={styles.speakerRole}>CEO Innovatech Latam</p>
                     </div>
                     <div className={styles.speakerCard}>
                         <div className={styles.speakerImg}>
-                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=350" alt="Ing. Marco Rossi" />
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=350" alt="Ing. Marco Rossi" loading="lazy" width="350" height="350" />
                         </div>
                         <h4 className={styles.speakerName}>Ing. Marco Rossi</h4>
                         <p className={styles.speakerRole}>Líder Infraestructuras Cloud</p>

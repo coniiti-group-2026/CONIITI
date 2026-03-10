@@ -5,6 +5,8 @@ from pydantic import BaseModel, HttpUrl
 class ContentCardBase(BaseModel):
     section: str
     title: str
+    subtitle: Optional[str] = None
+    year: Optional[int] = None
     description: Optional[str] = None
     image_url: Optional[str] = None
     link_url: Optional[str] = None
@@ -17,6 +19,8 @@ class ContentCardCreate(ContentCardBase):
 class ContentCardUpdate(BaseModel):
     section: Optional[str] = None
     title: Optional[str] = None
+    subtitle: Optional[str] = None
+    year: Optional[int] = None
     description: Optional[str] = None
     image_url: Optional[str] = None
     link_url: Optional[str] = None

@@ -145,9 +145,9 @@
 }
 
 .primaryBtn:hover {
-    background-color: #0b5ed7;
+    background-color: var(--color-primary-dark, #020a26);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.5);
+    box-shadow: 0 8px 25px rgba(2, 10, 38, 0.5);
 }
 
 .secondaryBtn {
