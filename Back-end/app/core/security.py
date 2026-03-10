@@ -106,8 +106,8 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=is_production,
-        samesite="lax",
+        secure=True,  # Siempre True para SameSite=none (requiere HTTPS, Render lo provee)
+        samesite="none", # Permitir envío cross-site
         path="/",
         # Sin max_age → cookie de sesión del navegador
     )
@@ -115,8 +115,8 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=is_production,
-        samesite="lax",
+        secure=True, # Siempre True para SameSite=none
+        samesite="none", # Permitir envío cross-site
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
         path="/auth/refresh",
     )
