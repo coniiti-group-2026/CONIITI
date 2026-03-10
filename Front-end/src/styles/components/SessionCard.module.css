@@ -176,17 +176,11 @@
     font-weight: 600;
 }
 
-/* Colores del texto según estado */
-.cupos_disponible {
-    color: #059669;
-}
-
-.cupos_casilleno {
-    color: #d97706;
-}
-
+/* Colores del texto neutralizados (un solo color intermedio para todos los estados) */
+.cupos_disponible,
+.cupos_casilleno,
 .cupos_lleno {
-    color: #dc2626;
+    color: var(--color-text-secondary);
 }
 
 .cuposBarBg {
@@ -203,17 +197,11 @@
     transition: width 0.6s ease;
 }
 
-/* Colores de la barra según estado */
-.cuposFill_disponible {
-    background: linear-gradient(90deg, #10b981, #34d399);
-}
-
-.cuposFill_casilleno {
-    background: linear-gradient(90deg, #f59e0b, #fbbf24);
-}
-
+/* Colores de la barra neutralizados (un solo gradiente intermedio suave) */
+.cuposFill_disponible,
+.cuposFill_casilleno,
 .cuposFill_lleno {
-    background: linear-gradient(90deg, #ef4444, #f87171);
+    background: linear-gradient(90deg, #64748b, #94a3b8);
 }
 
 /* ── Grid de meta-datos ── */

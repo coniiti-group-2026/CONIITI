@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Response, Request, status
+from typing import Union
 from sqlalchemy.orm import Session as DBSession
 
 from app.db.session import get_db
@@ -127,11 +128,11 @@ async def verify_otp(
 
 @router.post(
     "/login",
-    response_model=MessageResponse,
+    response_model=Union[MessageResponse, TokenResponse],
     summary="Iniciar sesión con email y contraseña",
-    description="Valida credenciales y envía OTP al correo para completar el inicio de sesión.",
+    description="Valida credenciales. Si el usuario es staff/superuser (o no está verificado), envía OTP. De lo contrario, retorna el token directamente.",
 )
-async def login(data: LoginRequest, db: DBSession = Depends(get_db)):
+async def login(data: LoginRequest, response: Response, db: DBSession = Depends(get_db)):
     """Autentica con email/contraseña y dispara el flujo de 2FA por correo."""
     user = user_service.get_user_by_email(data.email, db)
 
@@ -148,12 +149,21 @@ async def login(data: LoginRequest, db: DBSession = Depends(get_db)):
             detail="Cuenta inactiva. Contacte al administrador.",
         )
 
+    # Condición para saltar el OTP:
+    # Si es student o external Y ya está verificado, entra directo.
+    if user.role in (UserRole.STUDENT, UserRole.EXTERNAL) and user.is_verified:
+        access_token = create_access_token({"sub": str(user.id)})
+        refresh_token = create_refresh_token({"sub": str(user.id)})
+        set_auth_cookies(response, access_token, refresh_token)
+        return TokenResponse(message="Autenticación exitosa.", requires_otp=False)
+
     # Genera y envía el código OTP de inicio de sesión
     code = otp_service.generate_otp(user, OTPPurpose.LOGIN, db)
     await email_service.send_otp_email(user.email, user.full_name, code, "login")
 
     return MessageResponse(
-        message="Se envió un código de verificación a su correo electrónico."
+        message="Se envió un código de verificación a su correo electrónico.",
+        requires_otp=True
     )
 
 

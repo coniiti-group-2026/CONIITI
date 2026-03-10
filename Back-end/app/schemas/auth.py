@@ -7,6 +7,7 @@
 
 from pydantic import BaseModel, EmailStr, Field
 from app.models.otp import OTPPurpose
+from typing import Union
 
 
 class RegisterRequest(BaseModel):
@@ -47,6 +48,7 @@ class TokenResponse(BaseModel):
 class MessageResponse(BaseModel):
     """Respuesta genérica de éxito con un mensaje descriptivo."""
     message: str
+    requires_otp: bool = True
 
 
 class ForgotPasswordRequest(BaseModel):

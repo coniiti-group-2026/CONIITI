@@ -10,7 +10,7 @@ import {
     FiAlertTriangle,
     FiLogIn,
 } from 'react-icons/fi';
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import StatusBadge from './StatusBadge';
 import VirtualGatekeeper from './VirtualGatekeeper';
@@ -57,6 +57,12 @@ export default function SessionCard({
 }) {
     const { user } = useContext(AuthContext);
     const [showAuthHint, setShowAuthHint] = useState(false);
+    const [localInscritos, setLocalInscritos] = useState(session.inscritos || 0);
+
+    // Sincroniza con el props.session por si hay un refetch desde el servidor
+    useEffect(() => {
+        setLocalInscritos(session.inscritos || 0);
+    }, [session.inscritos]);
 
     const {
         titulo,
@@ -75,7 +81,6 @@ export default function SessionCard({
         timestamp_actualizacion,
         descripcion,
         cupos_totales = 0,
-        inscritos = 0,
     } = session;
 
     const lastUpdated = new Date(timestamp_actualizacion).toLocaleTimeString(
@@ -83,7 +88,7 @@ export default function SessionCard({
         { hour: '2-digit', minute: '2-digit' }
     );
 
-    const { disponibles, pct, estado } = cuposInfo(cupos_totales, inscritos);
+    const { disponibles, pct, estado } = cuposInfo(cupos_totales, localInscritos);
     const agotado = estado === 'lleno';
 
     /** Maneja el clic en Pre-inscribirse: bloquea si no hay sesión */
@@ -93,8 +98,20 @@ export default function SessionCard({
             setTimeout(() => setShowAuthHint(false), 4000);
             return;
         }
-        if (!agotado && onToggleRegister) onToggleRegister(session.id);
+        if (!agotado && onToggleRegister) {
+            onToggleRegister(session.id);
+            // Optimistic Update
+            setLocalInscritos(prev => isRegistered ? Math.max(0, prev - 1) : prev + 1);
+        }
     };
+    
+    /** Maneja el clic en cancelar inscripción desde "Mis Conferencias" */
+    const handleCancelRegistration = () => {
+        if (onToggleRegister) {
+            onToggleRegister(session.id);
+            setLocalInscritos(prev => Math.max(0, prev - 1));
+        }
+    }
 
     return (
         <article
@@ -219,7 +236,7 @@ export default function SessionCard({
                     </button>
                     <button
                         className={`${styles.cancelBtn}`}
-                        onClick={() => onToggleRegister && onToggleRegister(session.id)}
+                        onClick={handleCancelRegistration}
                         title="Cancelar pre-inscripción"
                     >
                         Cancelar inscripción

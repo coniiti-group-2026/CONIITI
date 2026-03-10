@@ -11,7 +11,7 @@
 /* ── HERO BANNER SUBPÁGINAS (PREMIUM) ── */
 .hero {
     background: linear-gradient(135deg, #0d2b4e 0%, #001f3f 100%);
-    padding: 6rem 2rem;
+    padding: 3.5rem 2rem;
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -71,6 +71,56 @@
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 40px rgba(13, 110, 253, 0.08); /* Glow de acento premium */
+}
+
+/* Modificadores para que la tarjeta sea idéntica al CMS Panel */
+.cardImg {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 12px 12px 0 0;
+    margin: -3rem -2rem 1.5rem -2rem;
+    width: calc(100% + 4rem);
+}
+
+.yearBadge {
+    display: inline-block;
+    width: fit-content;
+    background: #e9ecef;
+    color: #495057;
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    margin: 0 0 0.8rem 0;
+    font-weight: 600;
+}
+
+.cardDesc {
+    font-size: 0.95rem;
+    color: #6c757d;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.descWrapper {
+    flex: 1;
+    margin: 0 0 1rem 0;
+}
+
+.readMoreBtn {
+    background: none;
+    border: none;
+    color: #0d6efd;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0;
+    margin-top: 0.4rem;
+    cursor: pointer;
+}
+
+.readMoreBtn:hover {
+    text-decoration: underline;
+    color: #0b5ed7;
 }
 
 .iconWrapper {
@@ -195,4 +245,71 @@
 .empty p {
     color: #6c757d;
     font-size: 1rem;
+}
+.empty p {
+    color: #6c757d;
+    font-size: 1rem;
+}
+
+.overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.readModal {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.readModal h3 {
+    margin: 0;
+    color: #333;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+}
+
+.readText {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #444;
+    white-space: pre-wrap;
+    margin: 0;
+}
+
+.modalFoot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.modalFoot button {
+    background: #0d6efd;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.modalFoot button:hover {
+    background: #0b5ed7;
 }

@@ -144,3 +144,29 @@ Hero visual de la página de inicio con título animado, fecha del congreso y CT
 
 Pie de página con nombre del congreso, ubicación, fecha y copyright.  
 Tiene `position: relative; z-index: 10` para aparecer sobre el canvas de partículas del Login/Registro.
+
+---
+
+## `<CMSPanel />`
+**Archivo:** `src/components/CMSPanel.jsx`
+
+Panel inteligente multi-propósito usado para gestionar el contenido de las distintas secciones públicas. Renderiza pestañas y formularios dinámicos para operaciones CRUD en el backend (`/cms/`).
+
+**Secciones Integradas:**
+- `autores`, `comite`, `conferencistas` → Gestionan un grid de perfiles profesionales.
+- `memorias` → Gestiona la subida y visualización de documentos y proceedings históricos.
+- `galerias` → Gestiona la visualización de imágenes multimedia.
+
+**Características:**
+- Selector lógico interactivo.
+- Cortado automático de descripciones ("Ver Más").
+- Formularios superpuestos emergentes.
+
+---
+
+## `<PersonCard />`
+**Archivo:** `src/components/PersonCard.jsx`
+
+Componente re-utilizable de visualización diseñado para las páginas del CMS. Se usa en páginas como `/autores`, `/comite`, y `/conferencistas`.
+
+Muestra la foto de perfil del individuo en cabecera junto a información general. Las descripciones largas están truncadas en CSS con `-webkit-line-clamp` para consistencia en la rejilla.

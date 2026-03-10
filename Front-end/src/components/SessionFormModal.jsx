@@ -25,6 +25,7 @@ const EMPTY_FORM = {
     link_verificado: false,
     descripcion: '',
     descripcion_ponente: '',
+    cupos_totales: 0,
 };
 
 /**
@@ -141,6 +142,11 @@ export default function SessionFormModal({ session, onSave, onClose }) {
                                         <option key={s} value={s}>{s}</option>
                                     ))}
                                 </select>
+                            </div>
+                            
+                            <div className={styles.fieldGroup}>
+                                <label>Cupos Totales</label>
+                                <input name="cupos_totales" type="number" min="0" value={form.cupos_totales} onChange={handleChange} />
                             </div>
 
                             <div className={styles.fieldGroup}>

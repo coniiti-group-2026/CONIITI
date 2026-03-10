@@ -107,7 +107,7 @@ export default function Navbar({ registeredCount = 0 }) {
                                                 >
                                                     {subLink.icon === 'FiBookmark' && <FiBookmark size={13} />}
                                                     {subLink.name}
-                                                    {subLink.icon === 'FiBookmark' && registeredCount > 0 && (
+                                                    {user && subLink.icon === 'FiBookmark' && registeredCount > 0 && (
                                                         <span className={styles.badge}>{registeredCount}</span>
                                                     )}
                                                 </Link>

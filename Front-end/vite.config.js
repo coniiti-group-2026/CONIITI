@@ -20,6 +20,20 @@ export default defineConfig({
                 target: 'http://localhost:8000',
                 changeOrigin: true,
             },
+            '/cms': {
+                target: 'http://localhost:8000',
+                changeOrigin: true,
+            },
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    vendor: ['react', 'react-dom', 'react-router-dom'],
+                    icons: ['react-icons']
+                }
+            }
+        }
+    }
 });

@@ -11,12 +11,12 @@ import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
 import { FaMicrosoft, FaGoogle } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
-import { login, loginWithMicrosoft, loginWithGoogle } from '../services/authService';
+import { login, loginWithMicrosoft, loginWithGoogle, getMe } from '../services/authService';
 import { loginParticlesConfig } from '../utils/particlesConfig';
 import styles from '../styles/pages/Login.module.css';
 
 export default function Login() {
-    const { user } = useContext(AuthContext);
+    const { user, setUser } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [email, setEmail]         = useState('');
@@ -61,8 +61,17 @@ export default function Login() {
             localStorage.removeItem('coniiti_saved_email');
         }
         try {
-            await login({ email, password });
-            navigate(`/verificar-otp?email=${encodeURIComponent(email)}&purpose=login`);
+            const res = await login({ email, password });
+            
+            if (res.requires_otp === false) {
+                // El usuario es estudiante/externo y ya estaba verificado. Saltamos el OTP.
+                const userData = await getMe();
+                setUser(userData);
+                // La redirección al home sucederá automáticamente gracias al useEffect que escucha cambios en 'user'
+            } else {
+                // Requiere OTP, ir a la pantalla de verificación
+                navigate(`/verificar-otp?email=${encodeURIComponent(email)}&purpose=login`);
+            }
         } catch (err) {
             setError(err.message);
         } finally {

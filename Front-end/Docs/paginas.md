@@ -76,11 +76,28 @@ CRUD completo de sesiones. Columnas de la tabla:
 
 ---
 
-## Páginas pendientes de contenido real
+## `/superusuario` — Panel de Control Superior *(Ruta protegida)*
+**Archivo:** `src/pages/SuperuserDashboard.jsx`  
+**Requiere:** rol `superuser`
 
-| Ruta | Archivo | Estado |
-|---|---|---|
-| `/acerca-de` | `About.jsx` | Placeholder |
-| `/memorias` | `Memories.jsx` | Placeholder |
-| `/contacto` | `Contact.jsx` | Placeholder |
-| `/paginas` | `Paginas.jsx` | Placeholder |
+Vista jerárquicamente superior al `/staff`. Permite al superadministrador visualizar en tiempo real a los usuarios pre-inscritos a las sesiones y enviar herramientas masivas. Consume `/sessions/{id}/users`.
+
+---
+
+## Páginas Dinámicas (Módulo CMS)
+Las siguientes páginas exhiben el contenido ingresado desde la pestaña "Gestor de Contenido" en el `StaffDashboard` de forma pública. Apelan al módulo Pydantic `PersonModels` y `DocumentModels`.
+
+- `/autores` (`Autores.jsx`): Renderiza filas de `<PersonCard>` orientadas a investigadores. Configurado mediante categoría `autores`.
+- `/comite` (`Comite.jsx`): Muestra equipos y liderazgos de la universidad usando `<PersonCard>`.
+- `/conferencistas` (`Conferencistas.jsx`): Reversión pública con biografía extendida de los speakers usando `<PersonCard>`. Consume categoría `conferencistas`.
+- `/memorias` (`Memorias.jsx`): Módulo cronológico para descargar papers `/ proceedings`. Ordena inteligentemente la salida basada en el campo de "año". Posee modal interno "Ver más".
+- `/galerias` (`Galerias.jsx`): Parrilla fotográfica proveniente del CMS.
+
+---
+
+## Páginas Misceláneas Estáticas
+- `/acerca-de` (`About.jsx`)
+- `/contacto` (`Contact.jsx`)
+- `/paginas` (`Paginas.jsx`)
+- `/verificar-otp` (`OTPVerification.jsx`): Vista forzada para inyección de token en cuentas que requieren confirmación de correo.
+- `/recuperar-contrasena` (`ForgotPassword.jsx`): Flujo de token secreto por correo al extraviar cuenta.
