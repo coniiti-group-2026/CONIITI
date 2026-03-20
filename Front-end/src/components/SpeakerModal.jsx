@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { FiX, FiMapPin, FiBriefcase } from 'react-icons/fi';
+import { FiX, FiBriefcase } from 'react-icons/fi';
 import styles from '../styles/components/Speaker.module.css';
 
 export default function SpeakerModal({ speaker, onClose }) {

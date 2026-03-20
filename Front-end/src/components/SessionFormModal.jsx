@@ -36,6 +36,7 @@ export default function SessionFormModal({ session, onSave, onClose }) {
     const [form, setForm] = useState(EMPTY_FORM);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setForm(session ? { ...EMPTY_FORM, ...session } : EMPTY_FORM);
     }, [session]);
 

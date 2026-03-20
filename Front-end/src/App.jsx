@@ -62,7 +62,9 @@ function AppLayout() {
     useEffect(() => {
         try {
             localStorage.setItem('coniiti_pre_registrations', JSON.stringify([...registeredIds]));
-        } catch (e) {}
+        } catch {
+            // Ignore localStorage errors
+        }
     }, [registeredIds]);
 
     // 3. Traer del servidor cuando el usuario se loguea (hidratación remota)
@@ -71,8 +73,13 @@ function AppLayout() {
             // Leer cache local temporal para no esperar a la red (Optimistic Loading)
             try {
                 const saved = localStorage.getItem('coniiti_pre_registrations');
-                if (saved) setRegisteredIds(new Set(JSON.parse(saved)));
-            } catch (e) {}
+                if (saved) {
+                    // eslint-disable-next-line react-hooks/set-state-in-effect
+                    setRegisteredIds(new Set(JSON.parse(saved)));
+                }
+            } catch {
+                // Ignore localStorage errors
+            }
 
             getRegisteredSessions()
                 .then(sessions => {

@@ -202,10 +202,9 @@ export async function toggleLinkVerified(sessionId) {
  * NOTA: En esta versión, el modelo de ponentes aún no
  * tiene su propia tabla en el back-end. Se retorna null.
  *
- * @param {string} id - ID del ponente
  * @returns {null}
  */
-export function getSpeakerById(id) {
+export function getSpeakerById() {
     return null;
 }
 

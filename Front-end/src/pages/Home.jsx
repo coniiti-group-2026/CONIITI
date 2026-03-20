@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowRight, FiUsers, FiAward, FiBookOpen, FiGlobe, FiCheck, FiLink, FiBriefcase, FiMonitor } from 'react-icons/fi';
+import { FiArrowRight, FiUsers, FiAward, FiBookOpen, FiCheck, FiLink, FiBriefcase, FiMonitor } from 'react-icons/fi';
 import styles from '../styles/pages/Home.module.css';
 
 const Countdown = () => {
@@ -65,7 +65,7 @@ export default function Home() {
             <header className={styles.hero}>
                 <div className={styles.heroBackground}>
                     {/* Placeholder Colosseum Italy Video/Background */}
-                    <img src="/colosseum_italy_hero.png" alt="Colosseum Background Italy" fetchpriority="high" width="1920" height="1080" />
+                    <img src="/colosseum_italy_hero.png" alt="Colosseum Background Italy" fetchPriority="high" width="1920" height="1080" />
                 </div>
                 <div className={styles.heroOverlay}></div>
                 
