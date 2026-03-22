@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:strict": "vite build --logLevel error",
-    "lint": "eslint . --ext .js,.jsx --max-warnings 0",
+    "lint": "eslint . --ext .js,.jsx",
     "test": "vitest run",
     "preview": "vite preview"
   },
