@@ -65,7 +65,7 @@ export default function Home() {
             <header className={styles.hero}>
                 <div className={styles.heroBackground}>
                     {/* Placeholder Colosseum Italy Video/Background */}
-                    <img src="/colosseum_italy_hero.png" alt="Colosseum Background Italy" fetchpriority="high" width="1920" height="1080" />
+                    <img src="/colosseum_italy_hero.png" alt="Colosseum Background Italy" fetchPriority="high" width="1920" height="1080" />
                 </div>
                 <div className={styles.heroOverlay}></div>
                 

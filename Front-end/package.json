@@ -7,11 +7,13 @@
     "dev": "vite",
     "build": "vite build",
     "build:strict": "vite build --logLevel error",
-    "lint":"eslint . --ext .js,.jsx --max-warnings 0",
+    "lint": "eslint . --ext .js,.jsx --max-warnings 0",
     "test": "vitest run",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@vitejs/plugin-react": "^4.0.0",
@@ -19,6 +21,8 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "happy-dom": "^20.8.4",
     "jsdom": "^29.0.0",
     "vite": "^7.3.1",
     "vitest": "^4.1.0"
