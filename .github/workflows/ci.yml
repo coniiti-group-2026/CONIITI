@@ -29,7 +29,7 @@ jobs:
           node-version: "18"
 
       - name: Instalar dependencias
-        run: npm install
+        run: npm ci
 
       - name: Paso 1 - Ejecutar Linting
         run: npm run lint
