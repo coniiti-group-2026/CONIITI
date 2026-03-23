@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from '../styles/pages/DynamicPage.module.css';
 import { FiMail, FiMapPin, FiPhone } from 'react-icons/fi';
 

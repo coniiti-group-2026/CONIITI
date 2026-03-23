@@ -26,6 +26,7 @@ export default function StaffFormModal({ staffMember, onSave, onClose }) {
     // Precarga los datos si está editando
     useEffect(() => {
         if (staffMember) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setForm({
                 full_name: staffMember.full_name ?? '',
                 email: staffMember.email ?? '',

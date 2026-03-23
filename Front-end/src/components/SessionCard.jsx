@@ -61,6 +61,7 @@ export default function SessionCard({
 
     // Sincroniza con el props.session por si hay un refetch desde el servidor
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLocalInscritos(session.inscritos || 0);
     }, [session.inscritos]);
 

@@ -205,7 +205,7 @@ export async function toggleLinkVerified(sessionId) {
  * @param {string} id - ID del ponente
  * @returns {null}
  */
-export function getSpeakerById(id) {
+export function getSpeakerById() {
     return null;
 }
 
