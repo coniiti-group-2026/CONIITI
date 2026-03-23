@@ -4,7 +4,7 @@ name: CI/CD CONIITI - Control de Calidad
 on:
   push:
     branches:
-      - desarrollo-rediseño
+      - desarrollo-rediseno
   pull_request:
     branches:
       - main
@@ -14,7 +14,7 @@ jobs:
     name: Revisión Automática
     runs-on: ubuntu-latest
 
-    # le indica a GitHub que todo esto debe correr en la carpeta Front-end
+    # le indica a GitHub que todo esto debe correr en la carpeta Frontend
     defaults:
       run:
         working-directory: ./Front-end
