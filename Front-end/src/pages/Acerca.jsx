@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from '../styles/pages/DynamicPage.module.css';
 import { FiInfo, FiTarget, FiGlobe } from 'react-icons/fi';
 
@@ -22,7 +21,7 @@ export default function Acerca() {
                 <div className={styles.card}>
                     <div className={styles.iconWrapper}><FiTarget /></div>
                     <h2>Nuestro Propósito</h2>
-                    <p>Impulsar el desarrollo de la innovación brindando herramientas y conocimientos sobre las nuevas tendencias en el área, bajo el lema "Innovación y Tendencias en Ingeniería".</p>
+                    <p>Impulsar el desarrollo de la innovación brindando herramientas y conocimientos sobre las nuevas tendencias en el área, bajo el lema &quot;Innovación y Tendencias en Ingeniería&quot;.</p>
                 </div>
 
                 <div className={styles.card}>

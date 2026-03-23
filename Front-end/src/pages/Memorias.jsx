@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from '../styles/pages/DynamicPage.module.css';
-import { FiDownload, FiExternalLink } from 'react-icons/fi';
+import { FiDownload } from 'react-icons/fi';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 

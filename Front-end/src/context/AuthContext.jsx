@@ -5,7 +5,7 @@
 // la sesión desde la cookie HttpOnly si ya existe.
 // ============================================================
 
-import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
+import { createContext, useState, useEffect, useCallback, useContext } from 'react';
 import { getMe, logout as logoutService } from '../services/authService';
 
 /**
@@ -60,4 +60,5 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

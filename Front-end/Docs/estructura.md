@@ -101,8 +101,6 @@ CONIITI/
     ├── requirements.txt         # Dependencias Python
     ├── seed.py                  # Poblador original de BDD (deprecated)
     ├── seed_sessions.py         # Poblador principal de administradores y sesiones de prueba
-    ├── test_500.py              # Script local para validar manejo de errores HTTP
-    ├── test_db.py               # Script exploratorio para BDD
     │
     ├── migrations/              # Historial de versiones y revisiones Alembic
     │

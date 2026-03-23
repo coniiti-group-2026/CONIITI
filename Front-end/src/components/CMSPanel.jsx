@@ -25,6 +25,7 @@ export default function CMSPanel() {
     const [loading, setLoading] = useState(false);
     const [viewingDesc, setViewingDesc] = useState(null);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => { fetchCards(); }, [section]);
 
     const fetchCards = async () => {
