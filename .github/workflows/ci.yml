@@ -4,7 +4,7 @@ name: CI/CD CONIITI - Control de Calidad
 on:
   push:
     branches:
-      - desarrollo-rediseño
+      - desarrollo-rediseno
   pull_request:
     branches:
       - main
