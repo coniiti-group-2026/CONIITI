@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:strict": "vite build --logLevel error",
-    "lint":"eslint . --ext .js,.jsx --max-warnings 0",
+    "lint": "eslint src --ext js,jsx --max-warnings 0",
     "test": "vitest run",
     "preview": "vite preview"
   },
@@ -15,7 +15,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@vitejs/plugin-react": "^4.0.0",
-    "eslint": "^9.39.4",
+    "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
