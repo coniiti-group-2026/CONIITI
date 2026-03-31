@@ -25,7 +25,14 @@ export default function CMSPanel() {
     const [loading, setLoading] = useState(false);
     const [viewingDesc, setViewingDesc] = useState(null);
 
+<<<<<<< HEAD
     const fetchCards = useCallback(async () => {
+=======
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => { fetchCards(); }, [section]);
+
+    const fetchCards = async () => {
+>>>>>>> a59e145538146c0b18f814b81ff3ec8d5bfb3188
         setLoading(true);
         try {
             const res = await fetch(`${API_BASE}/cms/cards/${section}?active_only=false`);
