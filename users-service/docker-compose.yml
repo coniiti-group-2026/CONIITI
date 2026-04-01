@@ -1,0 +1,29 @@
+services:
+  users-db:
+    image: postgres:16
+    container_name: users-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: usersdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - users_data:/var/lib/postgresql/data
+
+  users-service:
+    build: .
+    container_name: users-service
+    restart: always
+    ports:
+      - "8001:8000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@users-db:5432/usersdb
+    depends_on:
+      - users-db
+
+volumes:
+  users_data:
