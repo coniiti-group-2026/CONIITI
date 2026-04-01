@@ -1,0 +1,43 @@
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - coniiti-net
+
+  backend:
+    build: ./Back-end
+    container_name: backend
+    networks:
+      - coniiti-net
+    environment:
+      DATABASE_URL: sqlite:///./test.db
+      SECRET_KEY: supersecreto123
+    labels:
+      - "traefik.enable=true"
+
+      # Router (entrada)
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.api.entrypoints=web"
+      - "traefik.http.routers.api.service=api-service"
+
+      # Middleware
+      - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"
+      - "traefik.http.middlewares.strip-api.stripprefix.forceSlash=true"
+      - "traefik.http.routers.api.middlewares=strip-api"
+
+      # Service
+      - "traefik.http.services.api-service.loadbalancer.server.port=8000"
+
+networks:
+  coniiti-net:
