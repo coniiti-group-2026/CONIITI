@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiUsers, FiAward, FiBookOpen, FiCheck, FiLink, FiBriefcase, FiMonitor } from 'react-icons/fi';
+import { createCheckoutSession } from '../services/microservicesApi';
 import styles from '../styles/pages/Home.module.css';
 
 const Countdown = () => {
@@ -59,6 +60,24 @@ const Countdown = () => {
 };
 
 export default function Home() {
+    const [loadingPayment, setLoadingPayment] = useState(false);
+
+    const handlePayment = async (amount, currency, region) => {
+        try {
+            setLoadingPayment(true);
+            const data = await createCheckoutSession(amount, currency, region);
+            if (data.checkout_url) {
+                window.location.href = data.checkout_url;
+            } else {
+                alert("Hubo un problema generando el link de pago.");
+            }
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            setLoadingPayment(false);
+        }
+    };
+
     return (
         <div className={styles.home}>
             {/* ── HERO SECTION & VIDEO ── */}
@@ -217,7 +236,14 @@ export default function Home() {
                                 <li><FiCheck size={20} color="#ffc107" /> Constancia de participación para todos los autores</li>
                                 <li><FiCheck size={20} color="#ffc107" /> Publicación de las memorias</li>
                             </ul>
-                            <button className={styles.pricingBtn} onClick={() => alert('Dirigiendo a Módulo de Pago')}>Pagar</button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <button className={styles.pricingBtn} disabled={loadingPayment} onClick={() => handlePayment(940000, 'COP', 'LOCAL')}>
+                                    {loadingPayment ? 'Cargando...' : 'Pagar Nacional (MercadoPago)'}
+                                </button>
+                                <button className={styles.pricingBtn} style={{ background: '#0070ba' }} disabled={loadingPayment} onClick={() => handlePayment(220, 'USD', 'INTERNATIONAL')}>
+                                    {loadingPayment ? 'Cargando...' : 'Pagar Internacional (PayPal)'}
+                                </button>
+                            </div>
                         </div>
 
                         {/* Tarjeta No Miembros */}
@@ -229,7 +255,14 @@ export default function Home() {
                                 <li><FiCheck size={20} color="#ffc107" /> Constancia de participación para todos los autores</li>
                                 <li><FiCheck size={20} color="#ffc107" /> Publicación de las memorias</li>
                             </ul>
-                            <button className={styles.pricingBtn} onClick={() => alert('Dirigiendo a Módulo de Pago')}>Pagar</button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <button className={styles.pricingBtn} disabled={loadingPayment} onClick={() => handlePayment(980000, 'COP', 'LOCAL')}>
+                                    {loadingPayment ? 'Cargando...' : 'Pagar Nacional (MercadoPago)'}
+                                </button>
+                                <button className={styles.pricingBtn} style={{ background: '#0070ba' }} disabled={loadingPayment} onClick={() => handlePayment(230, 'USD', 'INTERNATIONAL')}>
+                                    {loadingPayment ? 'Cargando...' : 'Pagar Internacional (PayPal)'}
+                                </button>
+                            </div>
                         </div>
 
                         {/* Tarjeta Opcional Conferencias */}
@@ -240,7 +273,9 @@ export default function Home() {
                             <ul className={styles.pricingFeatures}>
                                 <li><FiCheck size={20} color="#ffc107" /> Certificado de Asistencia</li>
                             </ul>
-                            <button className={styles.pricingBtn} onClick={() => alert('Dirigiendo a Módulo de Pago')}>Añadir al carrito</button>
+                            <button className={styles.pricingBtn} disabled={loadingPayment} onClick={() => handlePayment(120000, 'COP', 'LOCAL')}>
+                                Pagar Certificado (MercadoPago)
+                            </button>
                         </div>
 
                         {/* Tarjeta Opcional Workshops */}
@@ -251,7 +286,9 @@ export default function Home() {
                             <ul className={styles.pricingFeatures}>
                                 <li><FiCheck size={20} color="#ffc107" /> Certificado de Asistencia</li>
                             </ul>
-                            <button className={styles.pricingBtn} onClick={() => alert('Dirigiendo a Módulo de Pago')}>Añadir al carrito</button>
+                            <button className={styles.pricingBtn} disabled={loadingPayment} onClick={() => handlePayment(90000, 'COP', 'LOCAL')}>
+                                Pagar Certificado (MercadoPago)
+                            </button>
                         </div>
                     </div>
                 </div>

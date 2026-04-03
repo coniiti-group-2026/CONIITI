@@ -13,6 +13,7 @@ import {
 import { SESSION_STATUS, SESSION_MODALITY } from '../types/session';
 import SessionFormModal from '../components/SessionFormModal';
 import CMSPanel from '../components/CMSPanel';
+import FileManager from '../components/admin/FileManager';
 import styles from '../styles/pages/StaffDashboard.module.css';
 
 /**
@@ -130,7 +131,10 @@ export default function StaffDashboard() {
             </div>
 
             {activeTab === 'cms' ? (
-                <CMSPanel />
+                <>
+                    <CMSPanel />
+                    <FileManager />
+                </>
             ) : (
                 <>
                     <div className={styles.actionBar}>
