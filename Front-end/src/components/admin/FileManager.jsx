@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { uploadFile } from '../../services/microservicesApi';
-import { FiUploadCloud, FiFileText } from 'react-icons/fi';
+import { FiUploadCloud } from 'react-icons/fi';
 
 export default function FileManager() {
     const [selectedFile, setSelectedFile] = useState(null);
