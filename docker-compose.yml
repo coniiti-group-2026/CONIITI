@@ -1,0 +1,116 @@
+version: "3.8"
+
+services:
+  # ==========================================
+  # API GATEWAY (Traefik)
+  # ==========================================
+  traefik:
+    image: traefik:v2.10
+    container_name: api-gateway
+    command:
+      - "--configfile=/etc/traefik/traefik.yml"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - ./traefik:/etc/traefik
+    networks:
+      - coniiti_net
+
+  # ==========================================
+  # MENSAJERÍA ASÍNCRONA (RabbitMQ)
+  # ==========================================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: shared-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672" # Puerto de comunicación TCP
+      - "15672:15672" # Interfaz de administración (http://localhost:15672)
+    networks:
+      - coniiti_net
+
+  # ==========================================
+  # BASES DE DATOS COMPARTIDAS
+  # ==========================================
+  # Para Payments y Files (Kevin) + Users/Agenda (Compañeros si lo desean)
+  postgres_shared:
+    image: postgres:15-alpine
+    container_name: shared-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: coniiti_db # Aquí se crea los schemas de payments y files
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - coniiti_net
+
+  # Para Analytics (Kevin)
+  mongodb_analytics:
+    image: mongo:6-jammy
+    container_name: analytics-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpassword
+      MONGO_INITDB_DATABASE: analytics_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - coniiti_net
+
+  # ==========================================
+  # SERVICIOS DE KEVIN (Integrados con Traefik)
+  # ==========================================
+
+  payments-service:
+    build:
+      context: ./microservices/payments-service
+    container_name: payments-service
+    env_file:
+      - ./microservices/payments-service/.env
+    environment:
+      - PAYMENTS_DATABASE_URL=postgresql://admin:adminpassword@shared-postgres:5432/coniiti_db
+    depends_on:
+      - postgres_shared
+    networks:
+      - coniiti_net
+
+  files-service:
+    build:
+      context: ./microservices/files-service
+    container_name: files-service
+    volumes:
+      - files_data:/app/uploads
+    networks:
+      - coniiti_net
+
+  analytics-service:
+    build:
+      context: ./microservices/analytics-service
+    container_name: analytics-service
+    environment:
+      - MONGO_URI=mongodb://admin:adminpassword@analytics-mongodb:27017
+      - RABBITMQ_HOST=shared-rabbitmq
+      - RABBITMQ_USER=user
+      - RABBITMQ_PASS=password
+    depends_on:
+      - mongodb_analytics
+      - rabbitmq
+    networks:
+      - coniiti_net
+
+networks:
+  coniiti_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongo_data:
+  files_data:

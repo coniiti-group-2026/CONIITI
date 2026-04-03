@@ -1,0 +1,35 @@
+http:
+  routers:
+    payments:
+      rule: "PathPrefix(`/api/payments`)"
+      entryPoints:
+        - web
+      service: payments-svc
+
+    files:
+      rule: "PathPrefix(`/api/files`)"
+      entryPoints:
+        - web
+      service: files-svc
+
+    analytics:
+      rule: "PathPrefix(`/api/analytics`)"
+      entryPoints:
+        - web
+      service: analytics-svc
+
+  services:
+    payments-svc:
+      loadBalancer:
+        servers:
+          - url: "http://payments-service:8000"
+
+    files-svc:
+      loadBalancer:
+        servers:
+          - url: "http://files-service:8000"
+
+    analytics-svc:
+      loadBalancer:
+        servers:
+          - url: "http://analytics-service:8000"
