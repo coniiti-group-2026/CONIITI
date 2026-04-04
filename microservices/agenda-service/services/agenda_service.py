@@ -135,7 +135,7 @@ def toggle_registration(session: AgendaSession, user_id: uuid.UUID, db: DBSessio
     return registered
 
 def get_user_registered_sessions(user_id: uuid.UUID, db: DBSession) -> List[AgendaSession]:
-    from app.models.agenda import session_registrations
+    from models.agenda import session_registrations
     return db.query(AgendaSession).join(
         session_registrations, 
         session_registrations.c.session_id == AgendaSession.id

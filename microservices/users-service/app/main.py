@@ -1,11 +1,11 @@
 import time
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from app.database.connection import Base, engine
 from app.routes.users import router
-from app.database.connection import engine, Base
-from app.models.user import User
 
 
 DATABASE_READY_ATTEMPTS = 15
@@ -33,9 +33,33 @@ def initialize_database() -> None:
 
 initialize_database()
 
-app = FastAPI()
+app = FastAPI(
+    title="CONIITI Users Service",
+    version="1.0.0",
+    description="Microservicio de perfiles y administracion de cuentas del ecosistema CONIITI.",
+)
 
-app.include_router(router, prefix="/users", tags=["Users"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(router, tags=["Users"])
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "service": "users-service"}
+
 
 @app.get("/")
 def root():

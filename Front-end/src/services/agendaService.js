@@ -1,12 +1,14 @@
 // ============================================================
 // Servicio de Agenda — CONIITI Front-end
 // Capa de acceso a datos para las sesiones del congreso.
-// Consume la API REST del back-end FastAPI.
+// Consume la API REST de agenda-service a traves del gateway.
 // Mantiene la misma firma de funciones anterior para no
 // romper los hooks y componentes existentes.
 // ============================================================
 
-const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
+import { getApiBase, getJsonHeaders } from './apiConfig';
+
+const API_BASE = getApiBase();
 
 /**
  * Realiza una solicitud al API con manejo de errores centralizado.
@@ -19,10 +21,7 @@ async function apiFetch(path, options = {}) {
     const response = await fetch(`${API_BASE}${path}`, {
         ...options,
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
+        headers: getJsonHeaders(options),
     });
 
     if (!response.ok) {
@@ -91,7 +90,7 @@ export async function filterSessions({ day, modality, eventType, room, search } 
         day,
         modality,
         event_type: eventType,
-        room,
+        salon: room,
         search,
     });
     const data = await apiFetch(`/agenda${qs}`);

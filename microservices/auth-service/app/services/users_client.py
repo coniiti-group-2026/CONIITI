@@ -12,6 +12,10 @@ RETRY_ATTEMPTS = 3
 RETRY_BACKOFF_SECONDS = 0.5
 
 
+def _internal_headers() -> dict[str, str]:
+    return {"X-Internal-Service-Token": settings.INTERNAL_SERVICE_TOKEN}
+
+
 def _handle_http_error(exc: httpx.HTTPError, detail: str) -> None:
     raise HTTPException(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -34,6 +38,7 @@ def _request_users_service(
                 method,
                 url,
                 json=json,
+                headers=_internal_headers(),
                 timeout=REQUEST_TIMEOUT_SECONDS,
             )
             response.raise_for_status()
@@ -70,7 +75,7 @@ def create_profile(
     }
 
     try:
-        response = _request_users_service("POST", "/users/", json=payload)
+        response = _request_users_service("POST", "/internal/profiles", json=payload)
         response.raise_for_status()
         return response.json()
     except httpx.HTTPStatusError as exc:
@@ -86,7 +91,7 @@ def create_profile(
 
 def get_profile(user_id: str) -> dict[str, Any]:
     try:
-        response = _request_users_service("GET", f"/users/{user_id}")
+        response = _request_users_service("GET", f"/internal/profiles/{user_id}")
         response.raise_for_status()
         return response.json()
     except httpx.HTTPStatusError as exc:
@@ -99,7 +104,7 @@ def get_profile(user_id: str) -> dict[str, Any]:
 
 def update_profile(user_id: str, payload: dict[str, Any]) -> dict[str, Any]:
     try:
-        response = _request_users_service("PATCH", f"/users/{user_id}", json=payload)
+        response = _request_users_service("PATCH", f"/internal/profiles/{user_id}", json=payload)
         response.raise_for_status()
         return response.json()
     except httpx.HTTPStatusError as exc:
@@ -115,7 +120,7 @@ def update_profile(user_id: str, payload: dict[str, Any]) -> dict[str, Any]:
 
 def delete_profile(user_id: str) -> None:
     try:
-        response = _request_users_service("DELETE", f"/users/{user_id}")
+        response = _request_users_service("DELETE", f"/internal/profiles/{user_id}")
         response.raise_for_status()
     except httpx.HTTPStatusError as exc:
         if exc.response is not None and exc.response.status_code == 404:

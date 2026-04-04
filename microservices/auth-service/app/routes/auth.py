@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
+from app.dependencies import require_internal_request
 from app.config import settings
 from app.database.connection import get_db
 from app.schemas.auth import (
@@ -32,6 +33,21 @@ from app.security.jwt import (
 from app.services import auth_service, email_service, event_service, oauth_service, users_client
 
 router = APIRouter()
+FRONTEND_ORIGIN_COOKIE = "frontend_origin"
+
+
+def _get_requested_frontend_origin(request: Request) -> str:
+    origin = request.headers.get("origin", "").strip()
+    if origin:
+        return origin.rstrip("/")
+
+    referer = request.headers.get("referer", "").strip()
+    if referer.startswith("http://") or referer.startswith("https://"):
+        parts = referer.split("/", 3)
+        if len(parts) >= 3:
+            return f"{parts[0]}//{parts[2]}".rstrip("/")
+
+    return settings.FRONTEND_URL.rstrip("/")
 
 
 def _build_oauth_redirect_uri(request: Request, provider: str) -> str:
@@ -62,12 +78,22 @@ def _build_frontend_url(path: str, **params: str) -> str:
     return f"{base}{normalized_path}"
 
 
-def _build_oauth_error_redirect(message: str) -> RedirectResponse:
+def _build_frontend_url_from_request(request: Request, path: str, **params: str) -> str:
+    query = urlencode({key: value for key, value in params.items() if value})
+    base = request.cookies.get(FRONTEND_ORIGIN_COOKIE, settings.FRONTEND_URL).rstrip("/")
+    normalized_path = "/" + path.lstrip("/")
+    if query:
+        return f"{base}{normalized_path}?{query}"
+    return f"{base}{normalized_path}"
+
+
+def _build_oauth_error_redirect(request: Request, message: str) -> RedirectResponse:
     response = RedirectResponse(
-        url=_build_frontend_url(settings.FRONTEND_LOGIN_PATH, error=message),
+        url=_build_frontend_url_from_request(request, settings.FRONTEND_LOGIN_PATH, error=message),
         status_code=status.HTTP_302_FOUND,
     )
     clear_oauth_state_cookie(response)
+    response.delete_cookie(key=FRONTEND_ORIGIN_COOKIE, path="/")
     return response
 
 
@@ -258,6 +284,14 @@ def google_login(request: Request):
         status_code=status.HTTP_302_FOUND,
     )
     set_oauth_state_cookie(response, state)
+    response.set_cookie(
+        key=FRONTEND_ORIGIN_COOKIE,
+        value=_get_requested_frontend_origin(request),
+        httponly=True,
+        secure=settings.ENVIRONMENT == "production",
+        samesite="lax",
+        path="/",
+    )
     return response
 
 
@@ -270,9 +304,9 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     user_info: dict[str, str] = {}
 
     if error:
-        return _build_oauth_error_redirect("Google no completo la autenticacion.")
+        return _build_oauth_error_redirect(request, "Google no completo la autenticacion.")
     if not code or not state:
-        return _build_oauth_error_redirect("Callback de Google incompleto.")
+        return _build_oauth_error_redirect(request, "Callback de Google incompleto.")
 
     try:
         redirect_uri = _build_oauth_redirect_uri(request, "google")
@@ -306,18 +340,19 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
             full_name=profile["full_name"],
         )
         response = RedirectResponse(
-            url=_build_frontend_url(settings.FRONTEND_LOGIN_PATH, oauth="success"),
+            url=_build_frontend_url_from_request(request, settings.FRONTEND_LOGIN_PATH, oauth="success"),
             status_code=status.HTTP_302_FOUND,
         )
         set_access_cookie(response, token)
         clear_oauth_state_cookie(response)
+        response.delete_cookie(key=FRONTEND_ORIGIN_COOKIE, path="/")
         return response
     except event_service.EventPublishError:
         _rollback_oauth_user(user_info.get("email", ""), created, db)
-        return _build_oauth_error_redirect("No se pudo finalizar el registro OAuth.")
+        return _build_oauth_error_redirect(request, "No se pudo finalizar el registro OAuth.")
     except HTTPException as exc:
         _rollback_oauth_user(user_info.get("email", ""), created, db)
-        return _build_oauth_error_redirect(exc.detail)
+        return _build_oauth_error_redirect(request, exc.detail)
 
 
 @router.get("/oauth/microsoft")
@@ -329,6 +364,14 @@ def microsoft_login(request: Request):
         status_code=status.HTTP_302_FOUND,
     )
     set_oauth_state_cookie(response, state)
+    response.set_cookie(
+        key=FRONTEND_ORIGIN_COOKIE,
+        value=_get_requested_frontend_origin(request),
+        httponly=True,
+        secure=settings.ENVIRONMENT == "production",
+        samesite="lax",
+        path="/",
+    )
     return response
 
 
@@ -341,9 +384,9 @@ async def microsoft_callback(request: Request, db: Session = Depends(get_db)):
     user_info: dict[str, str] = {}
 
     if error:
-        return _build_oauth_error_redirect("Microsoft no completo la autenticacion.")
+        return _build_oauth_error_redirect(request, "Microsoft no completo la autenticacion.")
     if not code or not state:
-        return _build_oauth_error_redirect("Callback de Microsoft incompleto.")
+        return _build_oauth_error_redirect(request, "Callback de Microsoft incompleto.")
 
     try:
         redirect_uri = _build_oauth_redirect_uri(request, "microsoft")
@@ -377,18 +420,19 @@ async def microsoft_callback(request: Request, db: Session = Depends(get_db)):
             full_name=profile["full_name"],
         )
         response = RedirectResponse(
-            url=_build_frontend_url(settings.FRONTEND_LOGIN_PATH, oauth="success"),
+            url=_build_frontend_url_from_request(request, settings.FRONTEND_LOGIN_PATH, oauth="success"),
             status_code=status.HTTP_302_FOUND,
         )
         set_access_cookie(response, token)
         clear_oauth_state_cookie(response)
+        response.delete_cookie(key=FRONTEND_ORIGIN_COOKIE, path="/")
         return response
     except event_service.EventPublishError:
         _rollback_oauth_user(user_info.get("email", ""), created, db)
-        return _build_oauth_error_redirect("No se pudo finalizar el registro OAuth.")
+        return _build_oauth_error_redirect(request, "No se pudo finalizar el registro OAuth.")
     except HTTPException as exc:
         _rollback_oauth_user(user_info.get("email", ""), created, db)
-        return _build_oauth_error_redirect(exc.detail)
+        return _build_oauth_error_redirect(request, exc.detail)
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -397,7 +441,11 @@ def health():
 
 
 @router.post("/internal/users", response_model=InternalUserResponse, status_code=status.HTTP_201_CREATED)
-def create_internal_user(payload: InternalUserCreateRequest, db: Session = Depends(get_db)):
+def create_internal_user(
+    payload: InternalUserCreateRequest,
+    db: Session = Depends(get_db),
+    _: None = Depends(require_internal_request),
+):
     user = auth_service.create_internal_user(payload, db)
     return InternalUserResponse(
         user_id=user.id,
@@ -412,6 +460,7 @@ def update_internal_user(
     user_id: str,
     payload: InternalUserUpdateRequest,
     db: Session = Depends(get_db),
+    _: None = Depends(require_internal_request),
 ):
     user = auth_service.update_internal_user(user_id, payload, db)
     return InternalUserResponse(
@@ -423,5 +472,9 @@ def update_internal_user(
 
 
 @router.delete("/internal/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_internal_user(user_id: str, db: Session = Depends(get_db)):
+def delete_internal_user(
+    user_id: str,
+    db: Session = Depends(get_db),
+    _: None = Depends(require_internal_request),
+):
     auth_service.delete_user_by_id(user_id, db)

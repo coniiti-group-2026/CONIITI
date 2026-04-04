@@ -58,6 +58,7 @@ class Settings:
     RABBITMQ_USER = os.getenv("RABBITMQ_USER", "user")
     RABBITMQ_PASS = os.getenv("RABBITMQ_PASS", "password")
     RABBITMQ_EXCHANGE = os.getenv("RABBITMQ_EXCHANGE", "coniiti_events")
+    INTERNAL_SERVICE_TOKEN = os.getenv("INTERNAL_SERVICE_TOKEN", "coniiti-internal-token")
 
 
 settings = Settings()

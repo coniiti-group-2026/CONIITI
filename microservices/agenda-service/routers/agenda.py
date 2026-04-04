@@ -10,7 +10,7 @@ from schemas.agenda import (
 from services import agenda_service
 from utils.security import get_current_user_id, require_staff
 
-router = APIRouter(prefix="/agenda", tags=["Agenda del Congreso"])
+router = APIRouter(tags=["Agenda del Congreso"])
 
 @router.get("", response_model=SessionListResponse)
 def list_sessions(

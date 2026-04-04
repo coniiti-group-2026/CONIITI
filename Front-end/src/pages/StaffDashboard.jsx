@@ -1,37 +1,28 @@
-// ============================================================
-// Panel del Staff — CONIITI Front-end
-// Permite al staff gestionar (CRUD) las sesiones del congreso.
-// Conectado al API real. Reemplaza la versión con mockData.
-// ============================================================
-
 import { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiCalendar, FiLink, FiCheckCircle, FiXCircle, FiTrendingUp } from 'react-icons/fi';
+
 import {
-    getSessions, createSession, updateSession,
-    deleteSession, toggleLinkVerified,
+    getSessions,
+    createSession,
+    updateSession,
+    deleteSession,
+    toggleLinkVerified,
 } from '../services/agendaService';
-import { SESSION_STATUS, SESSION_MODALITY } from '../types/session';
 import SessionFormModal from '../components/SessionFormModal';
-import CMSPanel from '../components/CMSPanel';
-import DocumentManager from '../components/admin/DocumentManager';
-import DashboardPanel from '../components/admin/DashboardPanel';
 import { useAuth } from '../context/AuthContext';
+import { SESSION_MODALITY, SESSION_STATUS } from '../types/session';
 import styles from '../styles/pages/StaffDashboard.module.css';
 
-/**
- * StaffDashboard — panel de administración de sesiones del congreso.
- * Solo accesible para usuarios con rol 'staff' o 'superuser'.
- */
+
 export default function StaffDashboard() {
     const { user } = useAuth();
     const isSuperuser = user && user.role === 'superuser';
-    
+
     const [sessions, setSessions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [sessionToEdit, setSessionToEdit] = useState(null);
-    const [activeTab, setActiveTab] = useState(isSuperuser ? 'dashboard' : 'agenda'); // 'agenda' | 'cms' | 'documentos' | 'dashboard'
 
     const fetchSessions = useCallback(async () => {
         setIsLoading(true);
@@ -61,10 +52,10 @@ export default function StaffDashboard() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('¿Eliminar esta sesión? Esta acción no se puede deshacer.')) return;
+        if (!window.confirm('Eliminar esta sesion? Esta accion no se puede deshacer.')) return;
         try {
             await deleteSession(id);
-            setSessions((prev) => prev.filter((s) => s.id !== id));
+            setSessions((prev) => prev.filter((session) => session.id !== id));
         } catch (err) {
             alert(`Error: ${err.message}`);
         }
@@ -74,7 +65,7 @@ export default function StaffDashboard() {
         try {
             if (sessionToEdit) {
                 const updated = await updateSession(sessionToEdit.id, data);
-                setSessions((prev) => prev.map((s) => s.id === updated.id ? updated : s));
+                setSessions((prev) => prev.map((session) => (session.id === updated.id ? updated : session)));
             } else {
                 const created = await createSession(data);
                 setSessions((prev) => [created, ...prev]);
@@ -88,7 +79,7 @@ export default function StaffDashboard() {
     const handleToggleVerificado = async (id) => {
         try {
             const updated = await toggleLinkVerified(id);
-            setSessions((prev) => prev.map((s) => s.id === updated.id ? updated : s));
+            setSessions((prev) => prev.map((session) => (session.id === updated.id ? updated : session)));
         } catch (err) {
             alert(`Error: ${err.message}`);
         }
@@ -100,73 +91,57 @@ export default function StaffDashboard() {
         return styles.badgeNormal;
     };
 
-    const modalityClass = (mod) => {
-        if (mod === SESSION_MODALITY.VIRTUAL) return styles.badgeVirtual;
-        if (mod === SESSION_MODALITY.HIBRIDO) return styles.badgeHibrido;
+    const modalityClass = (modality) => {
+        if (modality === SESSION_MODALITY.VIRTUAL) return styles.badgeVirtual;
+        if (modality === SESSION_MODALITY.HIBRIDO) return styles.badgeHibrido;
         return styles.badgePresencial;
     };
 
     const formatDay = (iso) => {
-        if (!iso) return '—';
+        if (!iso) return '-';
         const [year, month, day] = iso.split('-');
         const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-        return `${parseInt(day)} ${months[parseInt(month) - 1]} ${year}`;
+        return `${parseInt(day, 10)} ${months[parseInt(month, 10) - 1]} ${year}`;
     };
 
     return (
         <div className={styles.page}>
             <div className={styles.pageHeader}>
-                <h1>Panel de Administración</h1>
-                <p>Gestiona la agenda, sesiones del congreso y contenido de la web.</p>
+                <h1>Panel de Administracion</h1>
+                <p>Gestiona la agenda y las sesiones del congreso desde los microservicios principales.</p>
             </div>
 
             <div className={styles.tabs} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '2px solid #eee' }}>
-                <button 
-                    onClick={() => setActiveTab('agenda')} 
-                    style={{ padding: '0.8rem 1.5rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, borderBottom: activeTab === 'agenda' ? '3px solid var(--color-primary)' : '3px solid transparent', color: activeTab === 'agenda' ? 'var(--color-primary)' : '#666' }}
+                <button
+                    onClick={() => undefined}
+                    style={{
+                        padding: '0.8rem 1.5rem',
+                        border: 'none',
+                        background: 'none',
+                        cursor: 'default',
+                        fontWeight: 600,
+                        borderBottom: '3px solid var(--color-primary)',
+                        color: 'var(--color-primary)',
+                    }}
                 >
-                    Gestión de Sesiones (Agenda)
-                </button>
-                <button 
-                    onClick={() => setActiveTab('cms')} 
-                    style={{ padding: '0.8rem 1.5rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, borderBottom: activeTab === 'cms' ? '3px solid var(--color-primary)' : '3px solid transparent', color: activeTab === 'cms' ? 'var(--color-primary)' : '#666' }}
-                >
-                    Gestor de Contenido (CMS)
-                </button>
-                <button 
-                    onClick={() => setActiveTab('documentos')} 
-                    style={{ padding: '0.8rem 1.5rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, borderBottom: activeTab === 'documentos' ? '3px solid var(--color-primary)' : '3px solid transparent', color: activeTab === 'documentos' ? 'var(--color-primary)' : '#666' }}
-                >
-                    Documentos CONIITI
+                    Gestion de Sesiones (Agenda)
                 </button>
                 {isSuperuser && (
-                    <button 
-                        onClick={() => setActiveTab('dashboard')} 
-                        style={{ padding: '0.8rem 1.5rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, borderBottom: activeTab === 'dashboard' ? '3px solid var(--color-primary)' : '3px solid transparent', color: activeTab === 'dashboard' ? 'var(--color-primary)' : '#666' }}
-                    >
+                    <div style={{ marginLeft: 'auto', padding: '0.8rem 0', color: '#666', fontWeight: 600 }}>
                         <FiTrendingUp style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
-                        Dashboard
-                    </button>
+                        Supervision activa de agenda
+                    </div>
                 )}
             </div>
 
-            {activeTab === 'dashboard' && isSuperuser ? (
-                <DashboardPanel />
-            ) : activeTab === 'cms' ? (
-                <CMSPanel />
-            ) : activeTab === 'documentos' ? (
-                <DocumentManager />
-            ) : (
-                <>
-                    <div className={styles.actionBar}>
-                        <button className={styles.primaryBtn} onClick={handleNew}>
-                            <FiPlus size={16} /> Nueva Sesión
-                        </button>
-                    </div>
+            <div className={styles.actionBar}>
+                <button className={styles.primaryBtn} onClick={handleNew}>
+                    <FiPlus size={16} /> Nueva Sesion
+                </button>
+            </div>
 
-                    {error && <div className={styles.error}>{error}</div>}
+            {error && <div className={styles.error}>{error}</div>}
 
-            {/* Tabla */}
             <div className={styles.card}>
                 <div className={styles.tableWrapper}>
                     {isLoading ? (
@@ -174,17 +149,17 @@ export default function StaffDashboard() {
                     ) : sessions.length === 0 ? (
                         <div className={styles.empty}>
                             <FiCalendar size={40} opacity={0.3} />
-                            <p>No hay sesiones registradas. ¡Crea la primera!</p>
+                            <p>No hay sesiones registradas. Crea la primera.</p>
                         </div>
                     ) : (
                         <table className={styles.table}>
                             <thead>
                                 <tr>
-                                    <th>Título</th>
+                                    <th>Titulo</th>
                                     <th>Ponente</th>
-                                    <th>Día</th>
+                                    <th>Dia</th>
                                     <th>Hora</th>
-                                    <th>Salón</th>
+                                    <th>Salon</th>
                                     <th>Modalidad</th>
                                     <th>Estado</th>
                                     <th>Enlace Virtual</th>
@@ -192,44 +167,41 @@ export default function StaffDashboard() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {sessions.map((s) => (
-                                    <tr key={s.id}>
-                                        <td><strong>{s.titulo}</strong></td>
-                                        <td>{s.ponente}</td>
-                                        <td>{formatDay(s.dia)}</td>
-                                        <td>{s.hora_inicio} – {s.hora_fin}</td>
-                                        <td>{s.salon}</td>
+                                {sessions.map((session) => (
+                                    <tr key={session.id}>
+                                        <td><strong>{session.titulo}</strong></td>
+                                        <td>{session.ponente}</td>
+                                        <td>{formatDay(session.dia)}</td>
+                                        <td>{session.hora_inicio} - {session.hora_fin}</td>
+                                        <td>{session.salon}</td>
                                         <td>
-                                            <span className={`${styles.badge} ${modalityClass(s.modalidad)}`}>
-                                                {s.modalidad}
+                                            <span className={`${styles.badge} ${modalityClass(session.modalidad)}`}>
+                                                {session.modalidad}
                                             </span>
                                         </td>
                                         <td>
-                                            <span className={`${styles.badge} ${statusClass(s.status_logistico)}`}>
-                                                {s.status_logistico}
+                                            <span className={`${styles.badge} ${statusClass(session.status_logistico)}`}>
+                                                {session.status_logistico}
                                             </span>
                                         </td>
                                         <td>
-                                            {s.modalidad !== 'Presencial' ? (
+                                            {session.modalidad !== 'Presencial' ? (
                                                 <div className={styles.linkCell}>
-                                                    {s.link_virtual ? (
+                                                    {session.link_virtual ? (
                                                         <>
                                                             <button
-                                                                className={s.link_verificado ? styles.verifiedBtn : styles.unverifiedBtn}
-                                                                onClick={() => handleToggleVerificado(s.id)}
-                                                                title={s.link_verificado ? 'Marcar como no verificado' : 'Marcar como verificado'}
+                                                                className={session.link_verificado ? styles.verifiedBtn : styles.unverifiedBtn}
+                                                                onClick={() => handleToggleVerificado(session.id)}
+                                                                title={session.link_verificado ? 'Marcar como no verificado' : 'Marcar como verificado'}
                                                             >
-                                                                {s.link_verificado
-                                                                    ? <><FiCheckCircle size={13} /> Verificado</>
-                                                                    : <><FiXCircle size={13} /> Sin verificar</>
-                                                                }
+                                                                {session.link_verificado ? <><FiCheckCircle size={13} /> Verificado</> : <><FiXCircle size={13} /> Sin verificar</>}
                                                             </button>
                                                             <a
-                                                                href={s.link_virtual}
+                                                                href={session.link_virtual}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className={styles.linkUrl}
-                                                                title={s.link_virtual}
+                                                                title={session.link_virtual}
                                                             >
                                                                 <FiLink size={12} /> Ver enlace
                                                             </a>
@@ -244,18 +216,10 @@ export default function StaffDashboard() {
                                         </td>
                                         <td>
                                             <div className={styles.actions}>
-                                                <button
-                                                    className={styles.editBtn}
-                                                    onClick={() => handleEdit(s)}
-                                                    title="Editar sesión"
-                                                >
+                                                <button className={styles.editBtn} onClick={() => handleEdit(session)} title="Editar sesion">
                                                     <FiEdit2 size={13} /> Editar
                                                 </button>
-                                                <button
-                                                    className={styles.deleteBtn}
-                                                    onClick={() => handleDelete(s.id)}
-                                                    title="Eliminar sesión"
-                                                >
+                                                <button className={styles.deleteBtn} onClick={() => handleDelete(session.id)} title="Eliminar sesion">
                                                     <FiTrash2 size={13} /> Eliminar
                                                 </button>
                                             </div>
@@ -267,13 +231,10 @@ export default function StaffDashboard() {
                     )}
                 </div>
                 <div className={styles.count}>
-                    {sessions.length} {sessions.length === 1 ? 'sesión' : 'sesiones'} en total
+                    {sessions.length} {sessions.length === 1 ? 'sesion' : 'sesiones'} en total
                 </div>
             </div>
-            </>
-            )}
 
-            {/* Modal */}
             {modalOpen && (
                 <SessionFormModal
                     session={sessionToEdit}

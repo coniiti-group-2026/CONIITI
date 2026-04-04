@@ -1,16 +1,14 @@
-// SessionFormModal.jsx
-// Modal para crear o editar una sesion de agenda.
+import { useEffect, useState } from 'react';
+import { FiStar, FiX } from 'react-icons/fi';
 
-import { useState, useEffect } from 'react';
-import { FiX, FiStar } from 'react-icons/fi';
-import SpeakerDocuments from './SpeakerDocuments';
 import styles from '../styles/components/SessionFormModal.module.css';
 import {
-    SESSION_STATUS,
-    SESSION_MODALITY,
-    SESSION_TRACK,
     SESSION_EVENT_TYPE,
+    SESSION_MODALITY,
+    SESSION_STATUS,
+    SESSION_TRACK,
 } from '../types/session';
+
 
 const EMPTY_FORM = {
     titulo: '',
@@ -34,13 +32,9 @@ const EMPTY_FORM = {
     cupos_totales: 0,
 };
 
-/**
- * Modal de formulario de sesion (crear o editar).
- * @param {{ session: object|null, onSave: Function, onClose: Function }} props
- */
+
 export default function SessionFormModal({ session, onSave, onClose }) {
     const [form, setForm] = useState(EMPTY_FORM);
-    const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
     useEffect(() => {
         setForm(session ? { ...EMPTY_FORM, ...session } : EMPTY_FORM);
@@ -48,41 +42,20 @@ export default function SessionFormModal({ session, onSave, onClose }) {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
-    };
-
-    // Sube foto del ponente al files-service
-    const handlePhotoUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        setUploadingPhoto(true);
-        try {
-            const fd = new FormData();
-            fd.append('file', file);
-            const res = await fetch('http://localhost/api/files/upload', { method: 'POST', body: fd });
-            if (!res.ok) throw new Error('Error subiendo foto');
-            const { url } = await res.json();
-            setForm(prev => ({ ...prev, foto_ponente_url: `http://localhost${url}` }));
-        } catch (err) {
-            alert(err.message);
-        } finally {
-            setUploadingPhoto(false);
-        }
+        setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave({
             ...form,
-            id: session?.id ?? `ses-${Date.now()}`,
             timestamp_actualizacion: new Date().toISOString(),
         });
     };
 
     return (
         <div className={styles.overlay} onClick={onClose}>
-            <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                {/* Encabezado */}
+            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.modalHeader}>
                     <h2>{session ? 'Editar Sesion' : 'Nueva Sesion'}</h2>
                     <button className={styles.closeBtn} onClick={onClose} aria-label="Cerrar">
@@ -93,13 +66,11 @@ export default function SessionFormModal({ session, onSave, onClose }) {
                 <form onSubmit={handleSubmit}>
                     <div className={styles.modalBody}>
                         <div className={styles.grid}>
-                            {/* Titulo */}
                             <div className={`${styles.fieldGroup} ${styles.fullWidth}`}>
                                 <label>Titulo *</label>
                                 <input name="titulo" value={form.titulo} onChange={handleChange} required placeholder="Titulo de la conferencia" />
                             </div>
 
-                            {/* Ponente */}
                             <div className={styles.fieldGroup}>
                                 <label>Ponente *</label>
                                 <input name="ponente" value={form.ponente} onChange={handleChange} required placeholder="Nombre del ponente" />
@@ -112,24 +83,17 @@ export default function SessionFormModal({ session, onSave, onClose }) {
 
                             <div className={`${styles.fieldGroup} ${styles.fullWidth}`}>
                                 <label>Descripcion del Ponente</label>
-                                <textarea name="descripcion_ponente" value={form.descripcion_ponente || ''} onChange={handleChange} placeholder="Pequena biografia del ponente..." />
+                                <textarea name="descripcion_ponente" value={form.descripcion_ponente || ''} onChange={handleChange} placeholder="Breve biografia del ponente..." />
                             </div>
 
-                            {/* Foto del ponente */}
                             <div className={styles.fieldGroup}>
-                                <label>Foto del Ponente</label>
-                                <input type="file" accept="image/*" onChange={handlePhotoUpload} />
-                                {uploadingPhoto && <small>Subiendo...</small>}
+                                <label>URL de la foto del ponente</label>
+                                <input name="foto_ponente_url" value={form.foto_ponente_url || ''} onChange={handleChange} placeholder="https://..." />
                                 {form.foto_ponente_url && (
-                                    <img
-                                        src={form.foto_ponente_url}
-                                        alt="preview"
-                                        className={styles.photoPreview}
-                                    />
+                                    <img src={form.foto_ponente_url} alt="preview" className={styles.photoPreview} />
                                 )}
                             </div>
 
-                            {/* Conferencista principal */}
                             <div className={`${styles.fieldGroup} ${styles.checkboxGroup}`}>
                                 <input
                                     type="checkbox"
@@ -143,12 +107,11 @@ export default function SessionFormModal({ session, onSave, onClose }) {
                                 </label>
                             </div>
 
-                            {/* Track */}
                             <div className={styles.fieldGroup}>
                                 <label>Track *</label>
                                 <select name="track" value={form.track} onChange={handleChange} required>
-                                    {Object.values(SESSION_TRACK).map(t => (
-                                        <option key={t} value={t}>{t}</option>
+                                    {Object.values(SESSION_TRACK).map((track) => (
+                                        <option key={track} value={track}>{track}</option>
                                     ))}
                                 </select>
                             </div>
@@ -156,13 +119,12 @@ export default function SessionFormModal({ session, onSave, onClose }) {
                             <div className={styles.fieldGroup}>
                                 <label>Tipo de Evento *</label>
                                 <select name="event_type" value={form.event_type} onChange={handleChange} required>
-                                    {Object.values(SESSION_EVENT_TYPE).map(t => (
-                                        <option key={t} value={t}>{t}</option>
+                                    {Object.values(SESSION_EVENT_TYPE).map((eventType) => (
+                                        <option key={eventType} value={eventType}>{eventType}</option>
                                     ))}
                                 </select>
                             </div>
 
-                            {/* Programacion */}
                             <div className={styles.fieldGroup}>
                                 <label>Dia *</label>
                                 <input name="dia" type="date" value={form.dia} onChange={handleChange} required />
@@ -186,8 +148,8 @@ export default function SessionFormModal({ session, onSave, onClose }) {
                             <div className={styles.fieldGroup}>
                                 <label>Modalidad *</label>
                                 <select name="modalidad" value={form.modalidad} onChange={handleChange} required>
-                                    {Object.values(SESSION_MODALITY).map(m => (
-                                        <option key={m} value={m}>{m}</option>
+                                    {Object.values(SESSION_MODALITY).map((modality) => (
+                                        <option key={modality} value={modality}>{modality}</option>
                                     ))}
                                 </select>
                             </div>
@@ -195,8 +157,8 @@ export default function SessionFormModal({ session, onSave, onClose }) {
                             <div className={styles.fieldGroup}>
                                 <label>Estado Logistico</label>
                                 <select name="status_logistico" value={form.status_logistico} onChange={handleChange}>
-                                    {Object.values(SESSION_STATUS).map(s => (
-                                        <option key={s} value={s}>{s}</option>
+                                    {Object.values(SESSION_STATUS).map((statusValue) => (
+                                        <option key={statusValue} value={statusValue}>{statusValue}</option>
                                     ))}
                                 </select>
                             </div>
@@ -208,7 +170,7 @@ export default function SessionFormModal({ session, onSave, onClose }) {
 
                             <div className={styles.fieldGroup}>
                                 <label>Enlace Virtual</label>
-                                <input name="link_virtual" value={form.link_virtual || ''} onChange={handleChange} placeholder="webex.com/..." />
+                                <input name="link_virtual" value={form.link_virtual || ''} onChange={handleChange} placeholder="https://..." />
                             </div>
 
                             <div className={`${styles.fieldGroup} ${styles.fullWidth}`}>
@@ -216,15 +178,8 @@ export default function SessionFormModal({ session, onSave, onClose }) {
                                 <textarea name="descripcion" value={form.descripcion || ''} onChange={handleChange} placeholder="Descripcion corta de la sesion..." />
                             </div>
                         </div>
-
-                        {/* Documentos del ponente — componente separado */}
-                        <SpeakerDocuments
-                            ponente={form.ponente || session?.ponente}
-                            sessionExists={!!session}
-                        />
                     </div>
 
-                    {/* Pie del modal */}
                     <div className={styles.modalFooter}>
                         <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancelar</button>
                         <button type="submit" className={styles.saveBtn}>Guardar</button>

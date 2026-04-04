@@ -3,18 +3,15 @@
 // Consume exclusivamente auth-service a traves del gateway.
 // ============================================================
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+import { getApiBase, getJsonHeaders } from './apiConfig';
+
+const API_BASE = getApiBase();
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ?? '';
 const AUTH_BASE = `${API_BASE}/auth`;
 
 function getApiOrigin() {
     if (API_ORIGIN) {
         return API_ORIGIN.replace(/\/$/, '');
-    }
-
-    const isLocalFrontendDevPort = ['3000', '4173', '5173'].includes(window.location.port);
-    if (isLocalFrontendDevPort) {
-        return `${window.location.protocol}//${window.location.hostname}`;
     }
 
     return window.location.origin;
@@ -45,10 +42,7 @@ async function apiFetch(path, options = {}) {
     const response = await fetch(path, {
         ...options,
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
+        headers: getJsonHeaders(options),
     });
 
     if (!response.ok) {

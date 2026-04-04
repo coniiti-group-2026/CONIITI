@@ -13,3 +13,5 @@ providers:
 
 log:
   level: INFO
+
+accessLog: {}

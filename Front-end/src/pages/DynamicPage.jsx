@@ -1,29 +1,11 @@
-import { useState, useEffect } from 'react';
-import styles from '../styles/pages/DynamicPage.module.css';
 import { FiExternalLink } from 'react-icons/fi';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
+import styles from '../styles/pages/DynamicPage.module.css';
+import { getContentSection } from '../services/contentService';
+
 
 export default function DynamicPage({ title, description, section }) {
-    const [cards, setCards] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchCards = async () => {
-            try {
-                const res = await fetch(`${API_BASE}/cms/cards/${section}?active_only=true`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setCards(data);
-                }
-            } catch (e) {
-                console.error(`Error loading ${section}:`, e);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchCards();
-    }, [section]);
+    const cards = getContentSection(section);
 
     return (
         <div className={styles.page}>
@@ -35,12 +17,10 @@ export default function DynamicPage({ title, description, section }) {
             </div>
 
             <div className={styles.container}>
-                {loading ? (
-                    <div className={styles.loader}>Cargando información...</div>
-                ) : cards.length === 0 ? (
+                {cards.length === 0 ? (
                     <div className={styles.empty}>
-                        <h3>Próximamente</h3>
-                        <p>Aún no hay información disponible para esta sección. Vuelve pronto.</p>
+                        <h3>Proximamente</h3>
+                        <p>Aun no hay informacion disponible para esta seccion. Vuelve pronto.</p>
                     </div>
                 ) : (
                     <div className={styles.grid}>
@@ -56,7 +36,7 @@ export default function DynamicPage({ title, description, section }) {
                                     {card.description && <p>{card.description}</p>}
                                     {card.link_url && (
                                         <a href={card.link_url} target="_blank" rel="noopener noreferrer" className={styles.linkBtn}>
-                                            Saber más <FiExternalLink />
+                                            Saber mas <FiExternalLink />
                                         </a>
                                     )}
                                 </div>

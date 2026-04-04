@@ -1,163 +1,38 @@
-# 🚀 CONIITI 2026 - API Gateway
+# CONIITI 2026 - Arquitectura de Microservicios
 
-Este proyecto implementa un **API Gateway** utilizando Traefik para centralizar el acceso a los microservicios del sistema CONIITI 2026.
+Este repositorio levanta el flujo principal de CONIITI sin el monolito legacy.
 
----
+## Servicios activos
 
-## 🧠 Descripción
+- `traefik`: API Gateway y unica puerta de entrada
+- `frontend`: SPA del congreso
+- `auth-service`: autenticacion, sesion, registro y recuperacion de contrasena
+- `users-service`: perfiles y gestion de cuentas staff
+- `agenda-service`: sesiones, agenda, speakers y preinscripciones
+- `notifications-service`: consumidor asincrono persistente de eventos
+- `rabbitmq`: mensajeria asincrona
+- `auth-db`, `users-db`, `agenda-db`, `notifications-db`: bases de datos independientes
 
-El sistema está basado en una arquitectura de microservicios donde **Traefik actúa como puerta de entrada única**.
+## Rutas finales
 
-Esto permite que:
+- Frontend: `http://localhost/`
+- Auth: `http://localhost/api/auth`
+- Users: `http://localhost/api/users`
+- Agenda: `http://localhost/api/agenda`
+- Traefik dashboard: `http://localhost:8080`
 
-- El Front-end consuma una sola URL base
-- No se expongan puertos internos innecesarios
-- Los servicios se comuniquen de forma segura dentro de Docker
+## Eventos asincronos
 
----
+- `usuario.registrado`
+- `ponencia.creada`
+- `agenda.sesion_actualizada`
 
-## 🏗️ Arquitectura
+`notifications-service` consume desde la cola durable `notifications_queue` y persiste cada evento procesado en su propia base de datos.
 
-- **Traefik** → API Gateway (enrutamiento)
-- **Backend (FastAPI)** → Lógica de negocio
-- **Docker Compose** → Orquestación
-- **Red interna Docker** → `coniiti-net`
+## Levantar todo
 
-📌 Todos los servicios se comunican usando nombres de contenedor, no IPs.
+```bash
+docker-compose up --build
+```
 
----
-
-## 🌐 Acceso al sistema
-
-### 🔗 API Gateway
-http://localhost/api
-
-
-### 📄 Documentación (Swagger)
-http://localhost/api/docs
-
-
-### 🌍 En Codespaces
-https://crispy-funicular-r47grr5x944j2gpx-80.app.github.dev/api
-https://crispy-funicular-r47grr5x944j2gpx-80.app.github.dev/api/docs
-
-
----
-
-## 🧩 Servicios disponibles
-
-| Servicio | Ruta |
-|--------|------|
-| Auth | `/api/auth` |
-| Users | `/api/users` |
-| Agenda (Sessions) | `/api/agenda` |
-| CMS / Files | `/api/files` |
-
-📌 Todas las rutas pasan obligatoriamente por el Gateway.
-
----
-
-## 🔀 Enrutamiento (Traefik)
-
-Traefik utiliza labels en Docker para enrutar las peticiones:
-
-- `/api` → Backend
-- Middleware elimina `/api` antes de llegar al servicio
-
-Ejemplo:
-traefik.http.routers.api.rule=PathPrefix(/api)
-
-
----
-
-## 🐳 Ejecución del proyecto
-
-1. Clonar repositorio:
-git clone <repo-url>
-cd CONIITI
-
-2. Ejecutar contenedores:
-docker-compose up -d --build
-
-3. Acceder:
-http://localhost/api/docs
-
-
----
-
-## 🔐 Puertos expuestos
-
-| Puerto | Uso |
-|------|-----|
-| 80 | Tráfico público (Gateway) |
-| 8080 | Dashboard de Traefik |
-
-❌ El backend NO expone puertos directamente  
-✔ Todo pasa por el Gateway
-
----
-
-## 🧪 Pruebas realizadas
-
-Se validaron los endpoints usando:
-
-- Swagger (`/api/docs`)
-- Navegador
-
-Resultados:
-
-- ✅ `200 OK` → Respuesta correcta
-- ✅ `401 Unauthorized` → Validación de autenticación
-
-Esto confirma que el API Gateway enruta correctamente las solicitudes.
-
----
-
-## 📦 Variables de entorno
-
-Configuración mínima del backend:
-
-DATABASE_URL=sqlite:///./test.db
-SECRET_KEY=supersecreto123
-
-
----
-
-## ☁️ Despliegue (Base)
-
-El sistema está preparado para desplegarse en:
-
-- AWS EC2
-- Docker Compose
-- IP pública o dominio
-
----
-
-## 📌 Buenas prácticas implementadas
-
-- Uso de API Gateway (Traefik)
-- No exposición directa de servicios internos
-- Red Docker aislada (`coniiti-net`)
-- Enrutamiento por PathPrefix
-- Variables de entorno centralizadas
-- Separación de responsabilidades (microservicios)
-
----
-
-## 👨‍💻 Autor
-
-**Duvan Vaca**  
-Responsable de API Gateway, enrutamiento y despliegue base
-
----
-
-## 🏁 Conclusión
-
-Se implementó correctamente un API Gateway que centraliza el acceso al sistema, garantizando:
-
-- Escalabilidad
-- Seguridad
-- Mantenibilidad
-- Integración con el Front-end
-
----
+El flujo principal ya no utiliza el directorio `Back-end` ni servicios legacy de CMS, analytics, files o payments.

@@ -1,20 +1,33 @@
-# Documento de Contratos JSON y Eventos — CONIITI 2026
-
-Este documento define los esquemas de los mensajes intercambiados a través del bus de eventos (RabbitMQ) para asegurar integraciones robustas entre microservicios.
+# Contratos JSON y Eventos - CONIITI 2026
 
 ## Infraestructura
-- **Exchange**: `coniiti_events`
-- **Tipo**: `topic`
-- **Persistencia**: Durable
 
----
+- Exchange: `coniiti_events`
+- Tipo: `topic`
+- Cola de notificaciones: `notifications_queue`
+- Persistencia: exchange durable, cola durable y mensajes persistentes
 
-## 1. Dominio de Agenda
+## `usuario.registrado`
 
-### Evento: `ponencia.creada`
-Publicado cuando se crea una nueva sesión en el congreso.
-- **Routing Key**: `ponencia.creada`
-- **Payload**:
+- Routing key: `usuario.registrado`
+- Publicador: `auth-service`
+
+```json
+{
+  "event_id": "uuid",
+  "event": "usuario.registrado",
+  "user_id": "uuid",
+  "email": "usuario@correo.com",
+  "name": "Nombre Completo",
+  "timestamp": "2026-04-04T15:30:00Z"
+}
+```
+
+## `ponencia.creada`
+
+- Routing key: `ponencia.creada`
+- Publicador: `agenda-service`
+
 ```json
 {
   "event_id": "uuid",
@@ -26,10 +39,11 @@ Publicado cuando se crea una nueva sesión en el congreso.
 }
 ```
 
-### Evento: `agenda.sesion_actualizada`
-Publicado cuando una sesión existente sufre cambios en campos críticos (título, hora, salón, etc.).
-- **Routing Key**: `agenda.sesion_actualizada`
-- **Payload**:
+## `agenda.sesion_actualizada`
+
+- Routing key: `agenda.sesion_actualizada`
+- Publicador: `agenda-service`
+
 ```json
 {
   "event_id": "uuid",
@@ -42,46 +56,6 @@ Publicado cuando una sesión existente sufre cambios en campos críticos (títul
 }
 ```
 
----
+## Comportamiento resiliente
 
-## 2. Dominio de Usuarios
-
-### Evento: `usuario.registrado`
-Publicado cuando un nuevo usuario completa su registro local.
-- **Routing Key**: `usuario.registrado`
-- **Payload**:
-```json
-{
-  "event_id": "uuid",
-  "event": "usuario.registrado",
-  "user_id": "uuid",
-  "email": "string",
-  "name": "string",
-  "timestamp": "2026-04-04T15:30:00Z"
-}
-```
-
----
-
-## 3. Dominio de Pagos (Simulado)
-
-### Evento: `pago.completado`
-Publicado tras una transacción exitosa en la pasarela.
-- **Routing Key**: `pago.completado`
-- **Payload**:
-```json
-{
-  "event_id": "uuid",
-  "user_id": "uuid",
-  "transaction_id": "string",
-  "monto": "float",
-  "moneda": "string"
-}
-```
-
----
-
-## Escenario de Resiliencia (Demo)
-El microservicio `notifications-service` actúa como consumidor pasivo. 
-- **Prueba**: Detener el contenedor `notifications-service`.
-- **Resultado**: Los servicios `agenda-service` y el monolito siguen operando y publicando eventos en RabbitMQ. Al reiniciar el contenedor de notificaciones, este procesará los mensajes acumulados en la cola `notifications_queue` sin pérdida de información.
+Si `notifications-service` se detiene, `auth-service` y `agenda-service` siguen publicando en RabbitMQ. Cuando notificaciones vuelve a levantarse, procesa los mensajes pendientes y los persiste en su propia base de datos sin depender del monolito.

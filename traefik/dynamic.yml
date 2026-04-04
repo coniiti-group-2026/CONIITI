@@ -1,36 +1,87 @@
 http:
   routers:
-    auth:
+    auth-file:
       rule: "PathPrefix(`/api/auth`)"
       entryPoints:
         - web
-      middlewares:
-        - strip-auth
       service: auth-svc
+      middlewares:
+        - cors-api
+        - strip-auth
+      priority: 300
 
-    payments:
+    users-file:
+      rule: "PathPrefix(`/api/users`)"
+      entryPoints:
+        - web
+      service: users-svc
+      middlewares:
+        - cors-api
+        - strip-users
+      priority: 290
+
+    agenda-file:
+      rule: "PathPrefix(`/api/agenda`)"
+      entryPoints:
+        - web
+      service: agenda-svc
+      middlewares:
+        - cors-api
+        - strip-agenda
+      priority: 280
+
+    payments-file:
       rule: "PathPrefix(`/api/payments`)"
       entryPoints:
         - web
       service: payments-svc
+      middlewares:
+        - cors-api
+      priority: 270
 
-    files:
-      rule: "PathPrefix(`/api/files`)"
+    frontend-file:
+      rule: "PathPrefix(`/`)"
       entryPoints:
         - web
-      service: files-svc
-
-    analytics:
-      rule: "PathPrefix(`/api/analytics`)"
-      entryPoints:
-        - web
-      service: analytics-svc
+      service: frontend-svc
+      priority: 1
 
   middlewares:
+    cors-api:
+      headers:
+        accessControlAllowCredentials: true
+        accessControlAllowHeaders:
+          - "*"
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        accessControlAllowOriginList:
+          - http://localhost
+          - http://localhost:3000
+          - http://127.0.0.1:3000
+          - http://localhost:5173
+          - http://127.0.0.1:5173
+        accessControlMaxAge: 600
+        addVaryHeader: true
+
     strip-auth:
       stripPrefix:
         prefixes:
           - /api/auth
+
+    strip-users:
+      stripPrefix:
+        prefixes:
+          - /api/users
+
+    strip-agenda:
+      stripPrefix:
+        prefixes:
+          - /api/agenda
 
   services:
     auth-svc:
@@ -38,17 +89,22 @@ http:
         servers:
           - url: "http://auth-service:8000"
 
+    users-svc:
+      loadBalancer:
+        servers:
+          - url: "http://users-service:8000"
+
+    agenda-svc:
+      loadBalancer:
+        servers:
+          - url: "http://agenda-service:8000"
+
     payments-svc:
       loadBalancer:
         servers:
           - url: "http://payments-service:8000"
 
-    files-svc:
+    frontend-svc:
       loadBalancer:
         servers:
-          - url: "http://files-service:8000"
-
-    analytics-svc:
-      loadBalancer:
-        servers:
-          - url: "http://analytics-service:8000"
+          - url: "http://frontend:80"

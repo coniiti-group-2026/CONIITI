@@ -9,6 +9,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     role: str
     institution: Optional[str] = None
+    password: Optional[str] = Field(default=None, min_length=8, max_length=128)
     is_active: bool = True
 
 class UserUpdate(BaseModel):
@@ -16,6 +17,7 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     role: Optional[str] = None
     institution: Optional[str] = None
+    password: Optional[str] = Field(default=None, min_length=8, max_length=128)
     is_active: Optional[bool] = None
 
 class UserResponse(BaseModel):

@@ -498,6 +498,185 @@
     margin: 0 auto;
 }
 
+.sectionBlock.blueBg .accessContainer {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.paymentError {
+    max-width: 960px;
+    margin: 0 auto 1.5rem auto;
+    padding: 0.95rem 1rem;
+    border-radius: 12px;
+    background: rgba(220, 38, 38, 0.14);
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    color: #fee2e2;
+    text-align: center;
+}
+
+.paymentProviders {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+
+.paymentProviders span {
+    border-radius: 999px;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.05);
+    font-size: 0.82rem;
+    color: #dbeafe;
+}
+
+.paymentActions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.paymentAltBtn {
+    background: transparent;
+    color: #ffffff;
+    border-color: rgba(255,255,255,0.35);
+}
+
+.paymentAltBtn:hover {
+    background: rgba(255,255,255,0.08);
+    box-shadow: none;
+}
+
+.accessGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.accessCard {
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    padding: 2rem;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+}
+
+.accessIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #001f3f;
+    background: #ffc107;
+    margin-bottom: 1.25rem;
+}
+
+.accessEyebrow {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #cbd5e1;
+    margin-bottom: 0.65rem;
+    font-weight: 700;
+}
+
+.accessCard h3 {
+    font-size: 1.9rem;
+    line-height: 1.15;
+    margin-bottom: 0.85rem;
+    color: #ffffff;
+}
+
+.accessCard p {
+    color: #dbeafe;
+    line-height: 1.7;
+    margin-bottom: 1.25rem;
+}
+
+.statusPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 999px;
+    padding: 0.6rem 0.9rem;
+    background: rgba(255, 193, 7, 0.14);
+    color: #ffd54f;
+    font-weight: 700;
+    width: fit-content;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.accessList {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem 0;
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    flex-grow: 1;
+}
+
+.accessList li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    line-height: 1.6;
+}
+
+.accessActions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-top: auto;
+}
+
+.primaryAction,
+.secondaryAction {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border-radius: 10px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.primaryAction {
+    background: #ffc107;
+    color: #001f3f;
+    border: 1px solid #ffc107;
+}
+
+.secondaryAction {
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.35);
+}
+
+.primaryAction:hover,
+.secondaryAction:hover {
+    transform: translateY(-2px);
+}
+
+.primaryAction:hover {
+    box-shadow: 0 10px 24px rgba(255, 193, 7, 0.28);
+}
+
+.secondaryAction:hover {
+    background: rgba(255,255,255,0.08);
+}
+
 .pricingGrid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -507,6 +686,7 @@
 }
 
 @media (max-width: 1200px) {
+    .accessGrid { grid-template-columns: 1fr; }
     .pricingGrid { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
 }
 @media (max-width: 768px) {
@@ -579,12 +759,20 @@
     border-radius: 4px;
     transition: all 0.2s;
     margin-top: auto;
+    cursor: pointer;
 }
 
 .pricingBtn:hover {
     background: #e0a800;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+}
+
+.pricingBtn:disabled {
+    opacity: 0.75;
+    cursor: wait;
+    transform: none;
+    box-shadow: none;
 }
 
 /* ── TARJETAS OPCIONALES DE PAGOS (AMARILLO CORPORATIVO) ── */
