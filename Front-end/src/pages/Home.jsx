@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiUsers, FiAward, FiBookOpen, FiCheck, FiLink, FiFacebook, FiLinkedin, FiChevronLeft, FiChevronRight, FiBriefcase, FiMonitor } from 'react-icons/fi';
 import { createCheckoutSession } from '../services/microservicesApi';
+import SpeakerCard from '../components/SpeakerCard';
 import styles from '../styles/pages/Home.module.css';
 
 const Countdown = () => {
@@ -85,19 +86,7 @@ function SpeakerSlider({ speakers }) {
         <div style={{ position: 'relative' }}>
             <div className={styles.speakersGrid} style={{ transition: 'all 0.4s ease' }}>
                 {visible.map((sp, i) => (
-                    <div key={sp.ponente + i} className={styles.speakerCard}>
-                        <div className={styles.speakerImg}>
-                            {sp.foto_ponente_url ? (
-                                <img src={sp.foto_ponente_url} alt={sp.ponente} loading="lazy" width="350" height="350" style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
-                            ) : (
-                                <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg,#1e3a5f,#0d6efd)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', color: 'white', fontWeight: 700 }}>
-                                    {sp.ponente.charAt(0).toUpperCase()}
-                                </div>
-                            )}
-                        </div>
-                        <h4 className={styles.speakerName}>{sp.ponente}</h4>
-                        <p className={styles.speakerRole}>{sp.afiliacion || 'Conferencista Invitado'}</p>
-                    </div>
+                    <SpeakerCard key={sp.ponente + i} speaker={sp} />
                 ))}
             </div>
             {pages > 1 && (
@@ -257,12 +246,12 @@ export default function Home() {
                     <SpeakerSlider speakers={keynotes} />
                 ) : (
                     <div className={styles.speakersGrid}>
-                        {[{name:'Dr. Alessandro Conti', role:'Experto en Inteligencia Artificial, Milán', img:'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=350'},{name:'Dra. Sofía Restrepo', role:'CEO Innovatech Latam', img:'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=350'},{name:'Ing. Marco Rossi', role:'Líder Infraestructuras Cloud', img:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=350'}].map((sp,i) => (
-                            <div key={i} className={styles.speakerCard}>
-                                <div className={styles.speakerImg}><img src={sp.img} alt={sp.name} loading="lazy" width="350" height="350" /></div>
-                                <h4 className={styles.speakerName}>{sp.name}</h4>
-                                <p className={styles.speakerRole}>{sp.role}</p>
-                            </div>
+                        {[
+                            {ponente:'Dr. Alessandro Conti', afiliacion:'Experto en Inteligencia Artificial, Milán', foto_ponente_url:'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=350'},
+                            {ponente:'Dra. Sofía Restrepo', afiliacion:'CEO Innovatech Latam', foto_ponente_url:'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=350'},
+                            {ponente:'Ing. Marco Rossi', afiliacion:'Líder Infraestructuras Cloud', foto_ponente_url:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=350'}
+                        ].map((sp,i) => (
+                            <SpeakerCard key={i} speaker={sp} />
                         ))}
                     </div>
                 )}
