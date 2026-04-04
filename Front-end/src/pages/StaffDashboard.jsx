@@ -13,7 +13,7 @@ import {
 import { SESSION_STATUS, SESSION_MODALITY } from '../types/session';
 import SessionFormModal from '../components/SessionFormModal';
 import CMSPanel from '../components/CMSPanel';
-import FileManager from '../components/admin/FileManager';
+import DocumentManager from '../components/admin/DocumentManager';
 import styles from '../styles/pages/StaffDashboard.module.css';
 
 /**
@@ -26,7 +26,7 @@ export default function StaffDashboard() {
     const [error, setError] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [sessionToEdit, setSessionToEdit] = useState(null);
-    const [activeTab, setActiveTab] = useState('agenda'); // 'agenda' o 'cms'
+    const [activeTab, setActiveTab] = useState('agenda'); // 'agenda' | 'cms' | 'documentos'
 
     const fetchSessions = useCallback(async () => {
         setIsLoading(true);
@@ -128,13 +128,18 @@ export default function StaffDashboard() {
                 >
                     Gestor de Contenido (CMS)
                 </button>
+                <button 
+                    onClick={() => setActiveTab('documentos')} 
+                    style={{ padding: '0.8rem 1.5rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, borderBottom: activeTab === 'documentos' ? '3px solid var(--color-primary)' : '3px solid transparent', color: activeTab === 'documentos' ? 'var(--color-primary)' : '#666' }}
+                >
+                    Documentos CONIITI
+                </button>
             </div>
 
             {activeTab === 'cms' ? (
-                <>
-                    <CMSPanel />
-                    <FileManager />
-                </>
+                <CMSPanel />
+            ) : activeTab === 'documentos' ? (
+                <DocumentManager />
             ) : (
                 <>
                     <div className={styles.actionBar}>

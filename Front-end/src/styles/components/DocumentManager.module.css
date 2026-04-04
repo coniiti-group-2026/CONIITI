@@ -1,0 +1,269 @@
+/* DocumentManager.module.css
+   Estilos del gestor de documentos CONIITI. */
+
+/* ── Barra de herramientas ── */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.filterGroup {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filterBtn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.84rem;
+    font-weight: 400;
+    background: white;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s;
+}
+
+.filterBtnActive {
+    font-weight: 600;
+    background: #e0eeff;
+    color: var(--color-primary, #0d6efd);
+    border: 2px solid var(--color-primary, #0d6efd);
+}
+
+.uploadBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-primary, #0d6efd);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.88rem;
+}
+
+.uploadBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ── Mensajes de error ── */
+.error {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #b91c1c;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.88rem;
+}
+
+/* ── Formulario ── */
+.form {
+    background: #f8faff;
+    border: 1.5px solid #d0e2ff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.formTitle {
+    margin: 0 0 1.25rem;
+    font-size: 1rem;
+    color: #1e3a5f;
+    font-weight: 600;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.formGridFull {
+    grid-column: 1 / -1;
+}
+
+.label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 4px;
+}
+
+.input,
+.select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    box-sizing: border-box;
+    font-family: inherit;
+    color: #1e293b;
+}
+
+.select {
+    appearance: none;
+    padding-right: 2rem;
+}
+
+.selectWrapper {
+    position: relative;
+}
+
+.selectIcon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    pointer-events: none;
+}
+
+.hint {
+    margin: 4px 0 0;
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+.formActions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.btnPrimary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-primary, #0d6efd);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.88rem;
+}
+
+.btnPrimary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btnSecondary {
+    background: #e2e8f0;
+    color: #475569;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.88rem;
+}
+
+/* ── Lista vacía ── */
+.emptyState {
+    text-align: center;
+    padding: 3rem;
+    color: #94a3b8;
+}
+
+.emptyIcon {
+    opacity: 0.3;
+    display: block;
+    margin: 0 auto 1rem;
+}
+
+/* ── Lista de documentos ── */
+.list {
+    display: grid;
+    gap: 0.6rem;
+}
+
+/* ── Ítem individual ── */
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.9rem 1.25rem;
+}
+
+.itemLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.itemIcon {
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.itemName {
+    margin: 0;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.95rem;
+}
+
+.itemMeta {
+    margin: 0;
+    font-size: 0.78rem;
+    color: #94a3b8;
+}
+
+.itemActions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.btnView {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    text-decoration: none;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.btnDelete {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.82rem;
+}
+
+@media (max-width: 600px) {
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .formGridFull {
+        grid-column: 1;
+    }
+}

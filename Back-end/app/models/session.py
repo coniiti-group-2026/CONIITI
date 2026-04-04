@@ -77,6 +77,8 @@ class Session(Base):
     ponente = Column(String(255), nullable=False)
     afiliacion = Column(String(255), nullable=True)
     descripcion_ponente = Column(Text, nullable=True)
+    foto_ponente_url = Column(String(1000), nullable=True)           # URL de foto subida vía files-service
+    es_conferencista_principal = Column(Boolean, nullable=False, default=False)  # Aparece en slider del Home
     speaker_id = Column(String(50), nullable=True)  # Reservado para integración futura con modelo Speaker
 
     # --- Clasificación ---

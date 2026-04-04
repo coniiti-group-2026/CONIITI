@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowRight, FiUsers, FiAward, FiBookOpen, FiCheck, FiLink, FiBriefcase, FiMonitor } from 'react-icons/fi';
+import { FiArrowRight, FiUsers, FiAward, FiBookOpen, FiCheck, FiLink, FiChevronLeft, FiChevronRight, FiBriefcase, FiMonitor } from 'react-icons/fi';
 import { createCheckoutSession } from '../services/microservicesApi';
+import SpeakerCard from '../components/SpeakerCard';
 import styles from '../styles/pages/Home.module.css';
 
 const Countdown = () => {
@@ -59,8 +60,59 @@ const Countdown = () => {
     );
 };
 
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const SPEAKERS_PER_PAGE = 5;
+
+function SpeakerSlider({ speakers }) {
+    const [idx, setIdx] = useState(0);
+    const timerRef = useRef(null);
+    const total = speakers.length;
+    const pages = Math.ceil(total / SPEAKERS_PER_PAGE);
+
+    const next = () => setIdx(i => (i + 1) % pages);
+    const prev = () => setIdx(i => (i - 1 + pages) % pages);
+
+    useEffect(() => {
+        if (pages <= 1) return;
+        timerRef.current = setInterval(next, 4500);
+        return () => clearInterval(timerRef.current);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pages]);
+
+    if (!speakers.length) return null;
+
+    const visible = speakers.slice(idx * SPEAKERS_PER_PAGE, idx * SPEAKERS_PER_PAGE + SPEAKERS_PER_PAGE);
+
+    return (
+        <div style={{ position: 'relative' }}>
+            <div className={styles.speakersGrid} style={{ transition: 'all 0.4s ease' }}>
+                {visible.map((sp, i) => (
+                    <SpeakerCard key={sp.ponente + i} speaker={sp} />
+                ))}
+            </div>
+            {pages > 1 && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '1.5rem' }}>
+                    <button onClick={prev} style={navBtnStyle}><FiChevronLeft size={20} /></button>
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>{idx + 1} / {pages}</span>
+                    <button onClick={next} style={navBtnStyle}><FiChevronRight size={20} /></button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+const navBtnStyle = { background: 'white', border: '1px solid #e2e8f0', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(0,0,0,0.08)' };
+
 export default function Home() {
     const [loadingPayment, setLoadingPayment] = useState(false);
+    const [keynotes, setKeynotes] = useState([]);
+
+    useEffect(() => {
+        fetch(`${API_BASE}/sessions/speakers?principal_only=true`)
+            .then(r => r.ok ? r.json() : [])
+            .then(data => setKeynotes(data))
+            .catch(() => setKeynotes([]));
+    }, []);
 
     const handlePayment = async (amount, currency, region) => {
         try {
@@ -191,29 +243,19 @@ export default function Home() {
                 <h2 className={styles.sectionTitle}>Conferencistas Principales</h2>
                 <p className={styles.sectionSubtitle}>Conoce a algunos de los expertos que guiarán las plenarias de innovación.</p>
 
-                <div className={styles.speakersGrid}>
-                    <div className={styles.speakerCard}>
-                        <div className={styles.speakerImg}>
-                            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=350" alt="Dr. Alessandro Conti" loading="lazy" width="350" height="350" />
-                        </div>
-                        <h4 className={styles.speakerName}>Dr. Alessandro Conti</h4>
-                        <p className={styles.speakerRole}>Experto en Inteligencia Artificial, Milán</p>
+                {keynotes.length > 0 ? (
+                    <SpeakerSlider speakers={keynotes} />
+                ) : (
+                    <div className={styles.speakersGrid}>
+                        {[
+                            {ponente:'Dr. Alessandro Conti', afiliacion:'Experto en Inteligencia Artificial, Milán', foto_ponente_url:'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=350'},
+                            {ponente:'Dra. Sofía Restrepo', afiliacion:'CEO Innovatech Latam', foto_ponente_url:'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=350'},
+                            {ponente:'Ing. Marco Rossi', afiliacion:'Líder Infraestructuras Cloud', foto_ponente_url:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=350'}
+                        ].map((sp,i) => (
+                            <SpeakerCard key={i} speaker={sp} />
+                        ))}
                     </div>
-                    <div className={styles.speakerCard}>
-                        <div className={styles.speakerImg}>
-                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=350" alt="Dra. Sofía Restrepo" loading="lazy" width="350" height="350" />
-                        </div>
-                        <h4 className={styles.speakerName}>Dra. Sofía Restrepo</h4>
-                        <p className={styles.speakerRole}>CEO Innovatech Latam</p>
-                    </div>
-                    <div className={styles.speakerCard}>
-                        <div className={styles.speakerImg}>
-                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=350" alt="Ing. Marco Rossi" loading="lazy" width="350" height="350" />
-                        </div>
-                        <h4 className={styles.speakerName}>Ing. Marco Rossi</h4>
-                        <p className={styles.speakerRole}>Líder Infraestructuras Cloud</p>
-                    </div>
-                </div>
+                )}
                 
                 <div className={styles.centerBtn}>
                     <Link to="/conferencistas" className={styles.primaryBtn}>Conoce a todos los conferencistas</Link>

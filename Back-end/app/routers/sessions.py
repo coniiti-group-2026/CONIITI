@@ -51,6 +51,46 @@ def list_sessions(
 
 
 @router.get(
+    "/speakers",
+    summary="Listar ponentes únicos",
+    description="Retorna la lista de ponentes únicos del congreso, con info del ponente. Acceso público.",
+)
+def list_speakers(
+    principal_only: bool = Query(False, description="Si true, solo retorna conferencistas principales"),
+    db: DBSession = Depends(get_db),
+):
+    """Retorna ponentes únicos del congreso, opcionalmente filtrados por es_conferencista_principal."""
+    from app.models.session import Session as SessionModel
+    query = db.query(SessionModel)
+    if principal_only:
+        query = query.filter(SessionModel.es_conferencista_principal == True)
+    sessions = query.order_by(SessionModel.ponente).all()
+
+    # Deduplica por nombre de ponente, conservando el más reciente con foto
+    seen = {}
+    for s in sessions:
+        name = s.ponente
+        if name not in seen or (s.foto_ponente_url and not seen[name].get("foto_ponente_url")):
+            seen[name] = {
+                "ponente": s.ponente,
+                "afiliacion": s.afiliacion,
+                "descripcion_ponente": s.descripcion_ponente,
+                "foto_ponente_url": s.foto_ponente_url,
+                "es_conferencista_principal": s.es_conferencista_principal,
+                "sesiones": []
+            }
+        seen[name]["sesiones"].append({
+            "id": str(s.id),
+            "titulo": s.titulo,
+            "dia": s.dia,
+            "hora_inicio": s.hora_inicio,
+        })
+
+    return list(seen.values())
+
+
+
+@router.get(
     "/{session_id}",
     response_model=SessionRead,
     summary="Obtener sesión por ID",

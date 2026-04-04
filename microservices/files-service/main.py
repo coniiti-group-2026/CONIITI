@@ -1,4 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 import shutil
 import os
 import uuid
@@ -9,7 +11,16 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = FastAPI(title="Files Service", version="1.0.0")
 
-@app.get("/health")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Health check accesible en /api/files/health (a través de Traefik)
+@app.get("/api/files/health")
 def health_check():
     return {"status": "ok", "service": "files"}
 
@@ -23,7 +34,7 @@ async def upload_file(file: UploadFile = File(...)):
     try:
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="Error guardando archivo")
         
     return {
@@ -32,12 +43,11 @@ async def upload_file(file: UploadFile = File(...)):
         "url": f"/api/files/download/{unique_filename}"
     }
 
-from fastapi.responses import FileResponse
-
 @app.get("/api/files/download/{filename}")
 async def download_file(filename: str):
     """Descarga un archivo previamente subido."""
     file_path = os.path.join(UPLOAD_DIR, filename)
     if not os.path.exists(file_path):
-         raise HTTPException(status_code=404, detail="Archivo no encontrado")
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
     return FileResponse(file_path)
+

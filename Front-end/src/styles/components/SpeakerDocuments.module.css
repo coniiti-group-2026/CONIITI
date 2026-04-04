@@ -1,0 +1,116 @@
+/* SpeakerDocuments.module.css
+   Seccion de documentos del ponente dentro del formulario de sesion. */
+
+.section {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+}
+
+.title {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Aviso cuando la sesion aun no existe */
+.hint {
+    margin: 0 0 0.75rem;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* Fila de documento existente */
+.docRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+    background: #f8faff;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+}
+
+.docIcon {
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.docLink {
+    flex: 1;
+    font-size: 0.85rem;
+    color: #334155;
+    text-decoration: none;
+}
+
+.docLink:hover {
+    text-decoration: underline;
+}
+
+.deleteBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #dc2626;
+    padding: 2px;
+    line-height: 1;
+}
+
+/* Formulario de subida */
+.uploadArea {
+    margin-top: 0.75rem;
+    background: #f1f5f9;
+    border-radius: 8px;
+    padding: 0.75rem;
+}
+
+.errorMsg {
+    margin: 0 0 0.5rem;
+    font-size: 0.8rem;
+    color: #dc2626;
+}
+
+.uploadRow {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.titleInput {
+    flex: 1 1 160px;
+    padding: 6px 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-size: 0.83rem;
+    font-family: inherit;
+}
+
+.fileInput {
+    flex: 1 1 160px;
+    font-size: 0.83rem;
+}
+
+.uploadBtn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--color-primary, #0d6efd);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.uploadBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
