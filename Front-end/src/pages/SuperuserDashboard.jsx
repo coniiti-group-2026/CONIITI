@@ -18,9 +18,6 @@ export default function SuperuserDashboard() {
 
     return (
         <div>
-            {/* Widget de Estadísticas de Kevin */}
-            <AnalyticsWidget />
-
             {/* Tabs de navegación */}
             <div className={styles.tabs}>
                 <button
