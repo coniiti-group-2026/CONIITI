@@ -111,6 +111,17 @@
     flex-shrink: 0;
 }
 
+/* Avatar de inicial cuando no hay foto */
+.photoAvatar {
+    background: linear-gradient(135deg, #1e3a8a, #0d6efd);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+}
+
 /* Contenedor del texto (nombre, cargo, universidad, país) */
 .headerInfo {
     display: flex;
@@ -209,4 +220,75 @@
         max-width: 95%;
         max-height: 95vh;
     }
+}
+
+/* ── Insignia de conferencista principal ── */
+.badge {
+    display: inline-block;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fbbf24;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+/* ── Seccion de documentos ── */
+.docList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.docItem {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    text-decoration: none;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.docItem:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.docIcon {
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.docDownload {
+    color: #94a3b8;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.docEmpty {
+    color: #64748b;
+    font-size: 0.88rem;
+    font-style: italic;
+}
+
+/* ── Enlace inferior ── */
+.speakerLink {
+    display: block;
+    margin-top: 1.5rem;
+    text-align: right;
+    color: #fbbf24;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.speakerLink:hover {
+    text-decoration: underline;
 }

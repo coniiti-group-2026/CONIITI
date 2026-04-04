@@ -190,3 +190,33 @@
         max-height: 95vh;
     }
 }
+
+/* ── Preview de foto del ponente ── */
+.photoPreview {
+    margin-top: 8px;
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #e2e8f0;
+}
+
+/* ── Checkbox de conferencista principal ── */
+.checkboxGroup {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 1.4rem;
+}
+
+.checkboxLabel {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--color-primary);
+    font-weight: 600;
+}
