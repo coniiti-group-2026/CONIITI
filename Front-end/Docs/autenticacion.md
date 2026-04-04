@@ -110,8 +110,8 @@ const isStaff = location.pathname === '/staff';
 
 ## Pendiente para Integración con Backend
 
-1. Reemplazar el `login()` mock por una llamada `POST /auth/login`
+1. Reemplazar el `login()` mock por una llamada `POST /api/auth/login`
 2. Almacenar el **JWT token** en `AuthContext` y en `localStorage`
 3. Enviar el token en el header `Authorization: Bearer <token>` en cada request
 4. Implementar refresh de token cuando expire
-5. El `logout()` debe llamar `POST /auth/logout` y limpiar el token
+5. El `logout()` debe llamar `POST /api/auth/logout` y limpiar el token

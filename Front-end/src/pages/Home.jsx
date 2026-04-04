@@ -60,7 +60,7 @@ const Countdown = () => {
     );
 };
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 const SPEAKERS_PER_PAGE = 5;
 
 function SpeakerSlider({ speakers }) {

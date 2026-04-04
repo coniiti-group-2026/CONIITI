@@ -1,37 +1,27 @@
 # ============================================================
-# Punto de Entrada — CONIITI API
+# Punto de Entrada - CONIITI API
+# El monolito ya no expone autenticacion propia: auth-service
+# es la unica fuente de verdad para login, registro y /me.
 # ============================================================
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import auth, oauth, users, cms, documents, admin_stats, payments, analytics
-
-# ==============================================================
-# Sección: Creación de la aplicación
-# ==============================================================
+from app.routers import admin_stats, analytics, cms, documents, payments, users
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     description=(
-        "API REST para la gestión del XI Congreso Internacional de Innovación "
-        "y Tendencias en Ingeniería — CONIITI 2026. "
-        "Incluye autenticación JWT con cookies HttpOnly, OAuth (Microsoft y Google), "
-        "verificación en dos pasos (OTP por correo) y gestión de sesiones del congreso."
+        "Fachada y back-office del ecosistema CONIITI. "
+        "Expone modulos internos y valida JWTs emitidos por auth-service."
     ),
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
-
-    # 🔥 🔥 🔥 ESTA ES LA LÍNEA IMPORTANTE
-    root_path="/api"
+    root_path="/api",
 )
-
-# ==============================================================
-# Sección: Middlewares
-# ==============================================================
 
 app.add_middleware(
     CORSMiddleware,
@@ -47,12 +37,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ==============================================================
-# Sección: Registro de routers
-# ==============================================================
-
-app.include_router(auth.router)
-app.include_router(oauth.router)
 app.include_router(users.router)
 app.include_router(cms.router)
 app.include_router(documents.router)
@@ -60,9 +44,6 @@ app.include_router(admin_stats.router)
 app.include_router(payments.router)
 app.include_router(analytics.router)
 
-# ==============================================================
-# Sección: Endpoints de sistema
-# ==============================================================
 
 @app.get("/", tags=["Sistema"], summary="Estado del API")
 def health_check():

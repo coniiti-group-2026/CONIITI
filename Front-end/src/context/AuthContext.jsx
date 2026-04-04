@@ -1,7 +1,7 @@
 // ============================================================
 // Contexto de Autenticación — CONIITI Front-end
 // Provee el estado global de autenticación del usuario.
-// Al montar la aplicación, consulta /auth/me para restaurar
+// Al montar la aplicación, consulta /api/auth/me para restaurar
 // la sesión desde la cookie HttpOnly si ya existe.
 // ============================================================
 
@@ -25,7 +25,7 @@ export const AuthContext = createContext(null);
 /**
  * AuthProvider — envuelve la aplicación y distribución el estado de sesión.
  * Restaura automáticamente la sesión al recargar la página
- * consultando el endpoint /auth/me con la cookie HttpOnly.
+ * consultando el endpoint /api/auth/me con la cookie HttpOnly.
  */
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);

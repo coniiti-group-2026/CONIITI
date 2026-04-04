@@ -6,7 +6,7 @@ import SpeakerCard from '../components/SpeakerCard';
 import pageStyles from '../styles/pages/DynamicPage.module.css';
 import styles from '../styles/pages/Conferencistas.module.css';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 const FILTERS = [
     { value: 'todos', label: 'Todos los Conferencistas' },

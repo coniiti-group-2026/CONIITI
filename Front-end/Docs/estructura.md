@@ -118,20 +118,16 @@ CONIITI/
         │
         ├── models/              # Tablas de Base de Datos
         │   ├── cms.py           # PersonModels, DocumentModels
-        │   ├── otp.py           # OTPModel
         │   ├── session.py       # SessionModel
         │   └── user.py          # UserModel
         │
         ├── schemas/             # Validadores de carga (Pydantic BaseModels)
-        │   ├── auth.py          # Tokens, Passwords
         │   ├── cms.py           # PersonCreate, DocumentCreate
         │   ├── session.py       # SessionCreate, SessionUpdate
         │   └── user.py          # UserCreate, UserResponse
         │
         ├── routers/             # Controladores (Endpoints HTTP)
-        │   ├── auth.py          # /auth/* (login, forgot-password, OTP)
         │   ├── cms.py           # /cms/* (crear miembros, documentos, etc.)
-        │   ├── oauth.py         # (Experimental) /oauth/google
         │   ├── sessions.py      # /sessions/* (CRUD de agenda)
         │   └── users.py         # /users/* (consulta de rol/perfil)
         │

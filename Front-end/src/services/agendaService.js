@@ -6,7 +6,7 @@
 // romper los hooks y componentes existentes.
 // ============================================================
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 /**
  * Realiza una solicitud al API con manejo de errores centralizado.

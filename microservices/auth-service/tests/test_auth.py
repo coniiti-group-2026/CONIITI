@@ -1,0 +1,364 @@
+import os
+import sys
+import types
+
+os.environ["DATABASE_URL"] = "sqlite://"
+os.environ["JWT_SECRET_KEY"] = "test-secret"
+os.environ["FRONTEND_URL"] = "http://localhost:3000"
+os.environ["GOOGLE_CLIENT_ID"] = "google-client"
+os.environ["GOOGLE_CLIENT_SECRET"] = "google-secret"
+os.environ["MICROSOFT_CLIENT_ID"] = "ms-client"
+os.environ["MICROSOFT_CLIENT_SECRET"] = "ms-secret"
+
+
+class _DummyConnection:
+    def channel(self):
+        return self
+
+    def exchange_declare(self, *args, **kwargs):
+        return None
+
+    def basic_publish(self, *args, **kwargs):
+        return None
+
+    def close(self):
+        return None
+
+
+sys.modules.setdefault(
+    "pika",
+    types.SimpleNamespace(
+        PlainCredentials=lambda *args, **kwargs: object(),
+        ConnectionParameters=lambda *args, **kwargs: object(),
+        BlockingConnection=lambda *args, **kwargs: _DummyConnection(),
+        BasicProperties=lambda *args, **kwargs: object(),
+    ),
+)
+
+from urllib.parse import parse_qs, urlparse
+
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
+from app.config import settings
+from app.database.connection import Base, get_db
+from app.main import app
+from app.services import email_service, event_service, oauth_service, users_client
+
+
+engine = create_engine(
+    "sqlite://",
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base.metadata.create_all(bind=engine)
+
+
+def override_get_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+app.dependency_overrides[get_db] = override_get_db
+client = TestClient(app)
+
+
+def _publish_stub(user):
+    return None
+
+
+event_service.publish_user_registered = _publish_stub
+users_client.create_profile = lambda **kwargs: {
+    "id": kwargs["user_id"],
+    "full_name": kwargs["full_name"],
+    "email": kwargs["email"],
+    "role": kwargs["role"],
+    "institution": kwargs.get("institution"),
+    "is_active": True,
+}
+users_client.get_profile = lambda user_id: {
+    "id": user_id,
+    "full_name": "Stub User",
+    "email": "stub@coniiti.edu",
+    "role": "external",
+    "institution": None,
+    "is_active": True,
+}
+users_client.delete_profile = lambda user_id: None
+email_service.send_password_reset_email = lambda **kwargs: None
+
+
+def setup_function():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+
+
+def test_register_success():
+    response = client.post(
+        "/register",
+        json={
+            "email": "demo@coniiti.edu",
+            "password": "ClaveSegura123",
+            "full_name": "Demo User",
+            "role": "external",
+        },
+    )
+
+    assert response.status_code == 201
+    data = response.json()
+    assert data["email"] == "demo@coniiti.edu"
+    assert data["full_name"] == "Demo User"
+    assert data["user_id"]
+
+
+def test_login_success():
+    client.post(
+        "/register",
+        json={
+            "email": "login@coniiti.edu",
+            "password": "ClaveSegura123",
+            "full_name": "Login User",
+            "role": "external",
+        },
+    )
+
+    response = client.post(
+        "/login",
+        json={
+            "email": "login@coniiti.edu",
+            "password": "ClaveSegura123",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["token_type"] == "bearer"
+    assert data["access_token"]
+    assert data["role"] == "external"
+
+
+def test_login_failure_with_invalid_password():
+    client.post(
+        "/register",
+        json={
+            "email": "fail@coniiti.edu",
+            "password": "ClaveSegura123",
+            "full_name": "Fail User",
+            "role": "external",
+        },
+    )
+
+    response = client.post(
+        "/login",
+        json={
+            "email": "fail@coniiti.edu",
+            "password": "incorrecta123",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Credenciales invalidas."
+
+
+def test_forgot_and_reset_password_flow():
+    captured = {}
+
+    def _capture_reset_email(**kwargs):
+        captured["reset_url"] = kwargs["reset_url"]
+
+    email_service.send_password_reset_email = _capture_reset_email
+
+    client.post(
+        "/register",
+        json={
+            "email": "reset@coniiti.edu",
+            "password": "ClaveSegura123",
+            "full_name": "Reset User",
+            "role": "external",
+        },
+    )
+
+    forgot_response = client.post(
+        "/forgot-password",
+        json={"email": "reset@coniiti.edu"},
+    )
+
+    assert forgot_response.status_code == 200
+    assert "reset_url" in captured
+
+    parsed = urlparse(captured["reset_url"])
+    token = parse_qs(parsed.query)["token"][0]
+
+    reset_response = client.post(
+        "/reset-password",
+        json={
+            "token": token,
+            "new_password": "NuevaClave456",
+        },
+    )
+
+    assert reset_response.status_code == 200
+
+    old_login = client.post(
+        "/login",
+        json={"email": "reset@coniiti.edu", "password": "ClaveSegura123"},
+    )
+    assert old_login.status_code == 401
+
+    new_login = client.post(
+        "/login",
+        json={"email": "reset@coniiti.edu", "password": "NuevaClave456"},
+    )
+    assert new_login.status_code == 200
+
+
+def test_google_oauth_redirect_sets_state_cookie():
+    response = client.get(
+        "/oauth/google",
+        headers={
+            "x-forwarded-prefix": "/api/auth",
+            "x-forwarded-host": "localhost",
+            "x-forwarded-proto": "http",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+    location = response.headers["location"]
+    params = parse_qs(urlparse(location).query)
+
+    assert "accounts.google.com" in location
+    assert "oauth_state=" in response.headers["set-cookie"]
+    assert params["client_id"] == ["google-client"]
+    assert params["response_type"] == ["code"]
+    assert params["redirect_uri"] == ["http://localhost/api/auth/oauth/google/callback"]
+    assert params["scope"] == ["openid email profile"]
+    assert params["prompt"] == ["select_account"]
+    assert params["access_type"] == ["offline"]
+
+
+def test_google_oauth_callback_creates_session_cookie():
+    async def _exchange_google_code(_code, redirect_uri=None):
+        assert redirect_uri == "http://localhost/api/auth/oauth/google/callback"
+        return {
+            "email": "oauth@coniiti.edu",
+            "full_name": "OAuth User",
+        }
+
+    oauth_service.exchange_google_code = _exchange_google_code
+    users_client.create_profile = lambda **kwargs: {
+        "id": kwargs["user_id"],
+        "full_name": kwargs["full_name"],
+        "email": kwargs["email"],
+        "role": kwargs["role"],
+        "institution": kwargs.get("institution"),
+        "is_active": True,
+    }
+    users_client.get_profile = lambda user_id: {
+        "id": user_id,
+        "full_name": "OAuth User",
+        "email": "oauth@coniiti.edu",
+        "role": "external",
+        "institution": None,
+        "is_active": True,
+    }
+
+    forwarded_headers = {
+        "x-forwarded-prefix": "/api/auth",
+        "x-forwarded-host": "localhost",
+        "x-forwarded-proto": "http",
+    }
+    start_response = client.get("/oauth/google", headers=forwarded_headers, follow_redirects=False)
+    state = parse_qs(urlparse(start_response.headers["location"]).query)["state"][0]
+
+    callback_response = client.get(
+        f"/oauth/google/callback?code=test-code&state={state}",
+        headers=forwarded_headers,
+        follow_redirects=False,
+    )
+
+    assert callback_response.status_code == 302
+    assert callback_response.headers["location"] == f"{settings.FRONTEND_URL}/login?oauth=success"
+    assert "access_token=" in callback_response.headers["set-cookie"]
+
+    me_response = client.get("/me")
+    assert me_response.status_code == 200
+    assert me_response.json()["email"] == "oauth@coniiti.edu"
+
+
+def test_microsoft_oauth_callback_creates_session_cookie():
+    async def _exchange_microsoft_code(_code, redirect_uri=None):
+        assert redirect_uri == "http://localhost/api/auth/oauth/microsoft/callback"
+        return {
+            "email": "microsoft@coniiti.edu",
+            "full_name": "Microsoft User",
+        }
+
+    oauth_service.exchange_microsoft_code = _exchange_microsoft_code
+    users_client.create_profile = lambda **kwargs: {
+        "id": kwargs["user_id"],
+        "full_name": kwargs["full_name"],
+        "email": kwargs["email"],
+        "role": kwargs["role"],
+        "institution": kwargs.get("institution"),
+        "is_active": True,
+    }
+    users_client.get_profile = lambda user_id: {
+        "id": user_id,
+        "full_name": "Microsoft User",
+        "email": "microsoft@coniiti.edu",
+        "role": "external",
+        "institution": None,
+        "is_active": True,
+    }
+
+    forwarded_headers = {
+        "x-forwarded-prefix": "/api/auth",
+        "x-forwarded-host": "localhost",
+        "x-forwarded-proto": "http",
+    }
+    start_response = client.get("/oauth/microsoft", headers=forwarded_headers, follow_redirects=False)
+    state = parse_qs(urlparse(start_response.headers["location"]).query)["state"][0]
+
+    callback_response = client.get(
+        f"/oauth/microsoft/callback?code=test-code&state={state}",
+        headers=forwarded_headers,
+        follow_redirects=False,
+    )
+
+    assert callback_response.status_code == 302
+    assert callback_response.headers["location"] == f"{settings.FRONTEND_URL}/login?oauth=success"
+    assert "access_token=" in callback_response.headers["set-cookie"]
+
+    me_response = client.get("/me")
+    assert me_response.status_code == 200
+    assert me_response.json()["email"] == "microsoft@coniiti.edu"
+
+
+def test_microsoft_oauth_redirect_includes_select_account():
+    response = client.get(
+        "/oauth/microsoft",
+        headers={
+            "x-forwarded-prefix": "/api/auth",
+            "x-forwarded-host": "localhost",
+            "x-forwarded-proto": "http",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 302
+    location = response.headers["location"]
+    params = parse_qs(urlparse(location).query)
+
+    assert "login.microsoftonline.com" in location
+    assert params["client_id"] == ["ms-client"]
+    assert params["response_type"] == ["code"]
+    assert params["redirect_uri"] == ["http://localhost/api/auth/oauth/microsoft/callback"]
+    assert params["scope"] == ["openid email profile User.Read"]
+    assert params["prompt"] == ["select_account"]

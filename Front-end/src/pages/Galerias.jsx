@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import styles from '../styles/pages/DynamicPage.module.css';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 export default function Galerias() {
     const [photos, setPhotos] = useState([]);

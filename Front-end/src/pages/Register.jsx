@@ -1,10 +1,3 @@
-// ============================================================
-// Página de Registro — CONIITI Front-end
-// Registra un nuevo usuario en la plataforma.
-// Al enviar el formulario, redirige a /verificar-otp
-// para completar la verificación por correo.
-// ============================================================
-
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
@@ -47,15 +40,15 @@ export default function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (form.password !== form.confirmPassword) {
-            setError('Las contraseñas no coinciden.');
+            setError('Las contrasenas no coinciden.');
             return;
         }
         if (form.password.length < 8) {
-            setError('La contraseña debe tener al menos 8 caracteres.');
+            setError('La contrasena debe tener al menos 8 caracteres.');
             return;
         }
         if (!form.acceptPolicy) {
-            setError('Debe aceptar la política de datos para registrarse.');
+            setError('Debes aceptar la politica de datos para registrarte.');
             return;
         }
 
@@ -68,10 +61,11 @@ export default function Register() {
                 institution: form.institucion || undefined,
                 role: form.tipoUsuario,
                 password: form.password,
-                accept_data_policy: form.acceptPolicy,
             });
-            // Redirige a la verificación OTP después del registro
-            navigate(`/verificar-otp?email=${encodeURIComponent(form.email)}&purpose=register`);
+            navigate('/login', {
+                replace: true,
+                state: { message: 'Cuenta creada correctamente. Ya puedes iniciar sesion.' },
+            });
         } catch (err) {
             setError(err.message);
         } finally {
@@ -90,11 +84,10 @@ export default function Register() {
             )}
 
             <div className={styles.registerCard}>
-                <h2 className={styles.title}>Crear Cuenta</h2>
-                <p className={styles.subtitle}>Únete a la plataforma CONIITI 2026</p>
+                <h2 className={styles.title}>Crear cuenta</h2>
+                <p className={styles.subtitle}>Completa tus datos para registrarte en CONIITI</p>
 
                 <form onSubmit={handleSubmit} className={styles.form}>
-                    {/* Nombre y Apellido */}
                     <div className={styles.row}>
                         <div className={styles.inputGroup}>
                             <label htmlFor="reg-nombre">Nombre*</label>
@@ -122,9 +115,8 @@ export default function Register() {
                         </div>
                     </div>
 
-                    {/* Correo */}
                     <div className={styles.inputGroup}>
-                        <label htmlFor="reg-email">Correo Electrónico*</label>
+                        <label htmlFor="reg-email">Correo electronico*</label>
                         <input
                             type="email"
                             id="reg-email"
@@ -137,9 +129,8 @@ export default function Register() {
                         />
                     </div>
 
-                    {/* Institución */}
                     <div className={styles.inputGroup}>
-                        <label htmlFor="reg-institucion">Institución / Empresa</label>
+                        <label htmlFor="reg-institucion">Institucion / empresa</label>
                         <input
                             type="text"
                             id="reg-institucion"
@@ -150,7 +141,6 @@ export default function Register() {
                         />
                     </div>
 
-                    {/* Tipo de Usuario */}
                     <div className={styles.inputGroup}>
                         <label htmlFor="reg-tipoUsuario">Tipo de Participante*</label>
                         <select
@@ -160,42 +150,40 @@ export default function Register() {
                             onChange={handleChange}
                             required
                         >
-                            <option value="student">Comunidad Interna (Estudiante / Docente)</option>
+                            <option value="student">Comunidad interna (Estudiante / Docente)</option>
                             <option value="external">Externo</option>
                         </select>
                     </div>
 
-                    {/* Contraseñas */}
                     <div className={styles.row}>
                         <div className={styles.inputGroup}>
-                            <label htmlFor="reg-password">Contraseña* (mín. 8)</label>
+                            <label htmlFor="reg-password">Contrasena* (min. 8)</label>
                             <input
                                 type="password"
                                 id="reg-password"
                                 name="password"
                                 value={form.password}
                                 onChange={handleChange}
-                                placeholder="Mínimo 8 caracteres"
+                                placeholder="Minimo 8 caracteres"
                                 required
                                 autoComplete="new-password"
                             />
                         </div>
                         <div className={styles.inputGroup}>
-                            <label htmlFor="reg-confirmPassword">Confirmar Contraseña*</label>
+                            <label htmlFor="reg-confirmPassword">Confirmar contrasena*</label>
                             <input
                                 type="password"
                                 id="reg-confirmPassword"
                                 name="confirmPassword"
                                 value={form.confirmPassword}
                                 onChange={handleChange}
-                                placeholder="Repite tu contraseña"
+                                placeholder="Repite tu contrasena"
                                 required
                                 autoComplete="new-password"
                             />
                         </div>
                     </div>
 
-                    {/* Política de datos */}
                     <div className={styles.checkboxGroup}>
                         <input
                             type="checkbox"
@@ -205,11 +193,7 @@ export default function Register() {
                             onChange={handleChange}
                         />
                         <label htmlFor="reg-acceptPolicy">
-                            Acepto la{' '}
-                            <a href="/politica-de-datos" target="_blank" rel="noopener noreferrer">
-                                política de datos
-                            </a>{' '}
-                            de CONIITI *
+                            Acepto la politica de datos de CONIITI *
                         </label>
                     </div>
 
@@ -225,8 +209,8 @@ export default function Register() {
                 </form>
 
                 <div className={styles.loginLink}>
-                    <span>¿Ya tienes cuenta? </span>
-                    <Link to="/login" className={styles.linkBtn}>Inicia sesión acá</Link>
+                    <span>Ya tienes cuenta? </span>
+                    <Link to="/login" className={styles.linkBtn}>Inicia sesion</Link>
                 </div>
             </div>
         </div>

@@ -1,67 +1,77 @@
 # ============================================================
-# Dependencias de Autenticación — CONIITI API
-# Define las dependencias de FastAPI para inyección en routers.
-# Principio DIP: los routers dependen de estas abstracciones,
-# no de los detalles de implementación de seguridad o BD.
+# Dependencias de Autenticacion - CONIITI API
+# El monolito ya no autentica credenciales; solo valida JWTs
+# emitidos por auth-service para autorizar sus propios modulos.
 # ============================================================
 
+from dataclasses import dataclass
+
 from fastapi import Depends, HTTPException, Request, status
-from sqlalchemy.orm import Session as DBSession
 
-from app.db.session import get_db
 from app.core.security import decode_token, get_token_from_cookie
-from app.models.user import User, UserRole
-from app.services import user_service
+from app.models.user import UserRole
 
 
-def get_current_user(
-    request: Request,
-    db: DBSession = Depends(get_db),
-) -> User:
-    """
-    Dependencia que extrae y valida el access token desde la cookie HttpOnly.
-    Retorna el usuario autenticado o lanza HTTPException 401.
-    """
+@dataclass
+class AuthenticatedUser:
+    id: str
+    email: str | None
+    full_name: str | None
+    role: UserRole
+    is_active: bool = True
+    is_verified: bool = True
+
+
+def get_current_user(request: Request) -> AuthenticatedUser:
     token = get_token_from_cookie(request, "access_token")
+    if not token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ", 1)[1]
+
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="No se encontró sesión activa. Inicie sesión.",
+            detail="No se encontro sesion activa. Inicie sesion.",
         )
 
     payload = decode_token(token, expected_type="access")
     user_id = payload.get("sub")
+    role = payload.get("role")
 
-    user = user_service.get_user_by_id(user_id, db)
-    if not user or not user.is_active:
+    if not user_id or not role:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuario no encontrado o cuenta inactiva.",
+            detail="Token invalido o incompleto.",
         )
 
-    return user
+    try:
+        normalized_role = UserRole(role)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Rol invalido en el token.",
+        ) from exc
+
+    return AuthenticatedUser(
+        id=user_id,
+        email=payload.get("email"),
+        full_name=payload.get("full_name"),
+        role=normalized_role,
+        is_active=True,
+        is_verified=True,
+    )
 
 
 def get_verified_user(
-    current_user: User = Depends(get_current_user),
-) -> User:
-    """
-    Dependencia que exige que el usuario haya completado la verificación OTP.
-    Lanza HTTPException 403 si no está verificado.
-    """
-    if not current_user.is_verified:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Cuenta no verificada. Complete el proceso de verificación por correo.",
-        )
+    current_user: AuthenticatedUser = Depends(get_current_user),
+) -> AuthenticatedUser:
     return current_user
 
 
-def require_staff(current_user: User = Depends(get_verified_user)) -> User:
-    """
-    Dependencia que exige rol de staff o superusuario.
-    Lanza HTTPException 403 si el rol es insuficiente.
-    """
+def require_staff(
+    current_user: AuthenticatedUser = Depends(get_verified_user),
+) -> AuthenticatedUser:
     if current_user.role not in (UserRole.STAFF, UserRole.SUPERUSER):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -70,11 +80,9 @@ def require_staff(current_user: User = Depends(get_verified_user)) -> User:
     return current_user
 
 
-def require_superuser(current_user: User = Depends(get_verified_user)) -> User:
-    """
-    Dependencia que exige el rol de superusuario.
-    Lanza HTTPException 403 si el usuario no es superusuario.
-    """
+def require_superuser(
+    current_user: AuthenticatedUser = Depends(get_verified_user),
+) -> AuthenticatedUser:
     if current_user.role != UserRole.SUPERUSER:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

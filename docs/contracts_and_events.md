@@ -53,10 +53,11 @@ Publicado cuando un nuevo usuario completa su registro local.
 ```json
 {
   "event_id": "uuid",
+  "event": "usuario.registrado",
   "user_id": "uuid",
-  "full_name": "string",
-  "correo": "string",
-  "role": "string"
+  "email": "string",
+  "name": "string",
+  "timestamp": "2026-04-04T15:30:00Z"
 }
 ```
 

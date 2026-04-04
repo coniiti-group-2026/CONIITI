@@ -60,8 +60,10 @@ def handle_event(routing_key: str, payload: dict[str, Any]) -> None:
         return
 
     if routing_key == "usuario.registrado":
-        correo = payload.get("correo", "N/A")
-        print(f"[NOTIFICATION] Enviando correo de bienvenida a: {correo}")
+        correo = payload.get("email") or payload.get("correo", "N/A")
+        nombre = payload.get("name") or payload.get("full_name", "usuario")
+        print(f"[NOTIFICATION] Registro detectado para: {nombre} <{correo}>")
+        print(f"[EMAIL] Enviando correo de bienvenida a: {correo}")
         return
 
     print(f"[INFO] Evento recibido sin accion especifica: {routing_key}")

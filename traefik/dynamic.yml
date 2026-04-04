@@ -1,5 +1,13 @@
 http:
   routers:
+    auth:
+      rule: "PathPrefix(`/api/auth`)"
+      entryPoints:
+        - web
+      middlewares:
+        - strip-auth
+      service: auth-svc
+
     payments:
       rule: "PathPrefix(`/api/payments`)"
       entryPoints:
@@ -18,7 +26,18 @@ http:
         - web
       service: analytics-svc
 
+  middlewares:
+    strip-auth:
+      stripPrefix:
+        prefixes:
+          - /api/auth
+
   services:
+    auth-svc:
+      loadBalancer:
+        servers:
+          - url: "http://auth-service:8000"
+
     payments-svc:
       loadBalancer:
         servers:

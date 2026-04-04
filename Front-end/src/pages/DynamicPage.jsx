@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import styles from '../styles/pages/DynamicPage.module.css';
 import { FiExternalLink } from 'react-icons/fi';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 export default function DynamicPage({ title, description, section }) {
     const [cards, setCards] = useState([]);

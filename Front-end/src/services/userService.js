@@ -4,7 +4,7 @@
 // Solo utilizado desde el panel del superusuario.
 // ============================================================
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 /**
  * Realiza una solicitud autenticada al API incluyendo cookies HttpOnly.

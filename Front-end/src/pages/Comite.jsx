@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import styles from '../styles/pages/DynamicPage.module.css';
 import PersonCard from '../components/PersonCard';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 export default function Comite() {
     const [members, setMembers] = useState([]);
