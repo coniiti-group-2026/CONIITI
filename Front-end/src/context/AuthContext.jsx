@@ -19,6 +19,7 @@ import { getMe, logout as logoutService } from '../services/authService';
  */
 
 /** @type {React.Context<{ user: AuthUser|null, isLoading: boolean, setUser: Function, logout: Function }>} */
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
 /**

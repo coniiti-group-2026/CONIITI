@@ -94,7 +94,11 @@ export default function MyConferences({ registeredIds = new Set(), onToggleRegis
             {mySessions.length === 0 ? (
                 <div className={styles.empty}>
                     <FiBookmark size={48} className={styles.emptyIcon} />
+<<<<<<< HEAD
+                    <p>Ve a la <strong>Agenda</strong> y haz clic en <em>&ldquo;Pre-inscribirse&rdquo;</em> en las sesiones que te interesen.</p>
+=======
                     <p>Ve a la <strong>Agenda</strong> y haz clic en <em>&quot;Pre-inscribirse&quot;</em> en las sesiones que te interesen.</p>
+>>>>>>> a59e145538146c0b18f814b81ff3ec8d5bfb3188
                 </div>
             ) : (
                 <AgendaGrid

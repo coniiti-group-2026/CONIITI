@@ -108,7 +108,7 @@ export default function Home() {
     const [keynotes, setKeynotes] = useState([]);
 
     useEffect(() => {
-        fetch(`${API_BASE}/sessions/speakers?principal_only=true`)
+        fetch(`${API_BASE}/agenda/speakers?principal_only=true`)
             .then(r => r.ok ? r.json() : [])
             .then(data => setKeynotes(data))
             .catch(() => setKeynotes([]));

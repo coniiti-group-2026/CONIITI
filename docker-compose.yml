@@ -93,6 +93,78 @@ services:
   # ==========================================
   # OTROS MICROSERVICIOS
   # ==========================================
+  users-db:
+    image: postgres:16
+    container_name: users-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=usersdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - users_data:/var/lib/postgresql/data
+    networks:
+      - coniiti_net
+
+  users-service:
+    build:
+      context: ./microservices/users-service
+    container_name: users-service
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@users-db:5432/usersdb
+    depends_on:
+      - users-db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.users.rule=PathPrefix(`/users-ms`)"
+      - "traefik.http.routers.users.entrypoints=web"
+      - "traefik.http.middlewares.strip-users.stripprefix.prefixes=/users-ms"
+      - "traefik.http.routers.users.middlewares=strip-users"
+      - "traefik.http.services.users-service.loadbalancer.server.port=8000"
+    networks:
+      - coniiti_net
+
+  # ==========================================
+  # SERVICIO DE AGENDA Y PONENCIAS (Agenda)
+  # ==========================================
+  agenda-db:
+    image: postgres:16
+    container_name: agenda-db
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=adminpassword
+      - POSTGRES_DB=agenda_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - agenda_data:/var/lib/postgresql/data
+    networks:
+      - coniiti_net
+
+  agenda-service:
+    build:
+      context: ./microservices/agenda-service
+    container_name: agenda-service
+    environment:
+      - DATABASE_URL=postgresql://admin:adminpassword@agenda-db:5432/agenda_db
+      - RABBITMQ_HOST=shared-rabbitmq
+      - RABBITMQ_USER=user
+      - RABBITMQ_PASS=password
+      - SECRET_KEY=supersecreto123
+    depends_on:
+      - agenda-db
+      - rabbitmq
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.agenda.rule=PathPrefix(`/api/agenda`)"
+      - "traefik.http.routers.agenda.entrypoints=web"
+      - "traefik.http.middlewares.strip-agenda.stripprefix.prefixes=/api/agenda"
+      - "traefik.http.routers.agenda.middlewares=strip-agenda"
+      - "traefik.http.services.agenda-service.loadbalancer.server.port=8000"
+    networks:
+      - coniiti_net
+
   payments-service:
     build:
       context: ./microservices/payments-service
@@ -138,3 +210,5 @@ volumes:
   postgres_data:
   mongo_data:
   files_data:
+  users_data:
+  agenda_data:

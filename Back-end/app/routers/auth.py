@@ -115,7 +115,7 @@ async def verify_otp(
         user_service.mark_user_verified(user, db)
 
     # Emite los tokens JWT como cookies HttpOnly
-    access_token = create_access_token({"sub": str(user.id)})
+    access_token = create_access_token({"sub": str(user.id), "role": user.role.value})
     refresh_token = create_refresh_token({"sub": str(user.id)})
     set_auth_cookies(response, access_token, refresh_token)
 
@@ -152,7 +152,7 @@ async def login(data: LoginRequest, response: Response, db: DBSession = Depends(
     # Condición para saltar el OTP:
     # Si es student o external Y ya está verificado, entra directo.
     if user.role in (UserRole.STUDENT, UserRole.EXTERNAL) and user.is_verified:
-        access_token = create_access_token({"sub": str(user.id)})
+        access_token = create_access_token({"sub": str(user.id), "role": user.role.value})
         refresh_token = create_refresh_token({"sub": str(user.id)})
         set_auth_cookies(response, access_token, refresh_token)
         return TokenResponse(message="Autenticación exitosa.", requires_otp=False)
@@ -211,7 +211,7 @@ def refresh_token(request: Request, response: Response, db: DBSession = Depends(
             detail="Usuario no válido.",
         )
 
-    new_access_token = create_access_token({"sub": str(user.id)})
+    new_access_token = create_access_token({"sub": str(user.id), "role": user.role.value})
     response.set_cookie(
         key="access_token",
         value=new_access_token,

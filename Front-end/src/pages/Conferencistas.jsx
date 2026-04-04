@@ -27,8 +27,8 @@ export default function Conferencistas() {
             setSpeakers([]);
             
             const url = filter === 'principal'
-                ? `${API_BASE}/sessions/speakers?principal_only=true`
-                : `${API_BASE}/sessions/speakers`;
+                ? `${API_BASE}/agenda/speakers?principal_only=true`
+                : `${API_BASE}/agenda/speakers`;
 
             try {
                 const r = await fetch(url);

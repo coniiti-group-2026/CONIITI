@@ -21,7 +21,11 @@ export default function Acerca() {
                 <div className={styles.card}>
                     <div className={styles.iconWrapper}><FiTarget /></div>
                     <h2>Nuestro Propósito</h2>
+<<<<<<< HEAD
+                    <p>Impulsar el desarrollo de la innovación brindando herramientas y conocimientos sobre las nuevas tendencias en el área, bajo el lema &ldquo;Innovación y Tendencias en Ingeniería&rdquo;.</p>
+=======
                     <p>Impulsar el desarrollo de la innovación brindando herramientas y conocimientos sobre las nuevas tendencias en el área, bajo el lema &quot;Innovación y Tendencias en Ingeniería&quot;.</p>
+>>>>>>> a59e145538146c0b18f814b81ff3ec8d5bfb3188
                 </div>
 
                 <div className={styles.card}>
