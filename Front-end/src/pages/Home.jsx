@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowRight, FiUsers, FiAward, FiBookOpen, FiCheck, FiLink, FiFacebook, FiLinkedin, FiChevronLeft, FiChevronRight, FiBriefcase, FiMonitor } from 'react-icons/fi';
+import { FiArrowRight, FiUsers, FiAward, FiBookOpen, FiCheck, FiLink, FiChevronLeft, FiChevronRight, FiBriefcase, FiMonitor } from 'react-icons/fi';
 import { createCheckoutSession } from '../services/microservicesApi';
 import SpeakerCard from '../components/SpeakerCard';
 import styles from '../styles/pages/Home.module.css';
@@ -76,6 +76,7 @@ function SpeakerSlider({ speakers }) {
         if (pages <= 1) return;
         timerRef.current = setInterval(next, 4500);
         return () => clearInterval(timerRef.current);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pages]);
 
     if (!speakers.length) return null;

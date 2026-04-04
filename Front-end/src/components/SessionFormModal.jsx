@@ -2,7 +2,7 @@
 // Modal para crear o editar una sesion de agenda.
 
 import { useState, useEffect } from 'react';
-import { FiX, FiUploadCloud, FiStar } from 'react-icons/fi';
+import { FiX, FiStar } from 'react-icons/fi';
 import SpeakerDocuments from './SpeakerDocuments';
 import styles from '../styles/components/SessionFormModal.module.css';
 import {

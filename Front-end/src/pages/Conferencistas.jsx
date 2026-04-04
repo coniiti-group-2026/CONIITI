@@ -20,17 +20,30 @@ export default function Conferencistas() {
     const [filter, setFilter] = useState('todos');
 
     useEffect(() => {
-        setLoading(true);
-        setSpeakers([]);
-        const url = filter === 'principal'
-            ? `${API_BASE}/sessions/speakers?principal_only=true`
-            : `${API_BASE}/sessions/speakers`;
+        let isMounted = true;
 
-        fetch(url)
-            .then(r => r.ok ? r.json() : [])
-            .then(setSpeakers)
-            .catch(() => setSpeakers([]))
-            .finally(() => setLoading(false));
+        const fetchData = async () => {
+            setLoading(true);
+            setSpeakers([]);
+            
+            const url = filter === 'principal'
+                ? `${API_BASE}/sessions/speakers?principal_only=true`
+                : `${API_BASE}/sessions/speakers`;
+
+            try {
+                const r = await fetch(url);
+                const data = r.ok ? await r.json() : [];
+                if (isMounted) setSpeakers(data);
+            } catch {
+                if (isMounted) setSpeakers([]);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        fetchData();
+
+        return () => { isMounted = false; };
     }, [filter]);
 
     return (
