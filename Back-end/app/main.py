@@ -1,14 +1,12 @@
 # ============================================================
 # Punto de Entrada — CONIITI API
-# Inicializa la aplicación FastAPI, configura CORS,
-# registra todos los routers y expone los metadatos del API.
 # ============================================================
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import auth, oauth, users, sessions, cms, documents, admin_stats
+from app.routers import auth, oauth, users, sessions, cms, documents, admin_stats, notifications, payments, analytics
 
 # ==============================================================
 # Sección: Creación de la aplicación
@@ -26,8 +24,10 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
-)
 
+    # 🔥 🔥 🔥 ESTA ES LA LÍNEA IMPORTANTE
+    root_path="/api"
+)
 
 # ==============================================================
 # Sección: Middlewares
@@ -42,11 +42,10 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
     ],
-    allow_credentials=True,  # Requerido para que el front-end pueda enviar cookies HttpOnly
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # ==============================================================
 # Sección: Registro de routers
@@ -59,7 +58,9 @@ app.include_router(sessions.router)
 app.include_router(cms.router)
 app.include_router(documents.router)
 app.include_router(admin_stats.router)
-
+app.include_router(notifications.router)
+app.include_router(payments.router)
+app.include_router(analytics.router)
 
 # ==============================================================
 # Sección: Endpoints de sistema
@@ -67,7 +68,6 @@ app.include_router(admin_stats.router)
 
 @app.get("/", tags=["Sistema"], summary="Estado del API")
 def health_check():
-    """Endpoint de salud para verificar que la API está operativa."""
     return {
         "status": "ok",
         "api": settings.PROJECT_NAME,

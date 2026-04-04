@@ -8,12 +8,39 @@ services:
     image: traefik:v2.10
     container_name: api-gateway
     command:
-      - "--configfile=/etc/traefik/traefik.yml"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--configfile=/etc/traefik/traefik.yml" # Mantiene compatibilidad
     ports:
       - "80:80"
       - "8080:8080"
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik:/etc/traefik
+    networks:
+      - coniiti_net
+
+  # ==========================================
+  # BACKEND MONOLÍTICO
+  # ==========================================
+  backend:
+    build: 
+      context: ./Back-end
+    container_name: backend
+    environment:
+      - DATABASE_URL=sqlite:///./test.db # Puede actualizarse luego a Postgres
+      - SECRET_KEY=supersecreto123
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.api.entrypoints=web"
+      - "traefik.http.routers.api.service=api-service"
+      - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"
+      - "traefik.http.middlewares.strip-api.stripprefix.forceSlash=true"
+      - "traefik.http.routers.api.middlewares=strip-api"
+      - "traefik.http.services.api-service.loadbalancer.server.port=8000"
     networks:
       - coniiti_net
 
@@ -27,22 +54,21 @@ services:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
     ports:
-      - "5672:5672" # Puerto de comunicación TCP
-      - "15672:15672" # Interfaz de administración (http://localhost:15672)
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - coniiti_net
 
   # ==========================================
   # BASES DE DATOS COMPARTIDAS
   # ==========================================
-  # Para Payments y Files (Kevin) + Users/Agenda (Compañeros si lo desean)
   postgres_shared:
     image: postgres:15-alpine
     container_name: shared-postgres
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: adminpassword
-      POSTGRES_DB: coniiti_db # Aquí se crea los schemas de payments y files
+      POSTGRES_DB: coniiti_db
     ports:
       - "5432:5432"
     volumes:
@@ -50,7 +76,6 @@ services:
     networks:
       - coniiti_net
 
-  # Para Analytics (Kevin)
   mongodb_analytics:
     image: mongo:6-jammy
     container_name: analytics-mongodb
@@ -66,9 +91,8 @@ services:
       - coniiti_net
 
   # ==========================================
-  # SERVICIOS DE KEVIN (Integrados con Traefik)
+  # OTROS MICROSERVICIOS
   # ==========================================
-
   payments-service:
     build:
       context: ./microservices/payments-service
