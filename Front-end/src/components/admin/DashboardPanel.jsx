@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getDashboardStats } from '../../services/adminService';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
-    PieChart, Pie, Cell, LineChart, Line
+    PieChart, Pie, Cell
 } from 'recharts';
-import { FiUsers, FiCalendar, FiMic, FiTrendingUp, FiCheckCircle, FiClock, FiAlertCircle } from 'react-icons/fi';
+import { FiUsers, FiCalendar, FiMic,  FiCheckCircle, } from 'react-icons/fi';
 import styles from '../../styles/components/DashboardPanel.module.css';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
