@@ -10,7 +10,6 @@ import { FiPlus, FiEdit2, FiTrash2, FiUser, FiCheckCircle, FiXCircle, FiCalendar
 import { listStaff, createStaff, updateStaff, deleteStaff } from '../services/userService';
 import StaffFormModal from '../components/StaffFormModal';
 import StaffDashboard from './StaffDashboard';
-import AnalyticsWidget from '../components/admin/AnalyticsWidget';
 import styles from '../styles/pages/SuperuserDashboard.module.css';
 
 export default function SuperuserDashboard() {
@@ -18,9 +17,6 @@ export default function SuperuserDashboard() {
 
     return (
         <div>
-            {/* Widget de Estadísticas de Kevin */}
-            <AnalyticsWidget />
-
             {/* Tabs de navegación */}
             <div className={styles.tabs}>
                 <button

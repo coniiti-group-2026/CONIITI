@@ -5,7 +5,7 @@
 // ============================================================
 
 import { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiCalendar, FiLink, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiCalendar, FiLink, FiCheckCircle, FiXCircle, FiTrendingUp } from 'react-icons/fi';
 import {
     getSessions, createSession, updateSession,
     deleteSession, toggleLinkVerified,
@@ -14,6 +14,8 @@ import { SESSION_STATUS, SESSION_MODALITY } from '../types/session';
 import SessionFormModal from '../components/SessionFormModal';
 import CMSPanel from '../components/CMSPanel';
 import DocumentManager from '../components/admin/DocumentManager';
+import DashboardPanel from '../components/admin/DashboardPanel';
+import { useAuth } from '../context/AuthContext';
 import styles from '../styles/pages/StaffDashboard.module.css';
 
 /**
@@ -21,12 +23,15 @@ import styles from '../styles/pages/StaffDashboard.module.css';
  * Solo accesible para usuarios con rol 'staff' o 'superuser'.
  */
 export default function StaffDashboard() {
+    const { user } = useAuth();
+    const isSuperuser = user && user.role === 'superuser';
+    
     const [sessions, setSessions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [sessionToEdit, setSessionToEdit] = useState(null);
-    const [activeTab, setActiveTab] = useState('agenda'); // 'agenda' | 'cms' | 'documentos'
+    const [activeTab, setActiveTab] = useState(isSuperuser ? 'dashboard' : 'agenda'); // 'agenda' | 'cms' | 'documentos' | 'dashboard'
 
     const fetchSessions = useCallback(async () => {
         setIsLoading(true);
@@ -134,9 +139,20 @@ export default function StaffDashboard() {
                 >
                     Documentos CONIITI
                 </button>
+                {isSuperuser && (
+                    <button 
+                        onClick={() => setActiveTab('dashboard')} 
+                        style={{ padding: '0.8rem 1.5rem', border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, borderBottom: activeTab === 'dashboard' ? '3px solid var(--color-primary)' : '3px solid transparent', color: activeTab === 'dashboard' ? 'var(--color-primary)' : '#666' }}
+                    >
+                        <FiTrendingUp style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
+                        Dashboard
+                    </button>
+                )}
             </div>
 
-            {activeTab === 'cms' ? (
+            {activeTab === 'dashboard' && isSuperuser ? (
+                <DashboardPanel />
+            ) : activeTab === 'cms' ? (
                 <CMSPanel />
             ) : activeTab === 'documentos' ? (
                 <DocumentManager />

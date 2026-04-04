@@ -1,15 +1,24 @@
 from fastapi import FastAPI
-import threading
+import asyncio
 from rabbitmq_consumer import start_consumer
 from database import events_collection
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="Analytics Service")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.on_event("startup")
-def startup_event():
-    """Inicia el consumidor de RabbitMQ en un hilo de fondo al prender la API."""
-    thread = threading.Thread(target=start_consumer, daemon=True)
-    thread.start()
+async def startup_event():
+    """Inicia el consumidor de RabbitMQ en el loop de eventos de FastAPI al prender la API."""
+    asyncio.create_task(start_consumer())
 
 @app.get("/health")
 def health_check():
