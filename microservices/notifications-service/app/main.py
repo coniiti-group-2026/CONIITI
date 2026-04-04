@@ -1,19 +1,23 @@
 import threading
+
 from fastapi import FastAPI
-from app import consumer
+
+from .consumer import start_consumer
 
 app = FastAPI(title="Notifications Service", version="1.0.0")
+
 
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "notifications"}
 
+
 @app.on_event("startup")
 def startup_event():
-    # Iniciar el consumidor en un hilo separado para no bloquear la API
-    thread = threading.Thread(target=consumer.iniciar_consumidor, daemon=True)
+    thread = threading.Thread(target=start_consumer, daemon=True, name="notifications-consumer")
     thread.start()
-    print("🚀 Consumidor de Notificaciones iniciado en segundo plano.")
+    print("Notifications consumer started in background.")
+
 
 @app.get("/")
 def root():
