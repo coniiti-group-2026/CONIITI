@@ -1,23 +1,12 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+import threading
+from app.consumer import iniciar_consumidor
 
 app = FastAPI()
 
-# Modelo de datos
-class Notificacion(BaseModel):
-    correo: str
-    asunto: str
-    mensaje: str
-
 @app.get("/")
 def home():
-    return {"mensaje": "Servicio de notificaciones CONIITI activo"}
+    return {"mensaje": "Servicio de notificaciones activo (CONIITI)"}
 
-@app.post("/notificar")
-def enviar_notificacion(notificacion: Notificacion):
-    return {
-        "estado": "enviado",
-        "correo": notificacion.correo,
-        "asunto": notificacion.asunto,
-        "mensaje": notificacion.mensaje
-    }
+# Ejecutar consumidor en segundo plano
+threading.Thread(target=iniciar_consumidor, daemon=True).start()
