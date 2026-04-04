@@ -69,7 +69,7 @@ def get_current_user(request: Request) -> AuthenticatedUser:
 def require_superuser(
     current_user: AuthenticatedUser = Depends(get_current_user),
 ) -> AuthenticatedUser:
-    if current_user.role != "superuser":
+    if current_user.role.strip().lower() != "superuser":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acceso denegado. Se requiere rol de superusuario.",

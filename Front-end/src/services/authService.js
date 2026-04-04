@@ -9,6 +9,21 @@ const API_BASE = getApiBase();
 const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ?? '';
 const AUTH_BASE = `${API_BASE}/auth`;
 
+function normalizeUserRole(userData) {
+    if (!userData || typeof userData !== 'object') {
+        return userData;
+    }
+
+    if (typeof userData.role !== 'string') {
+        return userData;
+    }
+
+    return {
+        ...userData,
+        role: userData.role.trim().toLowerCase(),
+    };
+}
+
 function getApiOrigin() {
     if (API_ORIGIN) {
         return API_ORIGIN.replace(/\/$/, '');
@@ -55,22 +70,25 @@ async function apiFetch(path, options = {}) {
 }
 
 export async function register(data) {
-    return apiFetch(buildAuthUrl('/register'), {
+    const result = await apiFetch(buildAuthUrl('/register'), {
         method: 'POST',
         body: JSON.stringify(data),
     });
+    return normalizeUserRole(result);
 }
 
 export async function login(data) {
-    return apiFetch(buildAuthUrl('/login'), {
+    const result = await apiFetch(buildAuthUrl('/login'), {
         method: 'POST',
         body: JSON.stringify(data),
     });
+    return normalizeUserRole(result);
 }
 
 export async function getMe() {
     try {
-        return await apiFetch(buildAuthUrl('/me'));
+        const result = await apiFetch(buildAuthUrl('/me'));
+        return normalizeUserRole(result);
     } catch {
         return null;
     }

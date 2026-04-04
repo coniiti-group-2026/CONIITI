@@ -33,6 +33,20 @@ services:
     networks:
       - coniiti_net
 
+  analytics-mongo:
+    image: mongo:7
+    container_name: analytics-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpassword
+    ports:
+      - "27017:27017"
+    volumes:
+      - analytics_mongo_data:/data/db
+    networks:
+      - coniiti_net
+
   users-db:
     image: postgres:16
     container_name: users-db
@@ -41,6 +55,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: usersdb
+    ports:
+      - "5433:5432"
     volumes:
       - users_data:/var/lib/postgresql/data
     networks:
@@ -54,6 +70,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: authdb
+    ports:
+      - "5434:5432"
     volumes:
       - auth_data:/var/lib/postgresql/data
     networks:
@@ -64,9 +82,11 @@ services:
     container_name: agenda-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: agendadb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: agenda_db
+    ports:
+      - "5435:5432"
     volumes:
       - agenda_data:/var/lib/postgresql/data
     networks:
@@ -80,6 +100,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: notificationsdb
+    ports:
+      - "5436:5432"
     volumes:
       - notifications_data:/var/lib/postgresql/data
     networks:
@@ -93,6 +115,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: paymentsdb
+    ports:
+      - "5437:5432"
     volumes:
       - payments_data:/var/lib/postgresql/data
     networks:
@@ -148,7 +172,7 @@ services:
     container_name: agenda-service
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@agenda-db:5432/agendadb
+      DATABASE_URL: postgresql://admin:adminpassword@agenda-db:5432/agenda_db
       SECRET_KEY: supersecreto123
       RABBITMQ_HOST: shared-rabbitmq
       RABBITMQ_USER: user
@@ -157,6 +181,38 @@ services:
     depends_on:
       - agenda-db
       - rabbitmq
+    networks:
+      - coniiti_net
+
+  analytics-service:
+    build:
+      context: ./microservices/analytics-service
+    container_name: analytics-service
+    restart: unless-stopped
+    environment:
+      MONGO_URI: mongodb://admin:adminpassword@analytics-mongo:27017/?authSource=admin
+      MONGO_DB_NAME: analytics_db
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: user
+      RABBITMQ_PASS: password
+      RABBITMQ_EXCHANGE: coniiti_events
+      RABBITMQ_QUEUE: analytics_queue
+      RABBITMQ_BINDING_KEY: "#"
+    depends_on:
+      - analytics-mongo
+      - rabbitmq
+    networks:
+      - coniiti_net
+
+  files-service:
+    build:
+      context: ./microservices/files-service
+    container_name: files-service
+    restart: unless-stopped
+    environment:
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - files_uploads:/app/uploads
     networks:
       - coniiti_net
 
@@ -188,6 +244,8 @@ services:
       - ./microservices/payments-service/.env
     environment:
       PAYMENTS_DATABASE_URL: postgresql://postgres:postgres@payments-db:5432/paymentsdb
+      PAYMENT_PROVIDER_MODE: live
+      PUBLIC_APP_URL: http://localhost
     depends_on:
       - payments-db
     networks:
@@ -198,8 +256,10 @@ networks:
     driver: bridge
 
 volumes:
+  analytics_mongo_data:
   users_data:
   auth_data:
   agenda_data:
   notifications_data:
   payments_data:
+  files_uploads:

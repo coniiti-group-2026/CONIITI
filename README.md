@@ -1,38 +1,35 @@
 # CONIITI 2026 - Arquitectura de Microservicios
 
-Este repositorio levanta el flujo principal de CONIITI sin el monolito legacy.
+El flujo principal del proyecto levanta solo microservicios y Traefik como puerta de entrada. El directorio `Back-end/` queda fuera del `docker-compose.yml` principal y no participa en el enrutamiento activo.
 
 ## Servicios activos
 
-- `traefik`: API Gateway y unica puerta de entrada
+- `traefik`: API Gateway y unica puerta de entrada HTTP
 - `frontend`: SPA del congreso
 - `auth-service`: autenticacion, sesion, registro y recuperacion de contrasena
-- `users-service`: perfiles y gestion de cuentas staff
-- `agenda-service`: sesiones, agenda, speakers y preinscripciones
-- `notifications-service`: consumidor asincrono persistente de eventos
-- `rabbitmq`: mensajeria asincrona
-- `auth-db`, `users-db`, `agenda-db`, `notifications-db`: bases de datos independientes
+- `users-service`: perfiles y gestion de cuentas
+- `agenda-service`: sesiones, speakers y preinscripciones
+- `analytics-service`: consumo de eventos y estadisticas
+- `files-service`: carga y descarga de archivos
+- `notifications-service`: consumo asincrono y persistencia de eventos
+- `payments-service`: checkout de pagos en modo local por gateway
+- `rabbitmq`: mensajeria asincrona compartida
+- `analytics-mongo`, `auth-db`, `users-db`, `agenda-db`, `notifications-db`, `payments-db`: persistencia aislada por servicio
 
-## Rutas finales
+## Rutas finales por Traefik
 
 - Frontend: `http://localhost/`
 - Auth: `http://localhost/api/auth`
 - Users: `http://localhost/api/users`
 - Agenda: `http://localhost/api/agenda`
+- Analytics: `http://localhost/api/analytics`
+- Files: `http://localhost/api/files`
+- Notifications: `http://localhost/api/notifications`
+- Payments: `http://localhost/api/payments`
 - Traefik dashboard: `http://localhost:8080`
-
-## Eventos asincronos
-
-- `usuario.registrado`
-- `ponencia.creada`
-- `agenda.sesion_actualizada`
-
-`notifications-service` consume desde la cola durable `notifications_queue` y persiste cada evento procesado en su propia base de datos.
 
 ## Levantar todo
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
-
-El flujo principal ya no utiliza el directorio `Back-end` ni servicios legacy de CMS, analytics, files o payments.

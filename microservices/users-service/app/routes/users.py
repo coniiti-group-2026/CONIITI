@@ -2,6 +2,7 @@ from typing import Any
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -18,6 +19,12 @@ def _get_user_or_404(user_id: str, db: Session) -> User:
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+
+
+def _normalized_role(value: str | None) -> str | None:
+    if value is None:
+        return value
+    return value.strip().lower()
 
 
 def _auth_headers() -> dict[str, str]:
@@ -63,7 +70,7 @@ def _update_profile_record(user: User, user_data: UserUpdate, db: Session) -> Us
         user.email = normalized_email
 
     if user_data.role:
-        user.role = user_data.role
+        user.role = _normalized_role(user_data.role)
 
     if user_data.institution is not None:
         user.institution = user_data.institution
@@ -129,7 +136,7 @@ def get_profiles(
 ):
     query = db.query(User)
     if role:
-        query = query.filter(User.role == role)
+        query = query.filter(func.lower(User.role) == role.strip().lower())
     return query.all()
 
 
@@ -180,7 +187,7 @@ def list_staff(
     db: Session = Depends(get_db),
     _: Any = Depends(require_superuser),
 ):
-    return db.query(User).filter(User.role == "staff").order_by(User.created_at.desc()).all()
+    return db.query(User).filter(func.lower(User.role) == "staff").order_by(User.created_at.desc()).all()
 
 
 @router.post("/staff", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
@@ -189,7 +196,7 @@ def create_staff(
     db: Session = Depends(get_db),
     _: Any = Depends(require_superuser),
 ):
-    if user.role != "staff":
+    if _normalized_role(user.role) != "staff":
         raise HTTPException(status_code=422, detail="Solo se permiten cuentas de staff.")
     if not user.password:
         raise HTTPException(status_code=422, detail="La contrasena es obligatoria para staff.")
@@ -230,7 +237,7 @@ def update_staff(
     _: Any = Depends(require_superuser),
 ):
     user = _get_user_or_404(user_id, db)
-    if user.role != "staff":
+    if _normalized_role(user.role) != "staff":
         raise HTTPException(status_code=404, detail="Cuenta staff no encontrada.")
 
     auth_payload: dict[str, Any] = {}
@@ -262,7 +269,7 @@ def delete_staff(
     _: Any = Depends(require_superuser),
 ):
     user = _get_user_or_404(user_id, db)
-    if user.role != "staff":
+    if _normalized_role(user.role) != "staff":
         raise HTTPException(status_code=404, detail="Cuenta staff no encontrada.")
 
     _delete_profile_record(user, db)

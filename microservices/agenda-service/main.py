@@ -53,14 +53,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(agenda.router)
-
-
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "agenda-service"}
 
 
-@app.get("/")
+@app.get("/info")
 def root():
     return {"message": "Welcome to Agenda Service"}
+
+
+app.include_router(agenda.router)

@@ -12,7 +12,7 @@ from utils.security import get_current_user_id, require_staff
 
 router = APIRouter(tags=["Agenda del Congreso"])
 
-@router.get("", response_model=SessionListResponse)
+@router.get("/", response_model=SessionListResponse)
 def list_sessions(
     day: Optional[str] = Query(None),
     modality: Optional[str] = Query(None),
@@ -63,7 +63,7 @@ def list_speakers(
 def get_session(session_id: uuid.UUID, db: DBSession = Depends(get_db)):
     return agenda_service.get_session_by_id_or_raise(session_id, db)
 
-@router.post("", response_model=SessionRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=SessionRead, status_code=status.HTTP_201_CREATED)
 def create_session(
     data: SessionCreate,
     db: DBSession = Depends(get_db),
