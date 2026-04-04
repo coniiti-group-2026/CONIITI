@@ -34,3 +34,4 @@ def iniciar_consumidor():
     )
 
     channel.start_consuming()
+    #comentario
