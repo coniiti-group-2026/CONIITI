@@ -165,6 +165,19 @@ services:
     networks:
       - coniiti_net
 
+  notifications-service:
+    build:
+      context: ./microservices/notifications-service
+    container_name: notifications-service
+    environment:
+      - RABBITMQ_HOST=shared-rabbitmq
+      - RABBITMQ_USER=user
+      - RABBITMQ_PASS=password
+    depends_on:
+      - rabbitmq
+    networks:
+      - coniiti_net
+
   payments-service:
     build:
       context: ./microservices/payments-service

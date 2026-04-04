@@ -60,11 +60,43 @@ def create_session(data: SessionCreate, author_id: uuid.UUID, db: DBSession) -> 
     return session
 
 def update_session(session: AgendaSession, data: SessionUpdate, db: DBSession) -> AgendaSession:
+    # Guardar estado anterior para detectar cambios críticos
+    old_data = {
+        "titulo": session.titulo,
+        "ponente": session.ponente,
+        "dia": session.dia,
+        "hora_inicio": session.hora_inicio,
+        "salon": session.salon
+    }
+
     update_data = data.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(session, field, value)
+    
     db.commit()
     db.refresh(session)
+
+    # Detectar si hubo cambios que requieran notificar a los usuarios
+    has_changes = any(getattr(session, k) != v for k, v in old_data.items() if k in update_data)
+
+    if has_changes:
+        from models.agenda import session_registrations
+        # Obtener IDs de usuarios preinscritos
+        users = db.execute(
+            session_registrations.select().where(session_registrations.c.session_id == session.id)
+        ).fetchall()
+        user_ids = [str(u.user_id) for u in users]
+
+        if user_ids:
+            event_data = {
+                "event_id": str(uuid.uuid4()),
+                "session_id": str(session.id),
+                "titulo": session.titulo,
+                "cambios": {k: getattr(session, k) for k in old_data if getattr(session, k) != old_data[k]},
+                "afectados": user_ids
+            }
+            publish_event("agenda.sesion_actualizada", event_data)
+
     return session
 
 def delete_session(session: AgendaSession, db: DBSession) -> None:
