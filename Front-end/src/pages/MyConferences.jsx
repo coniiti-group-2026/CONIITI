@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiBookmark, FiLogIn } from 'react-icons/fi';
+
 import AgendaGrid from '../components/AgendaGrid';
 import LiveFilter from '../components/LiveFilter';
 import SpeakerModal from '../components/SpeakerModal';
@@ -8,10 +9,6 @@ import { AuthContext } from '../context/AuthContext';
 import { useAgenda } from '../hooks/useAgenda';
 import styles from '../styles/pages/MyConferences.module.css';
 
-/**
- * MyConferences — muestra las sesiones en las que el usuario se preinscribió.
- * El botón "Validar asistencia" reemplaza a "Pre-inscribirse".
- */
 export default function MyConferences({ registeredIds = new Set(), onToggleRegister }) {
     const { user } = useContext(AuthContext);
     const [selectedSpeaker, setSelectedSpeaker] = useState(null);
@@ -60,9 +57,9 @@ export default function MyConferences({ registeredIds = new Set(), onToggleRegis
 
     const mySessions = sessions
         .filter((session) => registeredIds.has(session.id))
-        .sort((a, b) => {
-            if (a.hora_inicio < b.hora_inicio) return -1;
-            if (a.hora_inicio > b.hora_inicio) return 1;
+        .sort((left, right) => {
+            if (left.hora_inicio < right.hora_inicio) return -1;
+            if (left.hora_inicio > right.hora_inicio) return 1;
             return 0;
         });
 
@@ -71,10 +68,10 @@ export default function MyConferences({ registeredIds = new Set(), onToggleRegis
             <div className={styles.header}>
                 <FiBookmark className={styles.headerIcon} />
                 <div>
-                    <h1 className={styles.title}>Mis Conferencias</h1>
+                    <h1 className={styles.title}>Mis conferencias</h1>
                     <p className={styles.subtitle}>
                         {mySessions.length === 0
-                            ? 'Aún no te has preinscrito a ninguna sesión o no hay resultados.'
+                            ? 'Aún no te has preinscrito en ninguna sesión o no hay resultados disponibles.'
                             : `${mySessions.length} sesión${mySessions.length !== 1 ? 'es' : ''} preinscrita${mySessions.length !== 1 ? 's' : ''}`}
                     </p>
                 </div>
@@ -99,7 +96,9 @@ export default function MyConferences({ registeredIds = new Set(), onToggleRegis
             {mySessions.length === 0 ? (
                 <div className={styles.empty}>
                     <FiBookmark size={48} className={styles.emptyIcon} />
-                    <p>Ve a la <strong>Agenda</strong> y haz clic en <em>&ldquo;Pre-inscribirse&rdquo;</em> en las sesiones que te interesen.</p>
+                    <p>
+                        Ve a la <strong>Agenda</strong> y haz clic en <em>&ldquo;Preinscribirse&rdquo;</em> en las sesiones que te interesen.
+                    </p>
                 </div>
             ) : (
                 <AgendaGrid

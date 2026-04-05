@@ -24,7 +24,7 @@ async function apiFetch(path, options = {}) {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail ?? 'Error inesperado del servidor.');
+        throw new Error(errorData.detail ?? 'No se pudo completar la solicitud. Inténtalo de nuevo.');
     }
 
     if (response.status === 204) return null;

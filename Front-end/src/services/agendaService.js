@@ -26,7 +26,7 @@ async function apiFetch(path, options = {}) {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail ?? 'Error al comunicarse con el servidor.');
+        throw new Error(errorData.detail ?? 'No pudimos cargar la información. Inténtalo nuevamente.');
     }
 
     if (response.status === 204) return null;

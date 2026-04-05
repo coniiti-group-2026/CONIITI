@@ -19,7 +19,7 @@ export default function ResetPassword() {
         setError('');
 
         if (password !== confirmPassword) {
-            setError('Las contrasenas no coinciden.');
+            setError('Las contraseñas no coinciden.');
             return;
         }
 
@@ -31,7 +31,7 @@ export default function ResetPassword() {
             });
             navigate('/login', {
                 replace: true,
-                state: { message: 'Contrasena actualizada. Ya puedes iniciar sesion.' },
+                state: { message: 'Contraseña actualizada. Ya puedes iniciar sesión.' },
             });
         } catch (err) {
             setError(err.message);
@@ -43,15 +43,15 @@ export default function ResetPassword() {
     return (
         <div className={styles.pageContainer}>
             <div className={styles.card}>
-                <h2 className={styles.title}>Restablecer contrasena</h2>
+                <h2 className={styles.title}>Restablecer contraseña</h2>
                 <p className={styles.subtitle}>
-                    Elige una nueva contrasena para tu cuenta.
+                    Elige una nueva contraseña para tu cuenta.
                 </p>
 
                 {tokenMissing ? (
                     <>
                         <p className={styles.errorMessage}>
-                            El enlace de recuperacion es invalido, expiro o esta incompleto.
+                            El enlace de recuperación es inválido, expiró o está incompleto.
                         </p>
                         <div className={styles.footerLink}>
                             <Link to="/recuperar-contrasena" className={styles.linkBtn}>
@@ -62,26 +62,26 @@ export default function ResetPassword() {
                 ) : (
                     <form onSubmit={handleSubmit} className={styles.form}>
                         <div className={styles.inputGroup}>
-                            <label htmlFor="reset-password">Nueva contrasena</label>
+                            <label htmlFor="reset-password">Nueva contraseña</label>
                             <input
                                 id="reset-password"
                                 type="password"
                                 value={password}
                                 onChange={(event) => setPassword(event.target.value)}
-                                placeholder="Minimo 8 caracteres"
+                                placeholder="Mínimo 8 caracteres"
                                 required
                                 autoComplete="new-password"
                             />
                         </div>
 
                         <div className={styles.inputGroup}>
-                            <label htmlFor="reset-confirm-password">Confirmar contrasena</label>
+                            <label htmlFor="reset-confirm-password">Confirmar contraseña</label>
                             <input
                                 id="reset-confirm-password"
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(event) => setConfirmPassword(event.target.value)}
-                                placeholder="Repite tu contrasena"
+                                placeholder="Repite tu contraseña"
                                 required
                                 autoComplete="new-password"
                             />
@@ -90,13 +90,13 @@ export default function ResetPassword() {
                         {error && <p className={styles.errorMessage}>{error}</p>}
 
                         <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-                            {isLoading ? 'Actualizando...' : 'Guardar contrasena'}
+                            {isLoading ? 'Actualizando...' : 'Guardar contraseña'}
                         </button>
                     </form>
                 )}
 
                 <div className={styles.footerLink}>
-                    <Link to="/login" className={styles.linkBtn}>Volver al inicio de sesion</Link>
+                    <Link to="/login" className={styles.linkBtn}>Volver al inicio de sesión</Link>
                 </div>
             </div>
         </div>

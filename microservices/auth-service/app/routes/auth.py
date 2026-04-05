@@ -18,6 +18,7 @@ from app.schemas.auth import (
     LoginRequest,
     LoginResponse,
     MessageResponse,
+    OTPVerifyRequest,
     RegisterRequest,
     RegisterResponse,
     ResetPasswordRequest,
@@ -30,7 +31,8 @@ from app.security.jwt import (
     set_access_cookie,
     set_oauth_state_cookie,
 )
-from app.services import auth_service, email_service, event_service, oauth_service, users_client
+from app.services import auth_service, email_service, event_service, oauth_service, otp_service, users_client
+from app.models import OTPPurpose
 
 router = APIRouter()
 FRONTEND_ORIGIN_COOKIE = "frontend_origin"
@@ -121,6 +123,68 @@ def _validate_oauth_state(request: Request, state: str) -> None:
         )
 
 
+def _normalized_role(profile: dict) -> str:
+    return str(profile.get("role", "external")).strip().lower()
+
+
+def _build_authenticated_response(
+    response: Response,
+    user,
+    profile: dict,
+    *,
+    message: str,
+) -> LoginResponse:
+    role = _normalized_role(profile)
+    token = auth_service.create_access_token_for_user(
+        user,
+        role=role,
+        full_name=profile["full_name"],
+    )
+    set_access_cookie(response, token)
+    return LoginResponse(
+        message=message,
+        access_token=token,
+        token_type="bearer",
+        user_id=user.id,
+        email=user.email,
+        full_name=profile["full_name"],
+        role=role,
+    )
+
+
+def _build_otp_challenge_response(user, profile: dict, delivery: dict[str, str | bool | None]) -> LoginResponse:
+    delivered = bool(delivery.get("delivered"))
+    message = "Se envio un codigo de verificacion a tu correo electronico."
+    if not delivered:
+        message = str(
+            delivery.get("reason")
+            or "No pudimos enviar el correo. Usa el codigo temporal mostrado para continuar."
+        )
+
+    return LoginResponse(
+        message=message,
+        requires_otp=True,
+        purpose=OTPPurpose.LOGIN,
+        delivery_mode=str(delivery.get("delivery_mode")) if delivery.get("delivery_mode") else None,
+        debug_otp=str(delivery.get("debug_otp")) if delivery.get("debug_otp") else None,
+        user_id=user.id,
+        email=user.email,
+        full_name=profile["full_name"],
+        role=_normalized_role(profile),
+    )
+
+
+def _dispatch_login_otp(user, profile: dict, db: Session) -> LoginResponse:
+    code = otp_service.generate_otp(user, OTPPurpose.LOGIN, db)
+    delivery = email_service.send_otp_email(
+        to_email=user.email,
+        full_name=profile["full_name"],
+        code=code,
+        purpose=OTPPurpose.LOGIN.value,
+    )
+    return _build_otp_challenge_response(user, profile, delivery)
+
+
 def _ensure_oauth_profile(user, full_name: str, created: bool) -> dict:
     if created:
         profile = users_client.create_profile(
@@ -185,12 +249,73 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
         auth_service.delete_user(user, db)
         raise exc
 
+    code = otp_service.generate_otp(user, OTPPurpose.REGISTER, db)
+    delivery = email_service.send_otp_email(
+        to_email=user.email,
+        full_name=user.full_name,
+        code=code,
+        purpose=OTPPurpose.REGISTER.value,
+    )
+
+    register_message = "Cuenta creada. Se envio un codigo de verificacion a tu correo electronico."
+    if not delivery.get("delivered"):
+        register_message = str(
+            delivery.get("reason")
+            or "No pudimos enviar el correo. Usa el codigo temporal mostrado para continuar."
+        )
+
     return RegisterResponse(
-        message="Usuario registrado correctamente.",
+        message=register_message,
         user_id=user.id,
         email=user.email,
         full_name=user.full_name,
         role=payload.role,
+        requires_otp=True,
+        purpose=OTPPurpose.REGISTER,
+        delivery_mode=str(delivery.get("delivery_mode")) if delivery.get("delivery_mode") else None,
+        debug_otp=str(delivery.get("debug_otp")) if delivery.get("debug_otp") else None,
+    )
+
+
+@router.post(
+    "/verify-otp",
+    response_model=LoginResponse,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"model": ErrorResponse},
+        status.HTTP_404_NOT_FOUND: {"model": ErrorResponse},
+    },
+)
+def verify_otp(
+    payload: OTPVerifyRequest,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    user = auth_service.get_user_by_email(payload.email, db)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuario no encontrado.",
+        )
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="La cuenta esta inactiva.",
+        )
+
+    otp_service.verify_otp(user, payload.code, payload.purpose, db)
+    auth_service.mark_user_verified(user, db)
+    profile = users_client.get_profile(user.id)
+    if profile.get("is_active") is False:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="La cuenta esta inactiva.",
+        )
+
+    return _build_authenticated_response(
+        response,
+        user,
+        profile,
+        message="Verificacion exitosa. Sesion iniciada.",
     )
 
 
@@ -210,19 +335,14 @@ def login(payload: LoginRequest, response: Response, db: Session = Depends(get_d
             status_code=status.HTTP_403_FORBIDDEN,
             detail="La cuenta esta inactiva.",
         )
-    token = auth_service.create_access_token_for_user(
+    if auth_service.requires_login_otp(user, _normalized_role(profile)):
+        return _dispatch_login_otp(user, profile, db)
+
+    return _build_authenticated_response(
+        response,
         user,
-        role=profile["role"],
-        full_name=profile["full_name"],
-    )
-    set_access_cookie(response, token)
-    return LoginResponse(
-        access_token=token,
-        token_type="bearer",
-        user_id=user.id,
-        email=user.email,
-        full_name=profile["full_name"],
-        role=profile["role"],
+        profile,
+        message="Autenticacion exitosa.",
     )
 
 
@@ -237,8 +357,9 @@ def me(current_user=Depends(get_current_user)):
         id=current_user.id,
         email=current_user.email,
         full_name=profile["full_name"],
-        role=profile["role"],
+        role=_normalized_role(profile),
         institution=profile.get("institution"),
+        is_verified=current_user.is_verified,
         is_active=current_user.is_active,
     )
 
@@ -334,9 +455,14 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
             full_name=user_info.get("full_name") or user.full_name,
             created=created,
         )
+        if profile.get("is_active") is False:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="La cuenta esta inactiva.",
+            )
         token = auth_service.create_access_token_for_user(
             user,
-            role=profile["role"],
+            role=_normalized_role(profile),
             full_name=profile["full_name"],
         )
         response = RedirectResponse(
@@ -414,9 +540,14 @@ async def microsoft_callback(request: Request, db: Session = Depends(get_db)):
             full_name=user_info.get("full_name") or user.full_name,
             created=created,
         )
+        if profile.get("is_active") is False:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="La cuenta esta inactiva.",
+            )
         token = auth_service.create_access_token_for_user(
             user,
-            role=profile["role"],
+            role=_normalized_role(profile),
             full_name=profile["full_name"],
         )
         response = RedirectResponse(

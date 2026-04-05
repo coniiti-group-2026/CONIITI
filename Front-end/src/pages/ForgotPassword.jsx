@@ -28,14 +28,14 @@ export default function ForgotPassword() {
     return (
         <div className={styles.pageContainer}>
             <div className={styles.card}>
-                <h2 className={styles.title}>Recuperar contrasena</h2>
+                <h2 className={styles.title}>Recuperar contraseña</h2>
                 <p className={styles.subtitle}>
-                    Ingresa tu correo y te enviaremos un enlace seguro para restablecer tu contrasena.
+                    Ingresa tu correo y te enviaremos un enlace seguro para restablecer tu contraseña.
                 </p>
 
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.inputGroup}>
-                        <label htmlFor="forgot-email">Correo electronico</label>
+                        <label htmlFor="forgot-email">Correo electrónico</label>
                         <input
                             id="forgot-email"
                             type="email"
@@ -56,11 +56,11 @@ export default function ForgotPassword() {
                 </form>
 
                 <p className={styles.resendHint}>
-                    Si el correo existe, recibiras instrucciones sin exponer el estado de la cuenta.
+                    Si el correo existe, recibirás instrucciones sin exponer el estado de la cuenta.
                 </p>
 
                 <div className={styles.footerLink}>
-                    <Link to="/login" className={styles.linkBtn}>Volver al inicio de sesion</Link>
+                    <Link to="/login" className={styles.linkBtn}>Volver al inicio de sesión</Link>
                 </div>
             </div>
         </div>

@@ -2,6 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
+from app.models import OTPPurpose
+
 
 def _non_empty(value: str) -> str:
     cleaned = value.strip()
@@ -83,15 +85,45 @@ class RegisterResponse(BaseModel):
     email: EmailStr
     full_name: str
     role: str
+    requires_otp: bool = True
+    purpose: OTPPurpose = OTPPurpose.REGISTER
+    delivery_mode: str | None = None
+    debug_otp: str | None = None
 
 
 class LoginResponse(BaseModel):
-    access_token: str
-    token_type: str
-    user_id: str
+    message: str
+    requires_otp: bool = False
+    purpose: OTPPurpose | None = None
+    delivery_mode: str | None = None
+    debug_otp: str | None = None
+    access_token: str | None = None
+    token_type: str | None = None
+    user_id: str | None = None
+    email: EmailStr | None = None
+    full_name: str | None = None
+    role: str | None = None
+
+
+class OTPVerifyRequest(BaseModel):
     email: EmailStr
-    full_name: str
-    role: str
+    code: str = Field(..., min_length=6, max_length=6)
+    purpose: OTPPurpose
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: EmailStr) -> str:
+        return value.strip().lower()
+
+    @field_validator("code")
+    @classmethod
+    def validate_code(cls, value: str) -> str:
+        code = _non_empty(value)
+        if not code.isdigit():
+            raise ValueError("El codigo OTP debe contener solo numeros.")
+        if len(code) != 6:
+            raise ValueError("El codigo OTP debe tener 6 digitos.")
+        return code
 
 
 class AuthenticatedUserResponse(BaseModel):
@@ -100,6 +132,7 @@ class AuthenticatedUserResponse(BaseModel):
     full_name: str
     role: str
     institution: Optional[str] = None
+    is_verified: bool
     is_active: bool
 
 
@@ -114,6 +147,7 @@ class ErrorResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+    requires_otp: bool = False
 
 
 class ForgotPasswordRequest(BaseModel):

@@ -1,24 +1,24 @@
 import { useState } from 'react';
 import { FiDownload } from 'react-icons/fi';
 
+import useContentSection from '../hooks/useContentSection';
 import styles from '../styles/pages/DynamicPage.module.css';
-import { getContentSection } from '../services/contentService';
 
 
 export default function Memorias() {
-    const memorias = getContentSection('memorias');
+    const { items: memorias, loading } = useContentSection('memorias');
     const [viewingDesc, setViewingDesc] = useState(null);
 
     const grouped = memorias.reduce((acc, curr) => {
-        const year = curr.year || 'Sin Anio';
+        const year = curr.year || 'Sin año';
         if (!acc[year]) acc[year] = [];
         acc[year].push(curr);
         return acc;
     }, {});
 
     const sortedYears = Object.keys(grouped).sort((a, b) => {
-        if (a === 'Sin Anio') return 1;
-        if (b === 'Sin Anio') return -1;
+        if (a === 'Sin año') return 1;
+        if (b === 'Sin año') return -1;
         return Number(b) - Number(a);
     });
 
@@ -27,22 +27,27 @@ export default function Memorias() {
             <div className={styles.hero}>
                 <div className={styles.heroContent}>
                     <h1>Memorias del Congreso</h1>
-                    <p>Descarga y revisa las ponencias y documentacion entregada a lo largo del congreso.</p>
+                    <p>Descarga y revisa las ponencias y la documentación entregada a lo largo del congreso.</p>
                 </div>
             </div>
 
             <div className={styles.container}>
-                {memorias.length === 0 ? (
+                {loading ? (
                     <div className={styles.empty}>
-                        <h3>Proximamente</h3>
-                        <p>Aun no hay memorias disponibles para descargar.</p>
+                        <h3>Cargando</h3>
+                        <p>Estamos preparando el contenido para ti.</p>
+                    </div>
+                ) : memorias.length === 0 ? (
+                    <div className={styles.empty}>
+                        <h3>Próximamente</h3>
+                        <p>Aún no hay memorias disponibles para descargar.</p>
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
                         {sortedYears.map((year) => (
                             <div key={year}>
                                 <h2 style={{ paddingBottom: '0.5rem', borderBottom: '2px solid #e9ecef', marginBottom: '1.5rem', color: '#001f3f' }}>
-                                    Edicion {year}
+                                    Edición {year}
                                 </h2>
                                 <div className={styles.grid}>
                                     {grouped[year].map((item) => (
@@ -60,7 +65,7 @@ export default function Memorias() {
                                                     </p>
                                                     {item.description?.length > 100 && (
                                                         <button className={styles.readMoreBtn} onClick={() => setViewingDesc(item.description)}>
-                                                            Ver mas
+                                                            Ver más
                                                         </button>
                                                     )}
                                                 </div>
@@ -89,7 +94,7 @@ export default function Memorias() {
             {viewingDesc && (
                 <div className={styles.overlay} onClick={() => setViewingDesc(null)}>
                     <div className={styles.readModal} onClick={(e) => e.stopPropagation()}>
-                        <h3>Descripcion Completa</h3>
+                        <h3>Descripción completa</h3>
                         <p className={styles.readText}>{viewingDesc}</p>
                         <div className={styles.modalFoot}>
                             <button type="button" onClick={() => setViewingDesc(null)}>Cerrar</button>

@@ -26,6 +26,12 @@
 }
 
 /* Fila de documento existente */
+.docList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
 .docRow {
     display: flex;
     align-items: center;

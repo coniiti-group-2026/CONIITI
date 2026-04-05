@@ -77,10 +77,19 @@ def set_access_cookie(response: Response, token: str) -> None:
         samesite="lax",
         path="/",
     )
+    response.set_cookie(
+        key="session_hint",
+        value="1",
+        httponly=False,
+        secure=settings.ENVIRONMENT == "production",
+        samesite="lax",
+        path="/",
+    )
 
 
 def clear_access_cookie(response: Response) -> None:
     response.delete_cookie(key="access_token", path="/")
+    response.delete_cookie(key="session_hint", path="/")
 
 
 def generate_oauth_state() -> str:

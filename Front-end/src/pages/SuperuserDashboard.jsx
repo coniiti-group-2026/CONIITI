@@ -1,58 +1,50 @@
-// ============================================================
-// Panel del Superusuario — CONIITI Front-end
-// Muestra dos secciones mediante tabs:
-//  1. Gestión de Conferencias (reutiliza StaffDashboard)
-//  2. Gestión de Cuentas Staff (CRUD propio del superusuario)
-// ============================================================
-
 import { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiUser, FiCheckCircle, FiXCircle, FiCalendar, FiUsers } from 'react-icons/fi';
+
 import { listStaff, createStaff, updateStaff, deleteStaff } from '../services/userService';
 import StaffFormModal from '../components/StaffFormModal';
 import StaffDashboard from './StaffDashboard';
 import styles from '../styles/pages/SuperuserDashboard.module.css';
 
 export default function SuperuserDashboard() {
-    const [activeTab, setActiveTab] = useState('conferencias');
+    const [activeTab, setActiveTab] = useState('admin');
 
     return (
         <div>
-            {/* Tabs de navegación */}
             <div className={styles.tabs}>
                 <button
-                    className={`${styles.tab} ${activeTab === 'conferencias' ? styles.tabActive : ''}`}
-                    onClick={() => setActiveTab('conferencias')}
+                    className={`${styles.tab} ${activeTab === 'admin' ? styles.tabActive : ''}`}
+                    onClick={() => setActiveTab('admin')}
                 >
                     <FiCalendar style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
-                    Conferencias
+                    Operación general
                 </button>
                 <button
                     className={`${styles.tab} ${activeTab === 'staff' ? styles.tabActive : ''}`}
                     onClick={() => setActiveTab('staff')}
                 >
                     <FiUsers style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
-                    Gestión de Staff
+                    Equipo de apoyo
                 </button>
             </div>
 
-            {/* Contenido según tab activo */}
-            {activeTab === 'conferencias' && <StaffDashboard />}
-            {activeTab === 'staff'        && <StaffPanel />}
+            {activeTab === 'admin' && <StaffDashboard />}
+            {activeTab === 'staff' && <StaffPanel />}
         </div>
     );
 }
 
-// ── Sub-componente: Gestión de Staff ──────────────────────────
 function StaffPanel() {
-    const [staffList, setStaffList]   = useState([]);
-    const [isLoading, setIsLoading]   = useState(true);
-    const [modalOpen, setModalOpen]   = useState(false);
+    const [staffList, setStaffList] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [modalOpen, setModalOpen] = useState(false);
     const [staffToEdit, setStaffToEdit] = useState(null);
-    const [error, setError]           = useState('');
+    const [error, setError] = useState('');
 
     const fetchStaff = useCallback(async () => {
         setIsLoading(true);
         setError('');
+
         try {
             const data = await listStaff();
             setStaffList(data);
@@ -63,62 +55,76 @@ function StaffPanel() {
         }
     }, []);
 
-    useEffect(() => { fetchStaff(); }, [fetchStaff]);
+    useEffect(() => {
+        fetchStaff();
+    }, [fetchStaff]);
 
-    const handleNew       = ()       => { setStaffToEdit(null);   setModalOpen(true); };
-    const handleEdit      = (member) => { setStaffToEdit(member); setModalOpen(true); };
+    const handleNew = () => {
+        setStaffToEdit(null);
+        setModalOpen(true);
+    };
+
+    const handleEdit = (member) => {
+        setStaffToEdit(member);
+        setModalOpen(true);
+    };
 
     const handleDelete = async (member) => {
-        if (!window.confirm(`¿Eliminar la cuenta de ${member.full_name}? Esta acción no se puede deshacer.`)) return;
+        if (!window.confirm(`¿Deseas eliminar la cuenta de ${member.full_name}? Esta acción no se puede deshacer.`)) return;
+
         try {
             await deleteStaff(member.id);
-            setStaffList(prev => prev.filter(s => s.id !== member.id));
-        } catch (err) { alert(`Error: ${err.message}`); }
+            setStaffList((prev) => prev.filter((item) => item.id !== member.id));
+        } catch (err) {
+            alert(`No se pudo eliminar la cuenta. ${err.message}`);
+        }
     };
 
     const handleToggleActive = async (member) => {
         try {
             const updated = await updateStaff(member.id, { is_active: !member.is_active });
-            setStaffList(prev => prev.map(s => s.id === updated.id ? updated : s));
-        } catch (err) { alert(`Error: ${err.message}`); }
+            setStaffList((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+        } catch (err) {
+            alert(`No se pudo actualizar el estado de la cuenta. ${err.message}`);
+        }
     };
 
     const handleSave = async (data) => {
         try {
             if (staffToEdit) {
                 const updated = await updateStaff(staffToEdit.id, data);
-                setStaffList(prev => prev.map(s => s.id === updated.id ? updated : s));
+                setStaffList((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
             } else {
                 const created = await createStaff(data);
-                setStaffList(prev => [created, ...prev]);
+                setStaffList((prev) => [created, ...prev]);
             }
             setModalOpen(false);
-        } catch (err) { alert(`Error: ${err.message}`); }
+        } catch (err) {
+            alert(`No se pudieron guardar los cambios. ${err.message}`);
+        }
     };
 
     return (
         <div>
-            {/* Encabezado */}
             <div className={styles.header}>
                 <div className={styles.headerLeft}>
-                    <h1>Gestión de Staff</h1>
-                    <p>Administra las cuentas del equipo — CONIITI 2026</p>
+                    <h1>Equipo de apoyo</h1>
+                    <p>Administra las cuentas encargadas de la operación del congreso.</p>
                 </div>
                 <button className={styles.newBtn} onClick={handleNew}>
-                    <FiPlus size={16} /> Nueva cuenta staff
+                    <FiPlus size={16} /> Nueva cuenta
                 </button>
             </div>
 
             {error && <p className={styles.errorBanner}>{error}</p>}
 
-            {/* Tabla */}
             <div className={styles.card}>
                 {isLoading ? (
-                    <div className={styles.loading}>Cargando cuentas staff...</div>
+                    <div className={styles.loading}>Cargando cuentas del equipo...</div>
                 ) : staffList.length === 0 ? (
                     <div className={styles.empty}>
                         <FiUser size={40} opacity={0.3} />
-                        <p>No hay cuentas staff registradas. ¡Crea la primera!</p>
+                        <p>Aún no hay cuentas del equipo registradas. Crea la primera para comenzar.</p>
                     </div>
                 ) : (
                     <div className={styles.tableWrapper}>
@@ -133,11 +139,11 @@ function StaffPanel() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {staffList.map(member => (
+                                {staffList.map((member) => (
                                     <tr key={member.id} className={!member.is_active ? styles.rowInactive : ''}>
                                         <td><strong>{member.full_name}</strong></td>
                                         <td>{member.email}</td>
-                                        <td>{member.institution ?? '—'}</td>
+                                        <td>{member.institution ?? '-'}</td>
                                         <td>
                                             <span className={`${styles.badge} ${member.is_active ? styles.badgeActive : styles.badgeInactive}`}>
                                                 {member.is_active ? 'Activo' : 'Inactivo'}
@@ -168,7 +174,7 @@ function StaffPanel() {
                     </div>
                 )}
                 <div className={styles.count}>
-                    {staffList.length} {staffList.length === 1 ? 'cuenta staff' : 'cuentas staff'} en total
+                    {staffList.length} {staffList.length === 1 ? 'cuenta del equipo' : 'cuentas del equipo'} en total
                 </div>
             </div>
 

@@ -4,15 +4,12 @@ import {
     FiGlobe,
     FiRefreshCw,
 } from 'react-icons/fi';
+
 import styles from '../styles/components/Header.module.css';
 
-/**
- * Header — barra de marca CONIITI + sección hero.
- */
 export default function Header() {
     return (
         <header>
-            {/* Barra superior */}
             <div className={styles.header}>
                 <div className={styles.topBar}>
                     <span className={styles.topBarItem}>
@@ -21,7 +18,7 @@ export default function Header() {
                     </span>
                     <span className={styles.topBarItem}>
                         <FiCalendar size={12} />
-                        Octubre 1 – 3, 2026
+                        Octubre 1 - 3, 2026
                     </span>
                     <span className={styles.topBarItem}>
                         <FiGlobe size={12} />
@@ -41,17 +38,14 @@ export default function Header() {
                 </div>
             </div>
 
-            {/* Héroe */}
             <div className={styles.hero}>
                 <div className={styles.heroContent}>
                     <h1 className={styles.heroTitle}>
-                        Agenda{' '}
-                        <span className={styles.heroHighlight}>CONIITI 2026 v1</span>
+                        Agenda <span className={styles.heroHighlight}>CONIITI 2026</span>
                     </h1>
                     <p className={styles.heroSubtitle}>
-                        Décimo Primer Congreso Internacional de Innovación y Tendencias en
-                        Ingeniería — Consulta horarios, salones y enlaces de sesiones
-                        actualizados en tiempo real.
+                        Décimo primer Congreso Internacional de Innovación y Tendencias en Ingeniería.
+                        Consulta horarios, salones y enlaces de sesiones actualizados en tiempo real.
                     </p>
                     <div className={styles.heroBadges}>
                         <span className={styles.heroBadge}>
@@ -60,11 +54,11 @@ export default function Header() {
                         </span>
                         <span className={styles.heroBadge}>
                             <FiRefreshCw size={14} />
-                            Auto-refresh 60s
+                            Actualización automática
                         </span>
                         <span className={styles.heroBadge}>
                             <FiCalendar size={14} />
-                            3 días · 12 sesiones
+                            3 días | 12 sesiones
                         </span>
                     </div>
                 </div>

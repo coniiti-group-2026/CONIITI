@@ -5,6 +5,7 @@ import { loadSlim } from '@tsparticles/slim';
 import { FaGoogle, FaMicrosoft } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
 import {
+    cacheOtpDebugInfo,
     getGoogleLoginUrl,
     getMe,
     getMicrosoftLoginUrl,
@@ -75,7 +76,7 @@ export default function Login() {
             setIsRestoringOAuthSession(true);
 
             for (let attempt = 0; attempt < 3; attempt += 1) {
-                const userData = await getMe();
+                const userData = await getMe({ force: true });
                 if (isCancelled) {
                     return;
                 }
@@ -92,7 +93,7 @@ export default function Login() {
             }
 
             if (!isCancelled) {
-                setError('La autenticacion externa se completo, pero no pudimos restaurar la sesion.');
+                setError('La autenticación externa se completó, pero no pudimos restaurar la sesión.');
                 setIsRestoringOAuthSession(false);
             }
         };
@@ -124,8 +125,32 @@ export default function Login() {
         }
 
         try {
-            await login({ email, password });
-            const userData = await getMe();
+            const result = await login({ email, password });
+            if (result?.requires_otp) {
+                const otpEmail = encodeURIComponent(result.email ?? email);
+                const otpPurpose = encodeURIComponent(result.purpose ?? 'login');
+                cacheOtpDebugInfo({
+                    email: result.email ?? email,
+                    purpose: result.purpose ?? 'login',
+                    debugOtp: result.debug_otp,
+                    message: result.message,
+                    deliveryMode: result.delivery_mode,
+                });
+                navigate(`/verificar-otp?email=${otpEmail}&purpose=${otpPurpose}`, {
+                    replace: true,
+                    state: {
+                        message: result.message,
+                        debugOtp: result.debug_otp,
+                        deliveryMode: result.delivery_mode,
+                    },
+                });
+                return;
+            }
+
+            const userData = await getMe({ force: true });
+            if (!userData) {
+                throw new Error('No pudimos restaurar la sesión después del inicio.');
+            }
             setUser(userData);
         } catch (err) {
             setError(err.message);
@@ -157,7 +182,7 @@ export default function Login() {
             )}
 
             <div className={styles.loginCard}>
-                <h2 className={styles.title}>Iniciar sesion</h2>
+                <h2 className={styles.title}>Iniciar sesión</h2>
                 <p className={styles.subtitle}>Ingresa a la plataforma CONIITI</p>
 
                 <div className={styles.oauthSection}>
@@ -191,7 +216,7 @@ export default function Login() {
 
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.inputGroup}>
-                        <label htmlFor="login-email">Correo electronico</label>
+                        <label htmlFor="login-email">Correo electrónico</label>
                         <input
                             type="email"
                             id="login-email"
@@ -204,13 +229,13 @@ export default function Login() {
                         />
                     </div>
                     <div className={styles.inputGroup}>
-                        <label htmlFor="login-password">Contrasena</label>
+                        <label htmlFor="login-password">Contraseña</label>
                         <input
                             type="password"
                             id="login-password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Tu contrasena"
+                            placeholder="Tu contraseña"
                             required
                             autoComplete="current-password"
                             disabled={isLoading || isRestoringOAuthSession}
@@ -229,7 +254,7 @@ export default function Login() {
                             Recordar mi correo
                         </label>
                         <Link to="/recuperar-contrasena" className={styles.forgotLink}>
-                            Olvide mi contrasena
+                            Olvidé mi contraseña
                         </Link>
                     </div>
 
@@ -246,7 +271,7 @@ export default function Login() {
                 </form>
 
                 <div className={styles.registerLink}>
-                    <span>No tienes cuenta? </span>
+                    <span>¿No tienes cuenta? </span>
                     <Link to="/register" className={styles.linkBtn}>Crea tu cuenta</Link>
                 </div>
             </div>

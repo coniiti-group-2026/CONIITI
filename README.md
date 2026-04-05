@@ -33,3 +33,28 @@ El flujo principal del proyecto levanta solo microservicios y Traefik como puert
 ```bash
 docker compose up --build
 ```
+
+## Entregables del taller
+
+- Arquitectura y justificacion tecnologica: `docs/arquitectura_microservicios.md`
+- Diagrama exportable: `docs/architecture-diagram.svg`
+- Contratos JSON y eventos: `docs/contracts_and_events.md`
+- Guion de prueba de resiliencia: `docs/prueba_resiliencia.md`
+- Guia de despliegue remoto: `docs/despliegue_remoto.md`
+
+## Scripts utiles
+
+- Crear usuario interno `staff` o `superuser` desde PowerShell: `scripts/create-internal-user.ps1`
+- Crear usuario interno `staff` o `superuser` desde Bash: `scripts/create-internal-user.sh`
+
+## Resumen de la solucion
+
+- El Front-end consume exclusivamente rutas `'/api/*'` publicadas por Traefik.
+- Cada microservicio mantiene su propia persistencia y no comparte tablas con los demas.
+- `auth-service` y `agenda-service` publican eventos en RabbitMQ.
+- `notifications-service` y `analytics-service` reaccionan de forma asincrona a esos eventos.
+- Si `notifications-service` se apaga, el registro y la agenda siguen respondiendo; los eventos pendientes quedan en cola y se reprocesan cuando el consumidor vuelve.
+
+## Observacion tecnica
+
+La resiliencia frente a la caida de `notifications-service` esta cubierta por RabbitMQ y colas durables. Aun asi, una caida del broker durante el registro de usuarios todavia impacta `auth-service`; una mejora futura natural es implementar un patron Outbox para desacoplar todavia mas la publicacion de eventos.

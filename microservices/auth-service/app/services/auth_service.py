@@ -37,6 +37,7 @@ def register_user(payload: RegisterRequest, db: Session) -> AuthUser:
         email=payload.email,
         full_name=payload.full_name,
         password_hash=hash_password(payload.password),
+        is_verified=False,
     )
     db.add(user)
     db.commit()
@@ -110,6 +111,7 @@ def create_internal_user(payload: InternalUserCreateRequest, db: Session) -> Aut
         full_name=payload.full_name,
         password_hash=hash_password(payload.password),
         is_active=payload.is_active,
+        is_verified=True,
     )
     if payload.user_id:
         user.id = payload.user_id
@@ -154,6 +156,21 @@ def delete_user_by_id(user_id: str, db: Session) -> None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado.")
     db.delete(user)
     db.commit()
+
+
+def mark_user_verified(user: AuthUser, db: Session) -> AuthUser:
+    if user.is_verified:
+        return user
+
+    user.is_verified = True
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def requires_login_otp(user: AuthUser, role: str) -> bool:
+    normalized_role = role.strip().lower()
+    return (not user.is_verified) or normalized_role in {"staff", "superuser"}
 
 
 def _hash_reset_token(token: str) -> str:

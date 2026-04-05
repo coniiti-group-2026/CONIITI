@@ -1,5 +1,6 @@
-import styles from '../styles/pages/DynamicPage.module.css';
 import { FiMail, FiMapPin, FiPhone } from 'react-icons/fi';
+
+import styles from '../styles/pages/DynamicPage.module.css';
 
 export default function Contactos() {
     return (
@@ -15,13 +16,13 @@ export default function Contactos() {
                 <div className={styles.card}>
                     <div className={styles.iconWrapper}><FiMapPin /></div>
                     <h2>Ubicación</h2>
-                    <p>Bogotá, Carrera 13 # 47 – 30</p>
-                    <p>Universidad Católica de Colombia, Centro de Convenciones, Sede 4.</p>
+                    <p>Bogotá, carrera 13 # 47 - 30</p>
+                    <p>Universidad Católica de Colombia, Centro de Convenciones, sede 4.</p>
                 </div>
 
                 <div className={styles.card}>
                     <div className={styles.iconWrapper}><FiMail /></div>
-                    <h2>Correo Electrónico</h2>
+                    <h2>Correo electrónico</h2>
                     <p>Para preguntas generales e inscripciones:</p>
                     <a href="mailto:coniiti@ucatolica.edu.co">coniiti@ucatolica.edu.co</a>
                 </div>

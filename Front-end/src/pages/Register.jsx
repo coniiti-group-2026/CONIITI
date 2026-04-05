@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
 import { loginParticlesConfig } from '../utils/particlesConfig';
-import { register } from '../services/authService';
+import { cacheOtpDebugInfo, register } from '../services/authService';
 import styles from '../styles/pages/Register.module.css';
 
 export default function Register() {
@@ -40,31 +40,45 @@ export default function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (form.password !== form.confirmPassword) {
-            setError('Las contrasenas no coinciden.');
+            setError('Las contraseñas no coinciden.');
             return;
         }
         if (form.password.length < 8) {
-            setError('La contrasena debe tener al menos 8 caracteres.');
+            setError('La contraseña debe tener al menos 8 caracteres.');
             return;
         }
         if (!form.acceptPolicy) {
-            setError('Debes aceptar la politica de datos para registrarte.');
+            setError('Debes aceptar la política de datos para registrarte.');
             return;
         }
 
         setIsLoading(true);
         setError('');
         try {
-            await register({
+            const result = await register({
                 full_name: `${form.nombre} ${form.apellido}`.trim(),
                 email: form.email,
                 institution: form.institucion || undefined,
                 role: form.tipoUsuario,
                 password: form.password,
             });
-            navigate('/login', {
+
+            const otpEmail = encodeURIComponent(result.email ?? form.email);
+            const otpPurpose = encodeURIComponent(result.purpose ?? 'register');
+            cacheOtpDebugInfo({
+                email: result.email ?? form.email,
+                purpose: result.purpose ?? 'register',
+                debugOtp: result.debug_otp,
+                message: result.message,
+                deliveryMode: result.delivery_mode,
+            });
+            navigate(`/verificar-otp?email=${otpEmail}&purpose=${otpPurpose}`, {
                 replace: true,
-                state: { message: 'Cuenta creada correctamente. Ya puedes iniciar sesion.' },
+                state: {
+                    message: result.message,
+                    debugOtp: result.debug_otp,
+                    deliveryMode: result.delivery_mode,
+                },
             });
         } catch (err) {
             setError(err.message);
@@ -116,7 +130,7 @@ export default function Register() {
                     </div>
 
                     <div className={styles.inputGroup}>
-                        <label htmlFor="reg-email">Correo electronico*</label>
+                        <label htmlFor="reg-email">Correo electrónico*</label>
                         <input
                             type="email"
                             id="reg-email"
@@ -130,19 +144,19 @@ export default function Register() {
                     </div>
 
                     <div className={styles.inputGroup}>
-                        <label htmlFor="reg-institucion">Institucion / empresa</label>
+                        <label htmlFor="reg-institucion">Institución / empresa</label>
                         <input
                             type="text"
                             id="reg-institucion"
                             name="institucion"
                             value={form.institucion}
                             onChange={handleChange}
-                            placeholder="Universidad / Empresa (opcional)"
+                            placeholder="Universidad / empresa (opcional)"
                         />
                     </div>
 
                     <div className={styles.inputGroup}>
-                        <label htmlFor="reg-tipoUsuario">Tipo de Participante*</label>
+                        <label htmlFor="reg-tipoUsuario">Tipo de participante*</label>
                         <select
                             id="reg-tipoUsuario"
                             name="tipoUsuario"
@@ -150,34 +164,34 @@ export default function Register() {
                             onChange={handleChange}
                             required
                         >
-                            <option value="student">Comunidad interna (Estudiante / Docente)</option>
+                            <option value="student">Comunidad interna (estudiante / docente)</option>
                             <option value="external">Externo</option>
                         </select>
                     </div>
 
                     <div className={styles.row}>
                         <div className={styles.inputGroup}>
-                            <label htmlFor="reg-password">Contrasena* (min. 8)</label>
+                            <label htmlFor="reg-password">Contraseña* (mín. 8)</label>
                             <input
                                 type="password"
                                 id="reg-password"
                                 name="password"
                                 value={form.password}
                                 onChange={handleChange}
-                                placeholder="Minimo 8 caracteres"
+                                placeholder="Mínimo 8 caracteres"
                                 required
                                 autoComplete="new-password"
                             />
                         </div>
                         <div className={styles.inputGroup}>
-                            <label htmlFor="reg-confirmPassword">Confirmar contrasena*</label>
+                            <label htmlFor="reg-confirmPassword">Confirmar contraseña*</label>
                             <input
                                 type="password"
                                 id="reg-confirmPassword"
                                 name="confirmPassword"
                                 value={form.confirmPassword}
                                 onChange={handleChange}
-                                placeholder="Repite tu contrasena"
+                                placeholder="Repite tu contraseña"
                                 required
                                 autoComplete="new-password"
                             />
@@ -193,7 +207,7 @@ export default function Register() {
                             onChange={handleChange}
                         />
                         <label htmlFor="reg-acceptPolicy">
-                            Acepto la politica de datos de CONIITI *
+                            Acepto la política de datos de CONIITI *
                         </label>
                     </div>
 
@@ -204,13 +218,13 @@ export default function Register() {
                         className={styles.submitBtn}
                         disabled={isLoading}
                     >
-                        {isLoading ? 'Registrando...' : 'Crear Cuenta'}
+                        {isLoading ? 'Registrando...' : 'Crear cuenta'}
                     </button>
                 </form>
 
                 <div className={styles.loginLink}>
-                    <span>Ya tienes cuenta? </span>
-                    <Link to="/login" className={styles.linkBtn}>Inicia sesion</Link>
+                    <span>¿Ya tienes cuenta? </span>
+                    <Link to="/login" className={styles.linkBtn}>Inicia sesión</Link>
                 </div>
             </div>
         </div>

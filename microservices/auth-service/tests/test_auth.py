@@ -45,6 +45,7 @@ from sqlalchemy.pool import StaticPool
 from app.config import settings
 from app.database.connection import Base, get_db
 from app.main import app
+from app.models import AuthUser, OTPCode, OTPPurpose
 from app.services import email_service, event_service, oauth_service, users_client
 
 
@@ -94,9 +95,28 @@ users_client.delete_profile = lambda user_id: None
 email_service.send_password_reset_email = lambda **kwargs: None
 
 
+def _get_latest_otp(email: str, purpose: OTPPurpose) -> str:
+    db = TestingSessionLocal()
+    try:
+        user = db.query(AuthUser).filter(AuthUser.email == email).first()
+        assert user is not None
+        otp = (
+            db.query(OTPCode)
+            .filter(OTPCode.user_id == user.id, OTPCode.purpose == purpose)
+            .order_by(OTPCode.created_at.desc())
+            .first()
+        )
+        assert otp is not None
+        return otp.code
+    finally:
+        db.close()
+
+
 def setup_function():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    client.cookies.clear()
+    email_service.send_password_reset_email = lambda **kwargs: None
 
 
 def test_register_success():
@@ -115,6 +135,8 @@ def test_register_success():
     assert data["email"] == "demo@coniiti.edu"
     assert data["full_name"] == "Demo User"
     assert data["user_id"]
+    assert data["requires_otp"] is True
+    assert data["purpose"] == "register"
 
 
 def test_login_success():
@@ -127,6 +149,16 @@ def test_login_success():
             "role": "external",
         },
     )
+    verify_response = client.post(
+        "/verify-otp",
+        json={
+            "email": "login@coniiti.edu",
+            "code": _get_latest_otp("login@coniiti.edu", OTPPurpose.REGISTER),
+            "purpose": "register",
+        },
+    )
+    assert verify_response.status_code == 200
+    client.post("/logout")
 
     response = client.post(
         "/login",
@@ -138,9 +170,107 @@ def test_login_success():
 
     assert response.status_code == 200
     data = response.json()
+    assert data["requires_otp"] is False
     assert data["token_type"] == "bearer"
     assert data["access_token"]
     assert data["role"] == "external"
+
+
+def test_login_requires_otp_for_unverified_user():
+    client.post(
+        "/register",
+        json={
+            "email": "otp-login@coniiti.edu",
+            "password": "ClaveSegura123",
+            "full_name": "OTP Login User",
+            "role": "external",
+        },
+    )
+
+    response = client.post(
+        "/login",
+        json={
+            "email": "otp-login@coniiti.edu",
+            "password": "ClaveSegura123",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["requires_otp"] is True
+    assert data["purpose"] == "login"
+    assert data["email"] == "otp-login@coniiti.edu"
+
+
+def test_login_requires_otp_for_staff_accounts():
+    create_response = client.post(
+        "/internal/users",
+        headers={"X-Internal-Service-Token": settings.INTERNAL_SERVICE_TOKEN},
+        json={
+            "email": "staff@coniiti.edu",
+            "password": "ClaveSegura123",
+            "full_name": "Staff User",
+            "is_active": True,
+        },
+    )
+
+    assert create_response.status_code == 201
+    user_id = create_response.json()["user_id"]
+    original_get_profile = users_client.get_profile
+    users_client.get_profile = lambda requested_user_id: {
+        "id": requested_user_id,
+        "full_name": "Staff User",
+        "email": "staff@coniiti.edu",
+        "role": "staff" if requested_user_id == user_id else "external",
+        "institution": None,
+        "is_active": True,
+    }
+
+    try:
+        response = client.post(
+            "/login",
+            json={
+                "email": "staff@coniiti.edu",
+                "password": "ClaveSegura123",
+            },
+        )
+    finally:
+        users_client.get_profile = original_get_profile
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["requires_otp"] is True
+    assert data["purpose"] == "login"
+    assert data["role"] == "staff"
+
+
+def test_verify_otp_starts_session_after_register():
+    client.post(
+        "/register",
+        json={
+            "email": "verify@coniiti.edu",
+            "password": "ClaveSegura123",
+            "full_name": "Verify User",
+            "role": "external",
+        },
+    )
+
+    response = client.post(
+        "/verify-otp",
+        json={
+            "email": "verify@coniiti.edu",
+            "code": _get_latest_otp("verify@coniiti.edu", OTPPurpose.REGISTER),
+            "purpose": "register",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "access_token=" in response.headers["set-cookie"]
+
+    me_response = client.get("/me")
+    assert me_response.status_code == 200
+    assert me_response.json()["email"] == "verify@coniiti.edu"
+    assert me_response.json()["is_verified"] is True
 
 
 def test_login_failure_with_invalid_password():
@@ -183,6 +313,16 @@ def test_forgot_and_reset_password_flow():
             "role": "external",
         },
     )
+    verify_response = client.post(
+        "/verify-otp",
+        json={
+            "email": "reset@coniiti.edu",
+            "code": _get_latest_otp("reset@coniiti.edu", OTPPurpose.REGISTER),
+            "purpose": "register",
+        },
+    )
+    assert verify_response.status_code == 200
+    client.post("/logout")
 
     forgot_response = client.post(
         "/forgot-password",

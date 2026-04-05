@@ -30,7 +30,7 @@ export default function Agenda({ registeredIds = new Set(), onToggleRegister }) 
             {/* Indicador de sincronización */}
             <div className={styles.pollingBar}>
                 <span className={styles.pollingDot} />
-                Sincronización automática activa — cada 60 segundos
+                La agenda se actualiza automáticamente para mostrarte la información más reciente.
             </div>
 
             <LiveFilter

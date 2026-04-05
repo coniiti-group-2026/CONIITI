@@ -1,7 +1,5 @@
-// Conferencistas.jsx
-// Pagina de conferencistas del congreso CONIITI.
-
 import { useState, useEffect } from 'react';
+
 import SpeakerCard from '../components/SpeakerCard';
 import { getApiBase } from '../services/apiConfig';
 import pageStyles from '../styles/pages/DynamicPage.module.css';
@@ -10,11 +8,10 @@ import styles from '../styles/pages/Conferencistas.module.css';
 const API_BASE = getApiBase();
 
 const FILTERS = [
-    { value: 'todos', label: 'Todos los Conferencistas' },
-    { value: 'principal', label: 'Conferencistas Principales' },
+    { value: 'todos', label: 'Todos los conferencistas' },
+    { value: 'principal', label: 'Conferencistas principales' },
 ];
 
-/** Pagina de conferencistas invitados del congreso. */
 export default function Conferencistas() {
     const [speakers, setSpeakers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -26,14 +23,14 @@ export default function Conferencistas() {
         const fetchData = async () => {
             setLoading(true);
             setSpeakers([]);
-            
+
             const url = filter === 'principal'
                 ? `${API_BASE}/agenda/speakers?principal_only=true`
                 : `${API_BASE}/agenda/speakers`;
 
             try {
-                const r = await fetch(url);
-                const data = r.ok ? await r.json() : [];
+                const response = await fetch(url);
+                const data = response.ok ? await response.json() : [];
                 if (isMounted) setSpeakers(data);
             } catch {
                 if (isMounted) setSpeakers([]);
@@ -44,49 +41,46 @@ export default function Conferencistas() {
 
         fetchData();
 
-        return () => { isMounted = false; };
+        return () => {
+            isMounted = false;
+        };
     }, [filter]);
 
     return (
         <div className={pageStyles.page}>
-            {/* Hero */}
             <div className={pageStyles.hero}>
                 <div className={pageStyles.heroContent}>
-                    <h1>Oradores Principales</h1>
-                    <p>Conoce a nuestros conferencistas invitados de honor del XI Congreso CONIITI.</p>
+                    <h1>Conferencistas principales</h1>
+                    <p>Conoce a los conferencistas invitados de honor del XI Congreso CONIITI.</p>
                 </div>
             </div>
 
             <div className={pageStyles.container}>
-                {/* Filtros */}
                 <div className={styles.filters}>
-                    {FILTERS.map(f => (
+                    {FILTERS.map((item) => (
                         <button
-                            key={f.value}
-                            onClick={() => setFilter(f.value)}
-                            className={`${styles.filterBtn} ${filter === f.value ? styles.filterBtnActive : ''}`}
+                            key={item.value}
+                            onClick={() => setFilter(item.value)}
+                            className={`${styles.filterBtn} ${filter === item.value ? styles.filterBtnActive : ''}`}
                         >
-                            {f.label}
+                            {item.label}
                         </button>
                     ))}
                 </div>
 
-                {/* Estado de carga */}
-                {loading && <div className={pageStyles.loader}>Cargando informacion...</div>}
+                {loading && <div className={pageStyles.loader}>Cargando información...</div>}
 
-                {/* Estado vacio */}
                 {!loading && speakers.length === 0 && (
                     <div className={pageStyles.empty}>
-                        <h3>Proximamente</h3>
-                        <p>Aun no hay perfiles disponibles para esta seccion.</p>
+                        <h3>Próximamente</h3>
+                        <p>Aún no hay perfiles disponibles para esta sección.</p>
                     </div>
                 )}
 
-                {/* Grid de tarjetas */}
                 {!loading && speakers.length > 0 && (
                     <div className={styles.grid}>
-                        {speakers.map((sp, i) => (
-                            <SpeakerCard key={sp.ponente + i} speaker={sp} />
+                        {speakers.map((speaker, index) => (
+                            <SpeakerCard key={speaker.ponente + index} speaker={speaker} />
                         ))}
                     </div>
                 )}

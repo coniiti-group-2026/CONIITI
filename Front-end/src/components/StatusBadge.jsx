@@ -1,18 +1,9 @@
+import { FiCheckCircle, FiAlertTriangle, FiClock } from 'react-icons/fi';
+
 import { SESSION_STATUS } from '../types/session';
 import { isRecentChange } from '../services/agendaService';
-import { FiCheckCircle, FiAlertTriangle, FiClock } from 'react-icons/fi';
 import styles from '../styles/components/StatusBadge.module.css';
 
-/**
- * StatusBadge — indicador visual del estado logístico de una sesión.
- *
- * - Normal                     → insignia verde
- * - Cambio de Salón (< 30 min) → insignia roja pulsante
- * - Cambio de Salón (> 30 min) → insignia roja estática
- * - Retrasado                  → insignia ámbar
- *
- * @param {{ status: string, timestamp: string, salonAnterior: string | null }} props
- */
 export default function StatusBadge({ status, timestamp, salonAnterior }) {
     const recent = isRecentChange(timestamp, 30);
     const { className, icon, label } = getVariant(status, recent);
@@ -38,7 +29,7 @@ function getVariant(status, isRecent) {
             return {
                 className: isRecent ? styles.cambioSalonRecent : styles.cambioSalon,
                 icon: <FiAlertTriangle />,
-                label: 'Cambio de Salón',
+                label: 'Cambio de salón',
             };
         case SESSION_STATUS.RETRASADO:
             return {

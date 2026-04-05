@@ -1,11 +1,11 @@
 import { FiExternalLink } from 'react-icons/fi';
 
+import useContentSection from '../hooks/useContentSection';
 import styles from '../styles/pages/DynamicPage.module.css';
-import { getContentSection } from '../services/contentService';
 
 
 export default function DynamicPage({ title, description, section }) {
-    const cards = getContentSection(section);
+    const { items: cards, loading } = useContentSection(section);
 
     return (
         <div className={styles.page}>
@@ -17,10 +17,15 @@ export default function DynamicPage({ title, description, section }) {
             </div>
 
             <div className={styles.container}>
-                {cards.length === 0 ? (
+                {loading ? (
                     <div className={styles.empty}>
-                        <h3>Proximamente</h3>
-                        <p>Aun no hay informacion disponible para esta seccion. Vuelve pronto.</p>
+                        <h3>Cargando</h3>
+                        <p>Estamos preparando el contenido para ti.</p>
+                    </div>
+                ) : cards.length === 0 ? (
+                    <div className={styles.empty}>
+                        <h3>Próximamente</h3>
+                        <p>Aún no hay información disponible para esta sección. Vuelve pronto.</p>
                     </div>
                 ) : (
                     <div className={styles.grid}>
@@ -36,7 +41,7 @@ export default function DynamicPage({ title, description, section }) {
                                     {card.description && <p>{card.description}</p>}
                                     {card.link_url && (
                                         <a href={card.link_url} target="_blank" rel="noopener noreferrer" className={styles.linkBtn}>
-                                            Saber mas <FiExternalLink />
+                                            Saber más <FiExternalLink />
                                         </a>
                                     )}
                                 </div>

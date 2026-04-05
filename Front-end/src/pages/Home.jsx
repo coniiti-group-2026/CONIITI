@@ -27,7 +27,7 @@ const SPEAKERS_PER_PAGE = 5;
 const FALLBACK_SPEAKERS = [
     {
         ponente: 'Dr. Alessandro Conti',
-        afiliacion: 'Experto en Inteligencia Artificial, Milan',
+        afiliacion: 'Experto en Inteligencia Artificial, Milán',
         foto_ponente_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=350',
     },
     {
@@ -37,7 +37,7 @@ const FALLBACK_SPEAKERS = [
     },
     {
         ponente: 'Ing. Marco Rossi',
-        afiliacion: 'Lider Infraestructuras Cloud',
+        afiliacion: 'Líder de Infraestructuras Cloud',
         foto_ponente_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=350',
     },
 ];
@@ -73,7 +73,7 @@ function Countdown() {
     return (
         <div className={styles.countdownContainer}>
             {[
-                ['Dias', timeLeft.days],
+                ['Días', timeLeft.days],
                 ['Horas', timeLeft.hours],
                 ['Min', timeLeft.minutes],
                 ['Seg', timeLeft.seconds],
@@ -148,42 +148,42 @@ function getUserHubPath(user) {
 
 
 function getUserHubLabel(user) {
-    if (!user) return 'Crear Cuenta';
-    if (user.role === 'superuser') return 'Ir al Panel Admin';
-    if (user.role === 'staff') return 'Ir al Panel Staff';
-    return 'Ir a Mis Conferencias';
+    if (!user) return 'Crear cuenta';
+    if (user.role === 'superuser') return 'Ir al centro de control';
+    if (user.role === 'staff') return 'Ir al centro de gestión';
+    return 'Ir a mis conferencias';
 }
 
 
 function getAccessHighlights(user) {
     if (!user) {
         return [
-            'Crear cuenta segura con auth-service',
-            'Gestionar agenda desde agenda-service',
-            'Notificaciones desacopladas por eventos',
+            'Crea tu cuenta en pocos pasos',
+            'Consulta la agenda y las actividades del congreso',
+            'Recibe novedades importantes sobre tu participación',
         ];
     }
 
     if (user.role === 'superuser') {
         return [
-            'Sesion autenticada y cookies activas en auth-service',
-            'Acceso al panel administrativo y gestion de sesiones',
-            'Integracion con agenda y notificaciones desacopladas',
+            'Acceso al centro de supervisión del congreso',
+            'Vista general de la programación y del equipo',
+            'Seguimiento de la actividad y los recursos del evento',
         ];
     }
 
     if (user.role === 'staff') {
         return [
-            'Sesion autenticada y perfil staff cargado',
-            'Acceso directo al panel operativo de agenda',
-            'Flujo desacoplado con notificaciones por eventos',
+            'Acceso directo al centro operativo',
+            'Gestión de sesiones, contenido y archivos',
+            'Seguimiento de cambios y tareas del evento',
         ];
     }
 
     return [
-        'Sesion autenticada y cuenta activa en la plataforma',
-        'Acceso a agenda y preinscripciones personales',
-        'Flujo principal disponible sin depender del monolito',
+        'Tu cuenta está lista para continuar',
+        'Consulta la agenda y tus actividades',
+        'Gestiona tu participación desde un solo lugar',
     ];
 }
 
@@ -218,7 +218,7 @@ export default function Home() {
             });
 
             if (!payment?.checkout_url) {
-                throw new Error('La pasarela no devolvio una URL de checkout.');
+                throw new Error('No fue posible iniciar el pago. Inténtalo de nuevo.');
             }
 
             window.location.assign(payment.checkout_url);
@@ -238,19 +238,19 @@ export default function Home() {
                 <div className={styles.heroOverlay}></div>
 
                 <div className={styles.heroContent}>
-                    <span className={styles.badge}>Edicion Italia 2026</span>
+                    <span className={styles.badge}>Edición Italia 2026</span>
                     <h1>XI CONIITI 2026</h1>
                     <p>
                         {user
-                            ? `Bienvenido${user.full_name ? `, ${user.full_name}` : ''}. Tu sesion ya esta activa para participar en CONIITI 2026.`
-                            : 'Congreso Internacional de Innovacion y Tendencias en Ingenieria del 1 al 3 de octubre de 2026.'}
+                            ? `Bienvenido${user.full_name ? `, ${user.full_name}` : ''}. Tu sesión ya está activa para participar en CONIITI 2026.`
+                            : 'Congreso Internacional de Innovación y Tendencias en Ingeniería, del 1 al 3 de octubre de 2026.'}
                     </p>
 
                     <Countdown />
 
                     <div className={styles.heroButtons}>
                         <Link to="/agenda" className={styles.primaryBtn}>
-                            Ver Agenda Abierta <FiArrowRight />
+                            Ver agenda <FiArrowRight />
                         </Link>
                         {!isLoading && (
                             <Link to={getUserHubPath(user)} className={styles.secondaryBtn}>
@@ -263,8 +263,8 @@ export default function Home() {
 
             <section className={`${styles.sectionBlock} ${styles.whySection}`}>
                 <div className={styles.whyHeader}>
-                    <span className={styles.preTitle}>Por que asistir al</span>
-                    <h2 className={styles.mainTitleBlue}>XI Congreso Internacional de Innovacion y Tendencias en Ingenieria</h2>
+                    <span className={styles.preTitle}>Por qué asistir al</span>
+                    <h2 className={styles.mainTitleBlue}>XI Congreso Internacional de Innovación y Tendencias en Ingeniería</h2>
                 </div>
 
                 <div className={styles.whyGridCenter}>
@@ -272,12 +272,12 @@ export default function Home() {
                         <div className={styles.whyFeatureCard}>
                             <div className={styles.featureIcon}><FiUsers /></div>
                             <h3>Networking de alto nivel</h3>
-                            <p>Conecta con lideres de industria, investigadores y equipos con los que podras construir alianzas reales.</p>
+                            <p>Conecta con líderes de la industria, investigadores y equipos con los que podrás construir alianzas reales.</p>
                         </div>
                         <div className={styles.whyFeatureCard}>
                             <div className={styles.featureIcon}><FiLink /></div>
-                            <h3>Alianzas estrategicas</h3>
-                            <p>Las sesiones del congreso estan pensadas para crear proyectos conjuntos de impacto academico y profesional.</p>
+                            <h3>Alianzas estratégicas</h3>
+                            <p>Las sesiones del congreso están pensadas para crear proyectos conjuntos de impacto académico y profesional.</p>
                         </div>
                     </div>
 
@@ -294,12 +294,12 @@ export default function Home() {
                         <div className={styles.whyFeatureCard}>
                             <div className={styles.featureIcon}><FiBriefcase /></div>
                             <h3>Conferencias y talleres</h3>
-                            <p>Accede a plenarias y workshops centrados en software, datos, IA, ciberseguridad y transformacion digital.</p>
+                            <p>Accede a plenarias y talleres centrados en software, datos, IA, ciberseguridad y transformación digital.</p>
                         </div>
                         <div className={styles.whyFeatureCard}>
                             <div className={styles.featureIcon}><FiMonitor /></div>
                             <h3>Desarrollo profesional</h3>
-                            <p>Fortalece tu perfil tecnico con contenido vigente y experiencias de aplicacion real.</p>
+                            <p>Fortalece tu perfil técnico con contenido vigente y experiencias de aplicación real.</p>
                         </div>
                     </div>
                 </div>
@@ -308,7 +308,7 @@ export default function Home() {
             <section className={`${styles.sectionBlock} ${styles.darkBg} ${styles.fullWidthBlock}`}>
                 <div className={styles.darkBgInner}>
                     <h2 className={styles.sectionTitle}>Impacto CONIITI</h2>
-                    <p className={styles.sectionSubtitle}>Una plataforma que integra academia, industria y comunidad tecnologica.</p>
+                    <p className={styles.sectionSubtitle}>Una plataforma que integra academia, industria y comunidad tecnológica.</p>
 
                     <div className={styles.impactGrid}>
                         <div className={styles.impactCard}>
@@ -319,7 +319,7 @@ export default function Home() {
                         <div className={styles.impactCard}>
                             <div className={styles.impactIcon}><FiAward /></div>
                             <div className={styles.impactNumber}>12</div>
-                            <div className={styles.impactLabel}>Paises Invitados</div>
+                            <div className={styles.impactLabel}>Países invitados</div>
                         </div>
                         <div className={styles.impactCard}>
                             <div className={styles.impactIcon}><FiBookOpen /></div>
@@ -337,7 +337,7 @@ export default function Home() {
 
             <section className={styles.sectionBlock}>
                 <h2 className={styles.sectionTitle}>Conferencistas Principales</h2>
-                <p className={styles.sectionSubtitle}>Conoce a algunos de los expertos que guiaran las plenarias de innovacion.</p>
+                <p className={styles.sectionSubtitle}>Conoce a algunos de los expertos que guiarán las plenarias de innovación.</p>
 
                 {keynotes.length > 0 ? (
                     <SpeakerSlider speakers={keynotes} />
@@ -359,7 +359,7 @@ export default function Home() {
                     <div className={styles.accessContainer}>
                         <h2 className={styles.sectionTitle}>Opciones de pago</h2>
                         <p className={styles.sectionSubtitle}>
-                            Tu sesion esta activa. Completa tu proceso usando las dos pasarelas disponibles en payments-service.
+                            Tu sesión está activa. Elige la opción de pago que prefieras para completar tu inscripción.
                         </p>
 
                         {!!checkoutError && (
@@ -413,7 +413,7 @@ export default function Home() {
                     <div className={styles.pricingContainer}>
                         <h2 className={styles.sectionTitle}>Inscripciones</h2>
                         <p className={styles.sectionSubtitle}>
-                            El flujo principal de la plataforma ya esta desacoplado en microservicios y listo para registro, autenticacion y agenda.
+                            Crea tu cuenta para registrarte, consultar la agenda y continuar tu proceso de participación.
                         </p>
 
                         <div className={styles.pricingGrid}>
@@ -432,12 +432,12 @@ export default function Home() {
                             </div>
 
                             <div className={styles.pricingCard}>
-                                <h3 className={styles.pricingTitle}>Soporte de inscripcion</h3>
+                                <h3 className={styles.pricingTitle}>Soporte de inscripción</h3>
                                 <div className={styles.pricingAmount}>Canal oficial</div>
                                 <ul className={styles.pricingFeatures}>
-                                    <li><FiCheck size={20} color="#ffc107" /> Atencion para participantes internacionales</li>
-                                    <li><FiCheck size={20} color="#ffc107" /> Gestion de certificados y consultas</li>
-                                    <li><FiCheck size={20} color="#ffc107" /> Acompanamiento del equipo CONIITI</li>
+                                    <li><FiCheck size={20} color="#ffc107" /> Atención para participantes internacionales</li>
+                                    <li><FiCheck size={20} color="#ffc107" /> Gestión de certificados y consultas</li>
+                                    <li><FiCheck size={20} color="#ffc107" /> Acompañamiento del equipo CONIITI</li>
                                 </ul>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                     <a className={styles.pricingBtn} href="mailto:coniiti@ucatolica.edu.co">Escribir a soporte</a>

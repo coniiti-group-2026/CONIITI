@@ -8,10 +8,21 @@ import {
     deleteSession,
     toggleLinkVerified,
 } from '../services/agendaService';
+import CMSPanel from '../components/CMSPanel';
 import SessionFormModal from '../components/SessionFormModal';
+import DashboardPanel from '../components/admin/DashboardPanel';
+import DocumentManager from '../components/admin/DocumentManager';
+import FileManager from '../components/admin/FileManager';
 import { useAuth } from '../context/AuthContext';
 import { SESSION_MODALITY, SESSION_STATUS } from '../types/session';
 import styles from '../styles/pages/StaffDashboard.module.css';
+
+const BASE_TABS = [
+    { id: 'agenda', label: 'Agenda' },
+    { id: 'cms', label: 'Contenido del sitio' },
+    { id: 'documentos', label: 'Materiales' },
+    { id: 'archivos', label: 'Biblioteca' },
+];
 
 
 export default function StaffDashboard() {
@@ -23,6 +34,7 @@ export default function StaffDashboard() {
     const [error, setError] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [sessionToEdit, setSessionToEdit] = useState(null);
+    const [activeTab, setActiveTab] = useState(isSuperuser ? 'dashboard' : 'agenda');
 
     const fetchSessions = useCallback(async () => {
         setIsLoading(true);
@@ -52,7 +64,7 @@ export default function StaffDashboard() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Eliminar esta sesion? Esta accion no se puede deshacer.')) return;
+        if (!window.confirm('¿Eliminar esta sesión? Esta acción no se puede deshacer.')) return;
         try {
             await deleteSession(id);
             setSessions((prev) => prev.filter((session) => session.id !== id));
@@ -104,136 +116,145 @@ export default function StaffDashboard() {
         return `${parseInt(day, 10)} ${months[parseInt(month, 10) - 1]} ${year}`;
     };
 
+    const tabs = isSuperuser
+        ? [...BASE_TABS, { id: 'dashboard', label: 'Resumen' }]
+        : BASE_TABS;
+
     return (
         <div className={styles.page}>
             <div className={styles.pageHeader}>
-                <h1>Panel de Administracion</h1>
-                <p>Gestiona la agenda y las sesiones del congreso desde los microservicios principales.</p>
+                <div>
+                    <h1>Centro de gestión</h1>
+                    <p>
+                        {isSuperuser
+                            ? 'Supervisa la programación, el contenido y los recursos del congreso.'
+                            : 'Organiza la programación, el contenido y los recursos del congreso en un solo lugar.'}
+                    </p>
+                </div>
             </div>
 
-            <div className={styles.tabs} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '2px solid #eee' }}>
-                <button
-                    onClick={() => undefined}
-                    style={{
-                        padding: '0.8rem 1.5rem',
-                        border: 'none',
-                        background: 'none',
-                        cursor: 'default',
-                        fontWeight: 600,
-                        borderBottom: '3px solid var(--color-primary)',
-                        color: 'var(--color-primary)',
-                    }}
-                >
-                    Gestion de Sesiones (Agenda)
-                </button>
-                {isSuperuser && (
-                    <div style={{ marginLeft: 'auto', padding: '0.8rem 0', color: '#666', fontWeight: 600 }}>
-                        <FiTrendingUp style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
-                        Supervision activa de agenda
+            <div className={styles.tabs}>
+                {tabs.map((tab) => (
+                    <button
+                        key={tab.id}
+                        className={`${styles.tabButton} ${activeTab === tab.id ? styles.tabButtonActive : ''}`}
+                        onClick={() => setActiveTab(tab.id)}
+                    >
+                        {tab.id === 'dashboard' && <FiTrendingUp style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />}
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            {activeTab === 'cms' && <CMSPanel />}
+            {activeTab === 'documentos' && <DocumentManager />}
+            {activeTab === 'archivos' && <FileManager />}
+            {activeTab === 'dashboard' && isSuperuser && <DashboardPanel />}
+
+            {activeTab === 'agenda' && (
+                <>
+                    <div className={styles.actionBar}>
+                        <button className={styles.primaryBtn} onClick={handleNew}>
+                            <FiPlus size={16} /> Nueva sesión
+                        </button>
                     </div>
-                )}
-            </div>
 
-            <div className={styles.actionBar}>
-                <button className={styles.primaryBtn} onClick={handleNew}>
-                    <FiPlus size={16} /> Nueva Sesion
-                </button>
-            </div>
+                    {error && <div className={styles.error}>{error}</div>}
 
-            {error && <div className={styles.error}>{error}</div>}
-
-            <div className={styles.card}>
-                <div className={styles.tableWrapper}>
-                    {isLoading ? (
-                        <div className={styles.loading}>Cargando sesiones...</div>
-                    ) : sessions.length === 0 ? (
-                        <div className={styles.empty}>
-                            <FiCalendar size={40} opacity={0.3} />
-                            <p>No hay sesiones registradas. Crea la primera.</p>
-                        </div>
-                    ) : (
-                        <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th>Titulo</th>
-                                    <th>Ponente</th>
-                                    <th>Dia</th>
-                                    <th>Hora</th>
-                                    <th>Salon</th>
-                                    <th>Modalidad</th>
-                                    <th>Estado</th>
-                                    <th>Enlace Virtual</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {sessions.map((session) => (
-                                    <tr key={session.id}>
-                                        <td><strong>{session.titulo}</strong></td>
-                                        <td>{session.ponente}</td>
-                                        <td>{formatDay(session.dia)}</td>
-                                        <td>{session.hora_inicio} - {session.hora_fin}</td>
-                                        <td>{session.salon}</td>
-                                        <td>
-                                            <span className={`${styles.badge} ${modalityClass(session.modalidad)}`}>
-                                                {session.modalidad}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span className={`${styles.badge} ${statusClass(session.status_logistico)}`}>
-                                                {session.status_logistico}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {session.modalidad !== 'Presencial' ? (
-                                                <div className={styles.linkCell}>
-                                                    {session.link_virtual ? (
-                                                        <>
-                                                            <button
-                                                                className={session.link_verificado ? styles.verifiedBtn : styles.unverifiedBtn}
-                                                                onClick={() => handleToggleVerificado(session.id)}
-                                                                title={session.link_verificado ? 'Marcar como no verificado' : 'Marcar como verificado'}
-                                                            >
-                                                                {session.link_verificado ? <><FiCheckCircle size={13} /> Verificado</> : <><FiXCircle size={13} /> Sin verificar</>}
-                                                            </button>
-                                                            <a
-                                                                href={session.link_virtual}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className={styles.linkUrl}
-                                                                title={session.link_virtual}
-                                                            >
-                                                                <FiLink size={12} /> Ver enlace
-                                                            </a>
-                                                        </>
+                    <div className={styles.card}>
+                        <div className={styles.tableWrapper}>
+                            {isLoading ? (
+                                <div className={styles.loading}>Cargando sesiones...</div>
+                            ) : sessions.length === 0 ? (
+                                <div className={styles.empty}>
+                                    <FiCalendar size={40} opacity={0.3} />
+                                    <p>Aún no hay sesiones registradas. Crea la primera para comenzar.</p>
+                                </div>
+                            ) : (
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>Título</th>
+                                            <th>Ponente</th>
+                                            <th>Día</th>
+                                            <th>Hora</th>
+                                            <th>Salón</th>
+                                            <th>Modalidad</th>
+                                            <th>Estado</th>
+                                            <th>Enlace virtual</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {sessions.map((session) => (
+                                            <tr key={session.id}>
+                                                <td><strong>{session.titulo}</strong></td>
+                                                <td>{session.ponente}</td>
+                                                <td>{formatDay(session.dia)}</td>
+                                                <td>{session.hora_inicio} - {session.hora_fin}</td>
+                                                <td>{session.salon}</td>
+                                                <td>
+                                                    <span className={`${styles.badge} ${modalityClass(session.modalidad)}`}>
+                                                        {session.modalidad}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span className={`${styles.badge} ${statusClass(session.status_logistico)}`}>
+                                                        {session.status_logistico}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {session.modalidad !== 'Presencial' ? (
+                                                        <div className={styles.linkCell}>
+                                                            {session.link_virtual ? (
+                                                                <>
+                                                                    <button
+                                                                        className={session.link_verificado ? styles.verifiedBtn : styles.unverifiedBtn}
+                                                                        onClick={() => handleToggleVerificado(session.id)}
+                                                                        title={session.link_verificado ? 'Marcar como no verificado' : 'Marcar como verificado'}
+                                                                    >
+                                                                        {session.link_verificado ? <><FiCheckCircle size={13} /> Verificado</> : <><FiXCircle size={13} /> Sin verificar</>}
+                                                                    </button>
+                                                                    <a
+                                                                        href={session.link_virtual}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className={styles.linkUrl}
+                                                                        title={session.link_virtual}
+                                                                    >
+                                                                        <FiLink size={12} /> Ver enlace
+                                                                    </a>
+                                                                </>
+                                                            ) : (
+                                                                <span className={styles.noLink}>Sin enlace</span>
+                                                            )}
+                                                        </div>
                                                     ) : (
-                                                        <span className={styles.noLink}>Sin enlace</span>
+                                                        <span className={styles.presencialBadge}>Presencial</span>
                                                     )}
-                                                </div>
-                                            ) : (
-                                                <span className={styles.presencialBadge}>Presencial</span>
-                                            )}
-                                        </td>
-                                        <td>
-                                            <div className={styles.actions}>
-                                                <button className={styles.editBtn} onClick={() => handleEdit(session)} title="Editar sesion">
-                                                    <FiEdit2 size={13} /> Editar
-                                                </button>
-                                                <button className={styles.deleteBtn} onClick={() => handleDelete(session.id)} title="Eliminar sesion">
-                                                    <FiTrash2 size={13} /> Eliminar
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
-                <div className={styles.count}>
-                    {sessions.length} {sessions.length === 1 ? 'sesion' : 'sesiones'} en total
-                </div>
-            </div>
+                                                </td>
+                                                <td>
+                                                    <div className={styles.actions}>
+                                                        <button className={styles.editBtn} onClick={() => handleEdit(session)} title="Editar sesión">
+                                                            <FiEdit2 size={13} /> Editar
+                                                        </button>
+                                                        <button className={styles.deleteBtn} onClick={() => handleDelete(session.id)} title="Eliminar sesión">
+                                                            <FiTrash2 size={13} /> Eliminar
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                        <div className={styles.count}>
+                            {sessions.length} {sessions.length === 1 ? 'sesión' : 'sesiones'} en total
+                        </div>
+                    </div>
+                </>
+            )}
 
             {modalOpen && (
                 <SessionFormModal

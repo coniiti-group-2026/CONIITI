@@ -14,6 +14,7 @@ class AuthUser(Base):
     full_name = Column(String(255), nullable=False)
     password_hash = Column(String(255), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
+    is_verified = Column(Boolean, nullable=False, default=True)
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,

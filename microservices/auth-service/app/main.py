@@ -2,15 +2,32 @@ import time
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 
 from app.config import settings
 from app.database.connection import Base, engine
+from app.models import AuthUser, OTPCode, PasswordResetToken  # noqa: F401
 from app.routes.auth import router as auth_router
 
 
 DATABASE_READY_ATTEMPTS = 15
 DATABASE_READY_DELAY_SECONDS = 2
+
+
+def _ensure_schema_updates() -> None:
+    inspector = inspect(engine)
+    table_names = set(inspector.get_table_names())
+
+    if "auth_users" in table_names:
+        auth_user_columns = {column["name"] for column in inspector.get_columns("auth_users")}
+        if "is_verified" not in auth_user_columns:
+            with engine.begin() as connection:
+                connection.execute(
+                    text(
+                        "ALTER TABLE auth_users "
+                        "ADD COLUMN is_verified BOOLEAN NOT NULL DEFAULT TRUE"
+                    )
+                )
 
 
 def initialize_database() -> None:
@@ -21,6 +38,7 @@ def initialize_database() -> None:
             with engine.connect() as connection:
                 connection.execute(text("SELECT 1"))
             Base.metadata.create_all(bind=engine)
+            _ensure_schema_updates()
             return
         except Exception as exc:
             last_error = exc

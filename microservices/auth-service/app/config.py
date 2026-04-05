@@ -18,6 +18,9 @@ class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES = int(
         os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
     )
+    OTP_EXPIRATION_MINUTES = int(
+        os.getenv("OTP_EXPIRATION_MINUTES", "10")
+    )
     OAUTH_STATE_EXPIRE_MINUTES = int(
         os.getenv("OAUTH_STATE_EXPIRE_MINUTES", "10")
     )

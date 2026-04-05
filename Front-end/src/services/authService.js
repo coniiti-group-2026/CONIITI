@@ -45,6 +45,39 @@ function buildBrowserAuthUrl(path) {
     return `${getApiOrigin()}${AUTH_BASE}${normalizedPath}`;
 }
 
+function buildOtpDebugStorageKey(email, purpose) {
+    return `coniiti_otp_debug_${String(email || '').toLowerCase()}_${purpose || 'login'}`;
+}
+
+function hasSessionHint() {
+    if (typeof document === 'undefined') {
+        return true;
+    }
+
+    return document.cookie
+        .split(';')
+        .map((item) => item.trim())
+        .some((item) => item === 'session_hint=1' || item.startsWith('session_hint=1;'));
+}
+
+function shouldAttemptSessionRestore() {
+    if (typeof window === 'undefined') {
+        return true;
+    }
+
+    if (hasSessionHint()) {
+        return true;
+    }
+
+    const protectedPaths = new Set(['/staff', '/superusuario']);
+    if (protectedPaths.has(window.location.pathname)) {
+        return true;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    return params.get('oauth') === 'success';
+}
+
 export function getMicrosoftLoginUrl() {
     return buildBrowserAuthUrl('/oauth/microsoft');
 }
@@ -62,7 +95,7 @@ async function apiFetch(path, options = {}) {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail ?? 'Error inesperado del servidor.');
+        throw new Error(errorData.detail ?? 'No se pudo completar la solicitud. Inténtalo de nuevo.');
     }
 
     if (response.status === 204) return null;
@@ -85,7 +118,12 @@ export async function login(data) {
     return normalizeUserRole(result);
 }
 
-export async function getMe() {
+export async function getMe(options = {}) {
+    const { force = false } = options;
+    if (!force && !shouldAttemptSessionRestore()) {
+        return null;
+    }
+
     try {
         const result = await apiFetch(buildAuthUrl('/me'));
         return normalizeUserRole(result);
@@ -98,12 +136,58 @@ export async function logout() {
     return apiFetch(buildAuthUrl('/logout'), { method: 'POST' });
 }
 
-export async function verifyOtp() {
-    throw new Error('El flujo OTP legacy fue retirado. Usa el nuevo login directo.');
+export async function verifyOtp(data) {
+    const result = await apiFetch(buildAuthUrl('/verify-otp'), {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+    return normalizeUserRole(result);
+}
+
+export function cacheOtpDebugInfo({ email, purpose, debugOtp, message, deliveryMode }) {
+    if (typeof window === 'undefined' || !email || !debugOtp) {
+        return;
+    }
+
+    window.sessionStorage.setItem(
+        buildOtpDebugStorageKey(email, purpose),
+        JSON.stringify({
+            email,
+            purpose,
+            debugOtp,
+            message,
+            deliveryMode,
+        }),
+    );
+}
+
+export function getCachedOtpDebugInfo(email, purpose) {
+    if (typeof window === 'undefined' || !email) {
+        return null;
+    }
+
+    const raw = window.sessionStorage.getItem(buildOtpDebugStorageKey(email, purpose));
+    if (!raw) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return null;
+    }
+}
+
+export function clearCachedOtpDebugInfo(email, purpose) {
+    if (typeof window === 'undefined' || !email) {
+        return;
+    }
+
+    window.sessionStorage.removeItem(buildOtpDebugStorageKey(email, purpose));
 }
 
 export async function refreshToken() {
-    throw new Error('La renovacion manual de tokens ya no esta disponible en el frontend.');
+    throw new Error('Esta acción ya no está disponible.');
 }
 
 export async function forgotPassword(data) {

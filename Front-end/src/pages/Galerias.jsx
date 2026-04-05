@@ -1,24 +1,29 @@
+import useContentSection from '../hooks/useContentSection';
 import styles from '../styles/pages/DynamicPage.module.css';
-import { getContentSection } from '../services/contentService';
 
 
 export default function Galerias() {
-    const photos = getContentSection('galerias');
+    const { items: photos, loading } = useContentSection('galerias');
 
     return (
         <div className={styles.page}>
             <div className={styles.hero}>
                 <div className={styles.heroContent}>
-                    <h1>Galerias de Fotos</h1>
+                    <h1>Galerías de fotos</h1>
                     <p>Revive los mejores momentos de las ediciones del Congreso CONIITI.</p>
                 </div>
             </div>
 
             <div className={styles.container}>
-                {photos.length === 0 ? (
+                {loading ? (
                     <div className={styles.empty}>
-                        <h3>Proximamente</h3>
-                        <p>Aun no hay fotos disponibles en la galeria.</p>
+                        <h3>Cargando</h3>
+                        <p>Estamos preparando el contenido para ti.</p>
+                    </div>
+                ) : photos.length === 0 ? (
+                    <div className={styles.empty}>
+                        <h3>Próximamente</h3>
+                        <p>Aún no hay fotos disponibles en la galería.</p>
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>

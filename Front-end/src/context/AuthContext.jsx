@@ -8,6 +8,8 @@
 import { createContext, useState, useEffect, useCallback, useContext } from 'react';
 import { getMe, logout as logoutService } from '../services/authService';
 
+let restoreSessionPromise = null;
+
 /**
  * @typedef {Object} AuthUser
  * @property {string}  id
@@ -34,7 +36,11 @@ export const AuthProvider = ({ children }) => {
     // Restaura la sesión al montar el componente (ej: al recargar la página)
     useEffect(() => {
         const restoreSession = async () => {
-            const userData = await getMe();
+            if (!restoreSessionPromise) {
+                restoreSessionPromise = getMe();
+            }
+
+            const userData = await restoreSessionPromise;
             setUser(userData);
             setIsLoading(false);
         };
@@ -50,6 +56,7 @@ export const AuthProvider = ({ children }) => {
         try {
             await logoutService();
         } finally {
+            restoreSessionPromise = null;
             setUser(null);
         }
     }, []);
