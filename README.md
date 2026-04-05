@@ -37,10 +37,7 @@ docker compose up --build
 ## Entregables del taller
 
 - Arquitectura y justificacion tecnologica: `docs/arquitectura_microservicios.md`
-- Diagrama exportable: `docs/architecture-diagram.svg`
-- Contratos JSON y eventos: `docs/contracts_and_events.md`
-- Guion de prueba de resiliencia: `docs/prueba_resiliencia.md`
-- Guia de despliegue remoto: `docs/despliegue_remoto.md`
+
 
 ## Scripts utiles
 
