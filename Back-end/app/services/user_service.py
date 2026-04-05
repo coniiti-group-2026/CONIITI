@@ -1,175 +1,176 @@
 # ============================================================
-# Servicio de Usuarios — CONIITI API
-# Responsabilidad única (SRP): encapsula toda la lógica de
-# negocio relacionada con la creación, consulta y gestión
-# de cuentas de usuario en la plataforma.
+# Servicio de Usuarios - CONIITI API
+# Fachada del monolito para la gestion de cuentas staff.
+# Delega perfiles a users-service y credenciales a auth-service.
 # ============================================================
 
-import uuid
-from datetime import datetime, timezone
-from typing import Optional, List
+from typing import Any
 
+import httpx
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session as DBSession
 
-from app.models.user import User, UserRole, AuthProvider
-from app.core.security import hash_password
+from app.core.config import settings
 from app.schemas.user import UserCreate, UserUpdate
 
 
-# ==============================================================
-# Sección: Consultas de usuario
-# ==============================================================
-
-def get_user_by_email(email: str, db: DBSession) -> Optional[User]:
-    """Busca y retorna un usuario por su dirección de correo electrónico."""
-    return db.query(User).filter(User.email == email).first()
+def _users_url(path: str) -> str:
+    return f"{settings.USERS_SERVICE_URL}{path}"
 
 
-def get_user_by_id(user_id: uuid.UUID, db: DBSession) -> Optional[User]:
-    """Busca y retorna un usuario por su identificador único."""
-    return db.query(User).filter(User.id == user_id).first()
+def _auth_url(path: str) -> str:
+    return f"{settings.AUTH_SERVICE_URL}{path}"
 
 
-def get_user_by_id_or_raise(user_id: uuid.UUID, db: DBSession) -> User:
-    """
-    Busca un usuario por ID.
-    Lanza HTTPException 404 si no existe.
-    """
-    user = get_user_by_id(user_id, db)
-    if not user:
+def _map_user(data: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": data["id"],
+        "full_name": data["full_name"],
+        "email": data["email"],
+        "institution": data.get("institution"),
+        "role": data["role"],
+        "is_active": data.get("is_active", True),
+        "created_at": data.get("created_at"),
+    }
+
+
+def _raise_http_error(exc: httpx.HTTPStatusError, fallback: str) -> None:
+    detail = fallback
+    if exc.response is not None:
+        try:
+            detail = exc.response.json().get("detail", fallback)
+        except Exception:
+            detail = fallback
+        raise HTTPException(status_code=exc.response.status_code, detail=detail) from exc
+    raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=fallback) from exc
+
+
+def list_staff_users(_: object = None) -> list[dict[str, Any]]:
+    try:
+        response = httpx.get(_users_url("/users/"), params={"role": "staff"}, timeout=10.0)
+        response.raise_for_status()
+        return [_map_user(item) for item in response.json()]
+    except httpx.HTTPStatusError as exc:
+        _raise_http_error(exc, "No se pudo consultar la lista de staff.")
+    except httpx.HTTPError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Usuario no encontrado.",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="users-service no esta disponible.",
+        ) from exc
+
+
+def create_staff_account(data: UserCreate, _: object = None) -> dict[str, Any]:
+    auth_payload = {
+        "email": data.email,
+        "password": data.password,
+        "full_name": data.full_name,
+        "is_active": True,
+    }
+
+    try:
+        auth_response = httpx.post(
+            _auth_url("/internal/users"),
+            json=auth_payload,
+            timeout=10.0,
         )
-    return user
+        auth_response.raise_for_status()
+        auth_data = auth_response.json()
 
-
-def list_staff_users(db: DBSession) -> List[User]:
-    """Retorna todos los usuarios con rol de staff, ordenados por nombre."""
-    return (
-        db.query(User)
-        .filter(User.role == UserRole.STAFF)
-        .order_by(User.full_name)
-        .all()
-    )
-
-
-# ==============================================================
-# Sección: Creación de usuarios
-# ==============================================================
-
-def create_regular_user(
-    full_name: str,
-    email: str,
-    hashed_pw: str,
-    role: UserRole,
-    institution: Optional[str],
-    db: DBSession,
-) -> User:
-    """
-    Crea un usuario con autenticación local (email + contraseña).
-    Verifica que el correo no esté registrado previamente.
-    """
-    if get_user_by_email(email, db):
+        profile_payload = {
+            "id": auth_data["user_id"],
+            "full_name": data.full_name,
+            "email": data.email,
+            "institution": data.institution,
+            "role": data.role.value,
+            "is_active": True,
+        }
+        profile_response = httpx.post(_users_url("/users/"), json=profile_payload, timeout=10.0)
+        profile_response.raise_for_status()
+        return _map_user(profile_response.json())
+    except httpx.HTTPStatusError as exc:
+        if "auth_data" in locals():
+            try:
+                httpx.delete(_auth_url(f"/internal/users/{auth_data['user_id']}"), timeout=10.0)
+            except Exception:
+                pass
+        _raise_http_error(exc, "No se pudo crear la cuenta staff.")
+    except httpx.HTTPError as exc:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Ya existe una cuenta registrada con ese correo electrónico.",
-        )
-
-    user = User(
-        full_name=full_name,
-        email=email,
-        hashed_password=hashed_pw,
-        role=role,
-        institution=institution,
-        auth_provider=AuthProvider.LOCAL,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="No se pudo conectar con auth-service o users-service.",
+        ) from exc
 
 
-def create_staff_account(data: UserCreate, db: DBSession) -> User:
-    """
-    Crea una cuenta de staff desde el panel del superusuario.
-    La cuenta se marca como verificada directamente (no requiere OTP).
-    """
-    if get_user_by_email(data.email, db):
+def get_staff_account_or_raise(user_id: str) -> dict[str, Any]:
+    try:
+        response = httpx.get(_users_url(f"/users/{user_id}"), timeout=10.0)
+        response.raise_for_status()
+        return _map_user(response.json())
+    except httpx.HTTPStatusError as exc:
+        _raise_http_error(exc, "Cuenta staff no encontrada.")
+    except httpx.HTTPError as exc:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Ya existe una cuenta registrada con ese correo electrónico.",
-        )
-
-    user = User(
-        full_name=data.full_name,
-        email=data.email,
-        hashed_password=hash_password(data.password),
-        institution=data.institution,
-        role=UserRole.STAFF,
-        auth_provider=AuthProvider.LOCAL,
-        is_verified=True,  # El superusuario crea cuentas ya verificadas
-        accepted_data_policy=datetime.now(timezone.utc),
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="users-service no esta disponible.",
+        ) from exc
 
 
-def get_or_create_oauth_user(
-    email: str,
-    full_name: str,
-    provider: AuthProvider,
-    db: DBSession,
-) -> tuple[User, bool]:
-    """
-    Busca un usuario por correo en el flujo OAuth.
-    Si no existe, lo crea automáticamente con el rol apropiado según el dominio.
-    Retorna la tupla (usuario, es_nuevo). Un usuario nuevo aún no está verificado.
-    """
-    existing = get_user_by_email(email, db)
-    if existing:
-        return existing, False
+def update_staff_account(user_id: str, data: UserUpdate) -> dict[str, Any]:
+    profile_payload: dict[str, Any] = {}
+    if data.full_name is not None:
+        profile_payload["full_name"] = data.full_name
+    if data.institution is not None:
+        profile_payload["institution"] = data.institution
+    if data.role is not None:
+        profile_payload["role"] = data.role.value
+    if data.is_active is not None:
+        profile_payload["is_active"] = data.is_active
 
-    # Asigna rol initial según el dominio del correo institucional
-    role = UserRole.STUDENT if email.endswith("@ucatolica.edu.co") else UserRole.EXTERNAL
+    auth_payload: dict[str, Any] = {}
+    if data.full_name is not None:
+        auth_payload["full_name"] = data.full_name
+    if data.password is not None:
+        auth_payload["password"] = data.password
+    if data.is_active is not None:
+        auth_payload["is_active"] = data.is_active
 
-    user = User(
-        full_name=full_name,
-        email=email,
-        role=role,
-        auth_provider=provider,
-        accepted_data_policy=datetime.now(timezone.utc),
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user, True
-
-
-# ==============================================================
-# Sección: Actualización y eliminación
-# ==============================================================
-
-def update_user(user: User, data: UserUpdate, db: DBSession) -> User:
-    """Aplica las actualizaciones parciales a un usuario existente."""
-    update_data = data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(user, field, value)
-    db.commit()
-    db.refresh(user)
-    return user
-
-
-def delete_user(user: User, db: DBSession) -> None:
-    """Elimina permanentemente un usuario de la base de datos."""
-    db.delete(user)
-    db.commit()
+    try:
+        if profile_payload:
+            profile_response = httpx.patch(
+                _users_url(f"/users/{user_id}"),
+                json=profile_payload,
+                timeout=10.0,
+            )
+            profile_response.raise_for_status()
+        if auth_payload:
+            auth_response = httpx.patch(
+                _auth_url(f"/internal/users/{user_id}"),
+                json=auth_payload,
+                timeout=10.0,
+            )
+            auth_response.raise_for_status()
+        return get_staff_account_or_raise(user_id)
+    except httpx.HTTPStatusError as exc:
+        _raise_http_error(exc, "No se pudo actualizar la cuenta staff.")
+    except httpx.HTTPError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="No se pudo conectar con auth-service o users-service.",
+        ) from exc
 
 
-def mark_user_verified(user: User, db: DBSession) -> None:
-    """Marca al usuario como verificado tras completar el flujo OTP exitosamente."""
-    user.is_verified = True
-    db.commit()
+def delete_staff_account(user_id: str) -> None:
+    try:
+        profile_response = httpx.delete(_users_url(f"/users/{user_id}"), timeout=10.0)
+        if profile_response.status_code not in (204, 404):
+            profile_response.raise_for_status()
+
+        auth_response = httpx.delete(_auth_url(f"/internal/users/{user_id}"), timeout=10.0)
+        if auth_response.status_code not in (204, 404):
+            auth_response.raise_for_status()
+    except httpx.HTTPStatusError as exc:
+        _raise_http_error(exc, "No se pudo eliminar la cuenta staff.")
+    except httpx.HTTPError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="No se pudo conectar con auth-service o users-service.",
+        ) from exc

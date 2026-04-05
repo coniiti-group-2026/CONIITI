@@ -4,7 +4,9 @@
 // Solo utilizado desde el panel del superusuario.
 // ============================================================
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+import { getApiBase, getJsonHeaders } from './apiConfig';
+
+const API_BASE = getApiBase();
 
 /**
  * Realiza una solicitud autenticada al API incluyendo cookies HttpOnly.
@@ -17,15 +19,12 @@ async function apiFetch(path, options = {}) {
     const response = await fetch(`${API_BASE}${path}`, {
         ...options,
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
+        headers: getJsonHeaders(options),
     });
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail ?? 'Error inesperado del servidor.');
+        throw new Error(errorData.detail ?? 'No se pudo completar la solicitud. Inténtalo de nuevo.');
     }
 
     if (response.status === 204) return null;
@@ -55,7 +54,10 @@ export async function listStaff() {
 export async function createStaff(data) {
     return apiFetch('/users/staff', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+            ...data,
+            role: 'staff',
+        }),
     });
 }
 

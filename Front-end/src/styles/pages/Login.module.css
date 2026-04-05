@@ -116,6 +116,15 @@
     padding: 0.5rem 0.75rem;
 }
 
+.successMessage {
+    color: #166534;
+    font-size: 0.85rem;
+    background: rgba(22, 101, 52, 0.08);
+    border-left: 3px solid #166534;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+}
+
 /* ── Enlace ── */
 .linkBtn {
     color: var(--color-accent, #D4A017);
@@ -148,6 +157,7 @@
     cursor: pointer;
     border: 1.5px solid;
     background: #fff;
+    text-decoration: none;
     transition: opacity 0.2s, transform 0.15s;
 }
 
@@ -158,6 +168,14 @@
 .googleBtn:hover {
     opacity: 0.85;
     transform: translateY(-1px);
+}
+
+.microsoftBtn[aria-disabled='true'],
+.googleBtn[aria-disabled='true'] {
+    opacity: 0.55;
+    pointer-events: none;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* ── Fila recordar + olvidé contraseña ── */

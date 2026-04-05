@@ -11,7 +11,7 @@ export default function PersonCard({ person }) {
         ponente: person.title,
         afiliacion: person.subtitle,
         descripcion_ponente: person.description,
-        foto: person.image_url
+        foto_ponente_url: person.image_url
     };
 
     return (

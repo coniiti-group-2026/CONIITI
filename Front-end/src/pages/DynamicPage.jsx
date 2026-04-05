@@ -1,29 +1,11 @@
-import { useState, useEffect } from 'react';
-import styles from '../styles/pages/DynamicPage.module.css';
 import { FiExternalLink } from 'react-icons/fi';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+import useContentSection from '../hooks/useContentSection';
+import styles from '../styles/pages/DynamicPage.module.css';
+
 
 export default function DynamicPage({ title, description, section }) {
-    const [cards, setCards] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchCards = async () => {
-            try {
-                const res = await fetch(`${API_BASE}/cms/cards/${section}?active_only=true`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setCards(data);
-                }
-            } catch (e) {
-                console.error(`Error loading ${section}:`, e);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchCards();
-    }, [section]);
+    const { items: cards, loading } = useContentSection(section);
 
     return (
         <div className={styles.page}>
@@ -36,7 +18,10 @@ export default function DynamicPage({ title, description, section }) {
 
             <div className={styles.container}>
                 {loading ? (
-                    <div className={styles.loader}>Cargando información...</div>
+                    <div className={styles.empty}>
+                        <h3>Cargando</h3>
+                        <p>Estamos preparando el contenido para ti.</p>
+                    </div>
                 ) : cards.length === 0 ? (
                     <div className={styles.empty}>
                         <h3>Próximamente</h3>

@@ -1,12 +1,14 @@
 // ============================================================
 // Contexto de Autenticación — CONIITI Front-end
 // Provee el estado global de autenticación del usuario.
-// Al montar la aplicación, consulta /auth/me para restaurar
+// Al montar la aplicación, consulta /api/auth/me para restaurar
 // la sesión desde la cookie HttpOnly si ya existe.
 // ============================================================
 
 import { createContext, useState, useEffect, useCallback, useContext } from 'react';
 import { getMe, logout as logoutService } from '../services/authService';
+
+let restoreSessionPromise = null;
 
 /**
  * @typedef {Object} AuthUser
@@ -19,12 +21,13 @@ import { getMe, logout as logoutService } from '../services/authService';
  */
 
 /** @type {React.Context<{ user: AuthUser|null, isLoading: boolean, setUser: Function, logout: Function }>} */
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext(null);
 
 /**
  * AuthProvider — envuelve la aplicación y distribución el estado de sesión.
  * Restaura automáticamente la sesión al recargar la página
- * consultando el endpoint /auth/me con la cookie HttpOnly.
+ * consultando el endpoint /api/auth/me con la cookie HttpOnly.
  */
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -33,7 +36,11 @@ export const AuthProvider = ({ children }) => {
     // Restaura la sesión al montar el componente (ej: al recargar la página)
     useEffect(() => {
         const restoreSession = async () => {
-            const userData = await getMe();
+            if (!restoreSessionPromise) {
+                restoreSessionPromise = getMe();
+            }
+
+            const userData = await restoreSessionPromise;
             setUser(userData);
             setIsLoading(false);
         };
@@ -49,6 +56,7 @@ export const AuthProvider = ({ children }) => {
         try {
             await logoutService();
         } finally {
+            restoreSessionPromise = null;
             setUser(null);
         }
     }, []);

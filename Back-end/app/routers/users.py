@@ -4,7 +4,6 @@
 # Solo accesible para el superusuario (rol SUPERUSER).
 # ============================================================
 
-import uuid
 from typing import List
 
 from fastapi import APIRouter, Depends, status
@@ -56,14 +55,13 @@ def create_staff(
     description="Actualiza los datos de una cuenta staff existente. Solo superusuario.",
 )
 def update_staff(
-    user_id: uuid.UUID,
+    user_id: str,
     data: UserUpdate,
     db: DBSession = Depends(get_db),
     _: User = Depends(require_superuser),
 ):
     """Actualiza parcialmente los datos de un usuario staff."""
-    user = user_service.get_user_by_id_or_raise(user_id, db)
-    return user_service.update_user(user, data, db)
+    return user_service.update_staff_account(user_id, data)
 
 
 @router.delete(
@@ -73,10 +71,9 @@ def update_staff(
     description="Elimina permanentemente una cuenta staff. Solo superusuario.",
 )
 def delete_staff(
-    user_id: uuid.UUID,
+    user_id: str,
     db: DBSession = Depends(get_db),
     _: User = Depends(require_superuser),
 ):
     """Elimina una cuenta de staff de la plataforma."""
-    user = user_service.get_user_by_id_or_raise(user_id, db)
-    user_service.delete_user(user, db)
+    user_service.delete_staff_account(user_id)

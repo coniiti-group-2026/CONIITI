@@ -1,48 +1,86 @@
 import { useState, useEffect } from 'react';
-import styles from '../styles/pages/DynamicPage.module.css';
-import PersonCard from '../components/PersonCard';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+import SpeakerCard from '../components/SpeakerCard';
+import { getApiBase } from '../services/apiConfig';
+import pageStyles from '../styles/pages/DynamicPage.module.css';
+import styles from '../styles/pages/Conferencistas.module.css';
+
+const API_BASE = getApiBase();
+
+const FILTERS = [
+    { value: 'todos', label: 'Todos los conferencistas' },
+    { value: 'principal', label: 'Conferencistas principales' },
+];
 
 export default function Conferencistas() {
     const [speakers, setSpeakers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState('todos');
 
     useEffect(() => {
-        const fetchSpeakers = async () => {
+        let isMounted = true;
+
+        const fetchData = async () => {
+            setLoading(true);
+            setSpeakers([]);
+
+            const url = filter === 'principal'
+                ? `${API_BASE}/agenda/speakers?principal_only=true`
+                : `${API_BASE}/agenda/speakers`;
+
             try {
-                const res = await fetch(`${API_BASE}/cms/cards/conferencistas?active_only=true`);
-                if (res.ok) setSpeakers(await res.json());
-            } catch (e) {
-                console.error("Error loading conferencistas:", e);
+                const response = await fetch(url);
+                const data = response.ok ? await response.json() : [];
+                if (isMounted) setSpeakers(data);
+            } catch {
+                if (isMounted) setSpeakers([]);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
-        fetchSpeakers();
-    }, []);
+
+        fetchData();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [filter]);
 
     return (
-        <div className={styles.page}>
-            <div className={styles.hero}>
-                <div className={styles.heroContent}>
-                    <h1>Oradores Principales</h1>
-                    <p>Conoce a nuestros conferencistas invitados de honor de nuestro XI Congreso CONIITI.</p>
+        <div className={pageStyles.page}>
+            <div className={pageStyles.hero}>
+                <div className={pageStyles.heroContent}>
+                    <h1>Conferencistas principales</h1>
+                    <p>Conoce a los conferencistas invitados de honor del XI Congreso CONIITI.</p>
                 </div>
             </div>
 
-            <div className={styles.container}>
-                {loading ? (
-                    <div className={styles.loader}>Cargando información...</div>
-                ) : speakers.length === 0 ? (
-                    <div className={styles.empty}>
+            <div className={pageStyles.container}>
+                <div className={styles.filters}>
+                    {FILTERS.map((item) => (
+                        <button
+                            key={item.value}
+                            onClick={() => setFilter(item.value)}
+                            className={`${styles.filterBtn} ${filter === item.value ? styles.filterBtnActive : ''}`}
+                        >
+                            {item.label}
+                        </button>
+                    ))}
+                </div>
+
+                {loading && <div className={pageStyles.loader}>Cargando información...</div>}
+
+                {!loading && speakers.length === 0 && (
+                    <div className={pageStyles.empty}>
                         <h3>Próximamente</h3>
                         <p>Aún no hay perfiles disponibles para esta sección.</p>
                     </div>
-                ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-                        {speakers.map(speaker => (
-                            <PersonCard key={speaker.id} person={speaker} />
+                )}
+
+                {!loading && speakers.length > 0 && (
+                    <div className={styles.grid}>
+                        {speakers.map((speaker, index) => (
+                            <SpeakerCard key={speaker.ponente + index} speaker={speaker} />
                         ))}
                     </div>
                 )}

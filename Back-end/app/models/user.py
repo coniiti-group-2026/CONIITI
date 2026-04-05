@@ -93,7 +93,5 @@ class User(Base):
     registered_sessions = relationship(
         "Session", secondary="session_registrations", back_populates="registered_users"
     )
-    otp_codes = relationship("OTPCode", back_populates="user", cascade="all, delete-orphan")
-
     def __repr__(self) -> str:
         return f"<User id={self.id} email={self.email} role={self.role}>"

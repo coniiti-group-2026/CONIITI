@@ -1,173 +1,213 @@
 // ============================================================
-// Servicio de Autenticación — CONIITI Front-end
-// Centraliza todas las llamadas HTTP relacionadas con el
-// ciclo de autenticación: registro, OTP, login y sesión.
-// Los tokens JWT viajan en cookies HttpOnly gestionadas
-// automáticamente por el navegador.
+// Servicio de Autenticacion - CONIITI Front-end
+// Consume exclusivamente auth-service a traves del gateway.
 // ============================================================
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+import { getApiBase, getJsonHeaders } from './apiConfig';
 
-/**
- * Realiza una solicitud HTTP al API con manejo centralizado de errores.
- * Incluye `credentials: 'include'` para que el navegador envíe las cookies HttpOnly.
- *
- * @param {string} path - Ruta relativa del endpoint (ej: '/auth/login')
- * @param {RequestInit} options - Opciones del fetch
- * @returns {Promise<any>} - Datos JSON de la respuesta
- * @throws {Error} - Error con el mensaje del API si la respuesta no es exitosa
- */
+const API_BASE = getApiBase();
+const API_ORIGIN = import.meta.env.VITE_API_ORIGIN ?? '';
+const AUTH_BASE = `${API_BASE}/auth`;
+
+function normalizeUserRole(userData) {
+    if (!userData || typeof userData !== 'object') {
+        return userData;
+    }
+
+    if (typeof userData.role !== 'string') {
+        return userData;
+    }
+
+    return {
+        ...userData,
+        role: userData.role.trim().toLowerCase(),
+    };
+}
+
+function getApiOrigin() {
+    if (API_ORIGIN) {
+        return API_ORIGIN.replace(/\/$/, '');
+    }
+
+    return window.location.origin;
+}
+
+function buildAuthUrl(path) {
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    return `${AUTH_BASE}${normalizedPath}`;
+}
+
+function buildBrowserAuthUrl(path) {
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    if (/^https?:\/\//i.test(AUTH_BASE)) {
+        return `${AUTH_BASE}${normalizedPath}`;
+    }
+    return `${getApiOrigin()}${AUTH_BASE}${normalizedPath}`;
+}
+
+function buildOtpDebugStorageKey(email, purpose) {
+    return `coniiti_otp_debug_${String(email || '').toLowerCase()}_${purpose || 'login'}`;
+}
+
+function hasSessionHint() {
+    if (typeof document === 'undefined') {
+        return true;
+    }
+
+    return document.cookie
+        .split(';')
+        .map((item) => item.trim())
+        .some((item) => item === 'session_hint=1' || item.startsWith('session_hint=1;'));
+}
+
+function shouldAttemptSessionRestore() {
+    if (typeof window === 'undefined') {
+        return true;
+    }
+
+    if (hasSessionHint()) {
+        return true;
+    }
+
+    const protectedPaths = new Set(['/staff', '/superusuario']);
+    if (protectedPaths.has(window.location.pathname)) {
+        return true;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    return params.get('oauth') === 'success';
+}
+
+export function getMicrosoftLoginUrl() {
+    return buildBrowserAuthUrl('/oauth/microsoft');
+}
+
+export function getGoogleLoginUrl() {
+    return buildBrowserAuthUrl('/oauth/google');
+}
+
 async function apiFetch(path, options = {}) {
-    const response = await fetch(`${API_BASE}${path}`, {
+    const response = await fetch(path, {
         ...options,
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
+        headers: getJsonHeaders(options),
     });
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail ?? 'Error inesperado del servidor.');
+        throw new Error(errorData.detail ?? 'No se pudo completar la solicitud. Inténtalo de nuevo.');
     }
 
-    // Retorna null si la respuesta es 204 No Content
     if (response.status === 204) return null;
-
     return response.json();
 }
 
-
-// =============================================================
-// Sección: Registro
-// =============================================================
-
-/**
- * Registra un nuevo usuario en la plataforma.
- * El servidor enviará un código OTP al correo del usuario.
- *
- * @param {{ full_name: string, email: string, institution?: string, role: string, password: string, accept_data_policy: boolean }} data
- */
 export async function register(data) {
-    return apiFetch('/auth/register', {
+    const result = await apiFetch(buildAuthUrl('/register'), {
         method: 'POST',
         body: JSON.stringify(data),
     });
+    return normalizeUserRole(result);
 }
 
-
-// =============================================================
-// Sección: Verificación OTP
-// =============================================================
-
-/**
- * Verifica el código OTP de 6 dígitos recibido por correo.
- * Si es exitoso, el servidor establece las cookies JWT de sesión.
- *
- * @param {{ email: string, code: string, purpose: 'register' | 'login' }} data
- */
-export async function verifyOtp(data) {
-    return apiFetch('/auth/verify-otp', {
-        method: 'POST',
-        body: JSON.stringify(data),
-    });
-}
-
-
-// =============================================================
-// Sección: Inicio de sesión local
-// =============================================================
-
-/**
- * Inicia sesión con email y contraseña.
- * Si las credenciales son correctas, el servidor envía un código OTP al correo.
- * El cliente debe redirigir a la pantalla de verificación OTP.
- *
- * @param {{ email: string, password: string }} data
- */
 export async function login(data) {
-    return apiFetch('/auth/login', {
+    const result = await apiFetch(buildAuthUrl('/login'), {
         method: 'POST',
         body: JSON.stringify(data),
     });
+    return normalizeUserRole(result);
 }
 
+export async function getMe(options = {}) {
+    const { force = false } = options;
+    if (!force && !shouldAttemptSessionRestore()) {
+        return null;
+    }
 
-// =============================================================
-// Sección: OAuth
-// =============================================================
-
-/**
- * Redirige el navegador al proveedor de identidad de Microsoft.
- * El flujo OAuth continúa en el back-end de forma transparente.
- */
-export function loginWithMicrosoft() {
-    window.location.href = `${API_BASE}/auth/oauth/microsoft`;
-}
-
-/**
- * Redirige el navegador al proveedor de identidad de Google.
- * El flujo OAuth continúa en el back-end de forma transparente.
- */
-export function loginWithGoogle() {
-    window.location.href = `${API_BASE}/auth/oauth/google`;
-}
-
-
-// =============================================================
-// Sección: Sesión activa
-// =============================================================
-
-/**
- * Obtiene el perfil del usuario actualmente autenticado.
- * Retorna null si no hay sesión activa (en lugar de lanzar error).
- */
-export async function getMe() {
     try {
-        return await apiFetch('/auth/me');
+        const result = await apiFetch(buildAuthUrl('/me'));
+        return normalizeUserRole(result);
     } catch {
         return null;
     }
 }
 
-/**
- * Cierra la sesión del usuario.
- * El servidor elimina las cookies HttpOnly del navegador.
- */
 export async function logout() {
-    return apiFetch('/auth/logout', { method: 'POST' });
+    return apiFetch(buildAuthUrl('/logout'), { method: 'POST' });
 }
 
-/**
- * Renueva el access token usando el refresh token (cookie HttpOnly).
- * Se llama automáticamente cuando el access token ha expirado.
- */
+export async function verifyOtp(data) {
+    const result = await apiFetch(buildAuthUrl('/verify-otp'), {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+    return normalizeUserRole(result);
+}
+
+export function cacheOtpDebugInfo({ email, purpose, debugOtp, message, deliveryMode }) {
+    if (typeof window === 'undefined' || !email || !debugOtp) {
+        return;
+    }
+
+    window.sessionStorage.setItem(
+        buildOtpDebugStorageKey(email, purpose),
+        JSON.stringify({
+            email,
+            purpose,
+            debugOtp,
+            message,
+            deliveryMode,
+        }),
+    );
+}
+
+export function getCachedOtpDebugInfo(email, purpose) {
+    if (typeof window === 'undefined' || !email) {
+        return null;
+    }
+
+    const raw = window.sessionStorage.getItem(buildOtpDebugStorageKey(email, purpose));
+    if (!raw) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return null;
+    }
+}
+
+export function clearCachedOtpDebugInfo(email, purpose) {
+    if (typeof window === 'undefined' || !email) {
+        return;
+    }
+
+    window.sessionStorage.removeItem(buildOtpDebugStorageKey(email, purpose));
+}
+
 export async function refreshToken() {
-    return apiFetch('/auth/refresh', { method: 'POST' });
+    throw new Error('Esta acción ya no está disponible.');
 }
 
-/**
- * Solicita el envío de un código OTP de recuperación de contraseña.
- * Solo disponible para usuarios con rol student o external.
- * @param {string} email - Correo del usuario
- */
-export async function forgotPassword(email) {
-    return apiFetch('/auth/forgot-password', {
+export async function forgotPassword(data) {
+    return apiFetch(buildAuthUrl('/forgot-password'), {
         method: 'POST',
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(data),
     });
 }
 
-/**
- * Restablece la contraseña del usuario verificando el OTP recibido.
- * @param {string} email - Correo del usuario
- * @param {string} code - Código OTP de 6 dígitos
- * @param {string} newPassword - Nueva contraseña (mínimo 8 caracteres)
- */
-export async function resetPassword(email, code, newPassword) {
-    return apiFetch('/auth/reset-password', {
+export async function resetPassword(data) {
+    return apiFetch(buildAuthUrl('/reset-password'), {
         method: 'POST',
-        body: JSON.stringify({ email, code, new_password: newPassword }),
+        body: JSON.stringify(data),
     });
+}
+
+export function loginWithMicrosoft() {
+    window.location.assign(getMicrosoftLoginUrl());
+}
+
+export function loginWithGoogle() {
+    window.location.assign(getGoogleLoginUrl());
 }

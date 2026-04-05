@@ -1,94 +1,276 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowRight, FiUsers, FiAward, FiBookOpen, FiCheck, FiLink, FiBriefcase, FiMonitor } from 'react-icons/fi';
+import {
+    FiArrowRight,
+    FiAward,
+    FiBookOpen,
+    FiBriefcase,
+    FiCheck,
+    FiChevronLeft,
+    FiChevronRight,
+    FiLink,
+    FiMonitor,
+    FiUsers,
+} from 'react-icons/fi';
+
+import SpeakerCard from '../components/SpeakerCard';
+import { useAuth } from '../context/AuthContext';
+import { getApiBase } from '../services/apiConfig';
+import { createCheckout, PAYMENT_PLANS } from '../services/paymentService';
 import styles from '../styles/pages/Home.module.css';
 
-const Countdown = () => {
-    const calculateTimeLeft = () => {
-        // Fecha objetivo: 1 de octubre 2026
-        const targetDate = new Date("October 1, 2026 00:00:00").getTime();
-        const now = new Date().getTime();
-        const difference = targetDate - now;
 
-        let timeLeft = {};
+const API_BASE = getApiBase();
+const SPEAKERS_PER_PAGE = 5;
 
-        if (difference > 0) {
-            timeLeft = {
-                days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                minutes: Math.floor((difference / 1000 / 60) % 60),
-                seconds: Math.floor((difference / 1000) % 60)
-            };
-        }
-        return timeLeft;
+
+const FALLBACK_SPEAKERS = [
+    {
+        ponente: 'Dr. Alessandro Conti',
+        afiliacion: 'Experto en Inteligencia Artificial, Milán',
+        foto_ponente_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=350',
+    },
+    {
+        ponente: 'Dra. Sofia Restrepo',
+        afiliacion: 'CEO Innovatech Latam',
+        foto_ponente_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=350',
+    },
+    {
+        ponente: 'Ing. Marco Rossi',
+        afiliacion: 'Líder de Infraestructuras Cloud',
+        foto_ponente_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=350',
+    },
+];
+
+const COUNTDOWN_TARGET = new Date('October 1, 2026 00:00:00').getTime();
+
+function calculateTimeLeft(now) {
+    const difference = COUNTDOWN_TARGET - now;
+
+    if (difference <= 0) return {};
+
+    return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
     };
+}
 
-    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+function Countdown() {
+    const [timeLeft, setTimeLeft] = useState(null);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setTimeLeft(calculateTimeLeft());
-        }, 1000);
-        return () => clearTimeout(timer);
-    });
+        const updateTimeLeft = () => setTimeLeft(calculateTimeLeft(Date.now()));
+        const initialTimer = setTimeout(updateTimeLeft, 0);
+        const intervalId = setInterval(updateTimeLeft, 1000);
+
+        return () => {
+            clearTimeout(initialTimer);
+            clearInterval(intervalId);
+        };
+    }, []);
+
+    if (timeLeft === null) {
+        return <div className={styles.countdownContainer}><h2>Cargando contador...</h2></div>;
+    }
 
     if (!timeLeft.days && timeLeft.days !== 0) {
-        return <div className={styles.countdownContainer}><h2>¡El Congreso ha comenzado!</h2></div>;
+        return <div className={styles.countdownContainer}><h2>El Congreso ha comenzado.</h2></div>;
     }
 
     return (
         <div className={styles.countdownContainer}>
-            <div className={styles.countdownBox}>
-                <span className={styles.countdownValue}>{timeLeft.days}</span>
-                <span className={styles.countdownLabel}>Días</span>
-            </div>
-            <div className={styles.countdownBox}>
-                <span className={styles.countdownValue}>{timeLeft.hours}</span>
-                <span className={styles.countdownLabel}>Horas</span>
-            </div>
-            <div className={styles.countdownBox}>
-                <span className={styles.countdownValue}>{timeLeft.minutes}</span>
-                <span className={styles.countdownLabel}>Min</span>
-            </div>
-            <div className={styles.countdownBox}>
-                <span className={styles.countdownValue}>{timeLeft.seconds}</span>
-                <span className={styles.countdownLabel}>Seg</span>
-            </div>
+            {[
+                ['Días', timeLeft.days],
+                ['Horas', timeLeft.hours],
+                ['Min', timeLeft.minutes],
+                ['Seg', timeLeft.seconds],
+            ].map(([label, value]) => (
+                <div key={label} className={styles.countdownBox}>
+                    <span className={styles.countdownValue}>{value}</span>
+                    <span className={styles.countdownLabel}>{label}</span>
+                </div>
+            ))}
         </div>
     );
+}
+
+
+function SpeakerSlider({ speakers }) {
+    const [idx, setIdx] = useState(0);
+    const timerRef = useRef(null);
+    const totalPages = Math.ceil(speakers.length / SPEAKERS_PER_PAGE);
+
+    const next = () => setIdx((current) => (current + 1) % totalPages);
+    const prev = () => setIdx((current) => (current - 1 + totalPages) % totalPages);
+
+    useEffect(() => {
+        if (totalPages <= 1) return undefined;
+        timerRef.current = setInterval(next, 4500);
+        return () => clearInterval(timerRef.current);
+    });
+
+    if (!speakers.length) return null;
+
+    const visible = speakers.slice(idx * SPEAKERS_PER_PAGE, idx * SPEAKERS_PER_PAGE + SPEAKERS_PER_PAGE);
+
+    return (
+        <div style={{ position: 'relative' }}>
+            <div className={styles.speakersGrid}>
+                {visible.map((speaker, index) => (
+                    <SpeakerCard key={speaker.ponente + index} speaker={speaker} />
+                ))}
+            </div>
+            {totalPages > 1 && (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '1.5rem' }}>
+                    <button onClick={prev} style={navBtnStyle}><FiChevronLeft size={20} /></button>
+                    <span style={{ color: '#64748b', fontSize: '0.85rem' }}>{idx + 1} / {totalPages}</span>
+                    <button onClick={next} style={navBtnStyle}><FiChevronRight size={20} /></button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+
+const navBtnStyle = {
+    background: 'white',
+    border: '1px solid #e2e8f0',
+    borderRadius: '50%',
+    width: '36px',
+    height: '36px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
 };
 
+
+function getUserHubPath(user) {
+    if (!user) return '/register';
+    if (user.role === 'superuser') return '/superusuario';
+    if (user.role === 'staff') return '/staff';
+    return '/mis-conferencias';
+}
+
+
+function getUserHubLabel(user) {
+    if (!user) return 'Crear cuenta';
+    if (user.role === 'superuser') return 'Ir al centro de control';
+    if (user.role === 'staff') return 'Ir al centro de gestión';
+    return 'Ir a mis conferencias';
+}
+
+
+function getAccessHighlights(user) {
+    if (!user) {
+        return [
+            'Crea tu cuenta en pocos pasos',
+            'Consulta la agenda y las actividades del congreso',
+            'Recibe novedades importantes sobre tu participación',
+        ];
+    }
+
+    if (user.role === 'superuser') {
+        return [
+            'Acceso al centro de supervisión del congreso',
+            'Vista general de la programación y del equipo',
+            'Seguimiento de la actividad y los recursos del evento',
+        ];
+    }
+
+    if (user.role === 'staff') {
+        return [
+            'Acceso directo al centro operativo',
+            'Gestión de sesiones, contenido y archivos',
+            'Seguimiento de cambios y tareas del evento',
+        ];
+    }
+
+    return [
+        'Tu cuenta está lista para continuar',
+        'Consulta la agenda y tus actividades',
+        'Gestiona tu participación desde un solo lugar',
+    ];
+}
+
+
 export default function Home() {
+    const { user, isLoading } = useAuth();
+    const [keynotes, setKeynotes] = useState([]);
+    const [checkoutLoadingKey, setCheckoutLoadingKey] = useState('');
+    const [checkoutError, setCheckoutError] = useState('');
+
+    useEffect(() => {
+        fetch(`${API_BASE}/agenda/speakers?principal_only=true`)
+            .then((response) => (response.ok ? response.json() : []))
+            .then((data) => setKeynotes(data))
+            .catch(() => setKeynotes([]));
+    }, []);
+
+    const handleCheckout = async (plan, region) => {
+        if (!user) return;
+
+        const loadingKey = `${plan.id}-${region}`;
+        setCheckoutLoadingKey(loadingKey);
+        setCheckoutError('');
+
+        try {
+            const isLocal = region === 'LOCAL';
+            const payment = await createCheckout({
+                userId: user.id,
+                amount: isLocal ? plan.localAmount : plan.internationalAmount,
+                currency: isLocal ? plan.localCurrency : plan.internationalCurrency,
+                paymentRegion: region,
+            });
+
+            if (!payment?.checkout_url) {
+                throw new Error('No fue posible iniciar el pago. Inténtalo de nuevo.');
+            }
+
+            window.location.assign(payment.checkout_url);
+        } catch (error) {
+            setCheckoutError(error.message);
+        } finally {
+            setCheckoutLoadingKey('');
+        }
+    };
+
     return (
         <div className={styles.home}>
-            {/* ── HERO SECTION & VIDEO ── */}
             <header className={styles.hero}>
                 <div className={styles.heroBackground}>
-                    {/* Placeholder Colosseum Italy Video/Background */}
                     <img src="/colosseum_italy_hero.png" alt="Colosseum Background Italy" fetchPriority="high" width="1920" height="1080" />
                 </div>
                 <div className={styles.heroOverlay}></div>
-                
+
                 <div className={styles.heroContent}>
                     <span className={styles.badge}>Edición Italia 2026</span>
                     <h1>XI CONIITI 2026</h1>
-                    <p>Décimo Primer Congreso Internacional de Innovación y Tendencias en Ingeniería. Únete a la comunidad de investigadores y profesionales liderando el avance tecnológico en el mundo del 1 al 3 de octubre de 2026.</p>
-                    
+                    <p>
+                        {user
+                            ? `Bienvenido${user.full_name ? `, ${user.full_name}` : ''}. Tu sesión ya está activa para participar en CONIITI 2026.`
+                            : 'Congreso Internacional de Innovación y Tendencias en Ingeniería, del 1 al 3 de octubre de 2026.'}
+                    </p>
+
                     <Countdown />
 
                     <div className={styles.heroButtons}>
                         <Link to="/agenda" className={styles.primaryBtn}>
-                            Ver Agenda Abierta <FiArrowRight />
+                            Ver agenda <FiArrowRight />
                         </Link>
-                        {/* El link al ancla de precios en la misma página */}
-                        <a href="#inscripciones" className={styles.secondaryBtn}>
-                            Inscribirse Ahora
-                        </a>
+                        {!isLoading && (
+                            <Link to={getUserHubPath(user)} className={styles.secondaryBtn}>
+                                {getUserHubLabel(user)}
+                            </Link>
+                        )}
                     </div>
                 </div>
             </header>
 
-            {/* ── SECCIÓN: POR QUÉ ASISTIR (REDISEÑO PREMIUM) ── */}
             <section className={`${styles.sectionBlock} ${styles.whySection}`}>
                 <div className={styles.whyHeader}>
                     <span className={styles.preTitle}>Por qué asistir al</span>
@@ -96,21 +278,19 @@ export default function Home() {
                 </div>
 
                 <div className={styles.whyGridCenter}>
-                    {/* Columna Izquierda */}
                     <div className={styles.whyColLeft}>
                         <div className={styles.whyFeatureCard}>
                             <div className={styles.featureIcon}><FiUsers /></div>
                             <h3>Networking de alto nivel</h3>
-                            <p>Participar en CONIITI te permitirá conectar con líderes de la industria, potenciales empleadores y profesionales afines. Este networking abrirá puertas a invaluables proyecciones y proyectos colaborativos.</p>
+                            <p>Conecta con líderes de la industria, investigadores y equipos con los que podrás construir alianzas reales.</p>
                         </div>
                         <div className={styles.whyFeatureCard}>
                             <div className={styles.featureIcon}><FiLink /></div>
-                            <h3>Alianzas Estratégicas</h3>
-                            <p>Las sesiones y talleres están diseñados para fomentar la cooperación. Podrás conocer a posibles socios con los que podrás desarrollar iniciativas conjuntas altamente rentables e innovadoras.</p>
+                            <h3>Alianzas estratégicas</h3>
+                            <p>Las sesiones del congreso están pensadas para crear proyectos conjuntos de impacto académico y profesional.</p>
                         </div>
                     </div>
 
-                    {/* Columna Central (Ilustración Dinámica Orbital) */}
                     <div className={styles.whyColCenter}>
                         <div className={styles.centerGraphicPulse}>
                             <div className={styles.coreOrb}></div>
@@ -120,141 +300,163 @@ export default function Home() {
                         </div>
                     </div>
 
-                    {/* Columna Derecha */}
                     <div className={styles.whyColRight}>
                         <div className={styles.whyFeatureCard}>
                             <div className={styles.featureIcon}><FiBriefcase /></div>
                             <h3>Conferencias y talleres</h3>
-                            <p>Tendrás acceso a una serie de plenarias y talleres impartidos por expertos de renombre, donde podrás adquirir conocimientos valiosos sobre la vanguardia tecnológica mundial.</p>
+                            <p>Accede a plenarias y talleres centrados en software, datos, IA, ciberseguridad y transformación digital.</p>
                         </div>
                         <div className={styles.whyFeatureCard}>
                             <div className={styles.featureIcon}><FiMonitor /></div>
-                            <h3>Desarrollo Profesional</h3>
-                            <p>Participar en este magno evento te ayudará a desarrollar nuevas habilidades y competencias técnicas, mejorando exponencialmente tu currículum académico e investigativo.</p>
+                            <h3>Desarrollo profesional</h3>
+                            <p>Fortalece tu perfil técnico con contenido vigente y experiencias de aplicación real.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* ── IMPACTO CONIITI (DARK CORPORATE) ── */}
             <section className={`${styles.sectionBlock} ${styles.darkBg} ${styles.fullWidthBlock}`}>
                 <div className={styles.darkBgInner}>
                     <h2 className={styles.sectionTitle}>Impacto CONIITI</h2>
-                    <p className={styles.sectionSubtitle}>La evolución del congreso en números, reuniendo mentes brillantes de más de 12 países en un entorno híbrido sin precedentes.</p>
-                
-                <div className={styles.impactGrid}>
-                    <div className={styles.impactCard}>
-                        <div className={styles.impactIcon}><FiUsers /></div>
-                        <div className={styles.impactNumber}>95+</div>
-                        <div className={styles.impactLabel}>Conferencistas Principales</div>
+                    <p className={styles.sectionSubtitle}>Una plataforma que integra academia, industria y comunidad tecnológica.</p>
+
+                    <div className={styles.impactGrid}>
+                        <div className={styles.impactCard}>
+                            <div className={styles.impactIcon}><FiUsers /></div>
+                            <div className={styles.impactNumber}>95+</div>
+                            <div className={styles.impactLabel}>Conferencistas Principales</div>
+                        </div>
+                        <div className={styles.impactCard}>
+                            <div className={styles.impactIcon}><FiAward /></div>
+                            <div className={styles.impactNumber}>12</div>
+                            <div className={styles.impactLabel}>Países invitados</div>
+                        </div>
+                        <div className={styles.impactCard}>
+                            <div className={styles.impactIcon}><FiBookOpen /></div>
+                            <div className={styles.impactNumber}>30+</div>
+                            <div className={styles.impactLabel}>Workshops y ponencias</div>
+                        </div>
+                        <div className={styles.impactCard}>
+                            <div className={styles.impactIcon}><FiUsers /></div>
+                            <div className={styles.impactNumber}>999+</div>
+                            <div className={styles.impactLabel}>Participantes esperados</div>
+                        </div>
                     </div>
-                    <div className={styles.impactCard}>
-                        <div className={styles.impactIcon}><FiAward /></div>
-                        <div className={styles.impactNumber}>1</div>
-                        <div className={styles.impactLabel}>Patrocinadores</div>
-                    </div>
-                    <div className={styles.impactCard}>
-                        <div className={styles.impactIcon}><FiBookOpen /></div>
-                        <div className={styles.impactNumber}>30+</div>
-                        <div className={styles.impactLabel}>Ofertas de Workshops</div>
-                    </div>
-                    <div className={styles.impactCard}>
-                        <div className={styles.impactIcon}><FiUsers /></div>
-                        <div className={styles.impactNumber}>999+</div>
-                        <div className={styles.impactLabel}>Participantes del Evento</div>
-                    </div>
-                </div>
                 </div>
             </section>
 
-            {/* ── CONFERENCISTAS DESTACADOS ── */}
             <section className={styles.sectionBlock}>
                 <h2 className={styles.sectionTitle}>Conferencistas Principales</h2>
                 <p className={styles.sectionSubtitle}>Conoce a algunos de los expertos que guiarán las plenarias de innovación.</p>
 
-                <div className={styles.speakersGrid}>
-                    <div className={styles.speakerCard}>
-                        <div className={styles.speakerImg}>
-                            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=350" alt="Dr. Alessandro Conti" loading="lazy" width="350" height="350" />
-                        </div>
-                        <h4 className={styles.speakerName}>Dr. Alessandro Conti</h4>
-                        <p className={styles.speakerRole}>Experto en Inteligencia Artificial, Milán</p>
+                {keynotes.length > 0 ? (
+                    <SpeakerSlider speakers={keynotes} />
+                ) : (
+                    <div className={styles.speakersGrid}>
+                        {FALLBACK_SPEAKERS.map((speaker, index) => (
+                            <SpeakerCard key={speaker.ponente + index} speaker={speaker} />
+                        ))}
                     </div>
-                    <div className={styles.speakerCard}>
-                        <div className={styles.speakerImg}>
-                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=350" alt="Dra. Sofía Restrepo" loading="lazy" width="350" height="350" />
-                        </div>
-                        <h4 className={styles.speakerName}>Dra. Sofía Restrepo</h4>
-                        <p className={styles.speakerRole}>CEO Innovatech Latam</p>
-                    </div>
-                    <div className={styles.speakerCard}>
-                        <div className={styles.speakerImg}>
-                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=350" alt="Ing. Marco Rossi" loading="lazy" width="350" height="350" />
-                        </div>
-                        <h4 className={styles.speakerName}>Ing. Marco Rossi</h4>
-                        <p className={styles.speakerRole}>Líder Infraestructuras Cloud</p>
-                    </div>
-                </div>
-                
+                )}
+
                 <div className={styles.centerBtn}>
                     <Link to="/conferencistas" className={styles.primaryBtn}>Conoce a todos los conferencistas</Link>
                 </div>
             </section>
 
-            {/* ── PASARELA DE PAGOS / INSCRIPCIONES ── */}
             <section id="inscripciones" className={`${styles.sectionBlock} ${styles.blueBg}`}>
-                <div className={styles.pricingContainer}>
-                    <h2 className={styles.sectionTitle}>Pasarela de Pagos e Inscripciones</h2>
-                    <p className={styles.sectionSubtitle}>Asegura tu participación en el Congreso seleccionando tu categoría de inscripción.</p>
+                {user ? (
+                    <div className={styles.accessContainer}>
+                        <h2 className={styles.sectionTitle}>Opciones de pago</h2>
+                        <p className={styles.sectionSubtitle}>
+                            Tu sesión está activa. Elige la opción de pago que prefieras para completar tu inscripción.
+                        </p>
 
-                    <div className={styles.pricingGrid}>
-                        {/* Tarjeta Miembros UCatólica e IEEE */}
-                        <div className={styles.pricingCard}>
-                            <h3 className={styles.pricingTitle}>Miembros U. Católica E IEEE</h3>
-                            <div className={styles.pricingAmount}>$ 940.000<span style={{ fontSize: '1rem' }}>/COP</span></div>
-                            <ul className={styles.pricingFeatures}>
-                                <li><FiCheck size={20} color="#ffc107" /> Inscripción como Ponente</li>
-                                <li><FiCheck size={20} color="#ffc107" /> Constancia de participación para todos los autores</li>
-                                <li><FiCheck size={20} color="#ffc107" /> Publicación de las memorias</li>
-                            </ul>
-                            <button className={styles.pricingBtn} onClick={() => alert('Dirigiendo a Módulo de Pago')}>Pagar</button>
-                        </div>
+                        {!!checkoutError && (
+                            <p className={styles.paymentError}>{checkoutError}</p>
+                        )}
 
-                        {/* Tarjeta No Miembros */}
-                        <div className={styles.pricingCard}>
-                            <h3 className={styles.pricingTitle}>Sí no eres miembro UCatólica ó IEEE</h3>
-                            <div className={styles.pricingAmount}>$ 980.000<span style={{ fontSize: '1rem' }}>/COP</span></div>
-                            <ul className={styles.pricingFeatures}>
-                                <li><FiCheck size={20} color="#ffc107" /> Inscripción como Ponente</li>
-                                <li><FiCheck size={20} color="#ffc107" /> Constancia de participación para todos los autores</li>
-                                <li><FiCheck size={20} color="#ffc107" /> Publicación de las memorias</li>
-                            </ul>
-                            <button className={styles.pricingBtn} onClick={() => alert('Dirigiendo a Módulo de Pago')}>Pagar</button>
-                        </div>
-
-                        {/* Tarjeta Opcional Conferencias */}
-                        <div className={`${styles.pricingCard} ${styles.optionalCard}`}>
-                            <div className={styles.optionalBadge}>OPCIONAL</div>
-                            <h3 className={styles.pricingTitle}>Si desea constancia por participación en conferencias</h3>
-                            <div className={styles.pricingAmount}>$ 120.000<span style={{ fontSize: '1rem' }}>/COP</span></div>
-                            <ul className={styles.pricingFeatures}>
-                                <li><FiCheck size={20} color="#ffc107" /> Certificado de Asistencia</li>
-                            </ul>
-                            <button className={styles.pricingBtn} onClick={() => alert('Dirigiendo a Módulo de Pago')}>Añadir al carrito</button>
-                        </div>
-
-                        {/* Tarjeta Opcional Workshops */}
-                        <div className={`${styles.pricingCard} ${styles.optionalCard}`}>
-                            <div className={styles.optionalBadge}>OPCIONAL</div>
-                            <h3 className={styles.pricingTitle}>Si desea constancia por participación en Workshops</h3>
-                            <div className={styles.pricingAmount}>$ 90.000<span style={{ fontSize: '1rem' }}>/COP</span></div>
-                            <ul className={styles.pricingFeatures}>
-                                <li><FiCheck size={20} color="#ffc107" /> Certificado de Asistencia</li>
-                            </ul>
-                            <button className={styles.pricingBtn} onClick={() => alert('Dirigiendo a Módulo de Pago')}>Añadir al carrito</button>
+                        <div className={styles.pricingGrid}>
+                            {PAYMENT_PLANS.map((plan) => (
+                                <article
+                                    key={plan.id}
+                                    className={`${styles.pricingCard} ${plan.optional ? styles.optionalCard : ''}`}
+                                >
+                                    {plan.optional && <span className={styles.optionalBadge}>Opcional</span>}
+                                    <h3 className={styles.pricingTitle}>{plan.title}</h3>
+                                    <div className={styles.pricingAmount}>
+                                        {plan.amountLabel}
+                                        <span> COP</span>
+                                    </div>
+                                    <div className={styles.paymentProviders}>
+                                        <span>Mercado Pago</span>
+                                        <span>PayPal</span>
+                                    </div>
+                                    <ul className={styles.pricingFeatures}>
+                                        {plan.features.map((feature) => (
+                                            <li key={feature}><FiCheck size={20} color="#ffc107" /> {feature}</li>
+                                        ))}
+                                    </ul>
+                                    <div className={styles.paymentActions}>
+                                        <button
+                                            type="button"
+                                            className={styles.pricingBtn}
+                                            onClick={() => handleCheckout(plan, 'LOCAL')}
+                                            disabled={checkoutLoadingKey !== ''}
+                                        >
+                                            {checkoutLoadingKey === `${plan.id}-LOCAL` ? 'Conectando...' : 'Pagar en Colombia'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`${styles.pricingBtn} ${styles.paymentAltBtn}`}
+                                            onClick={() => handleCheckout(plan, 'INTERNATIONAL')}
+                                            disabled={checkoutLoadingKey !== ''}
+                                        >
+                                            {checkoutLoadingKey === `${plan.id}-INTERNATIONAL` ? 'Conectando...' : 'Pagar internacional'}
+                                        </button>
+                                    </div>
+                                </article>
+                            ))}
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <div className={styles.pricingContainer}>
+                        <h2 className={styles.sectionTitle}>Inscripciones</h2>
+                        <p className={styles.sectionSubtitle}>
+                            Crea tu cuenta para registrarte, consultar la agenda y continuar tu proceso de participación.
+                        </p>
+
+                        <div className={styles.pricingGrid}>
+                            <div className={styles.pricingCard}>
+                                <h3 className={styles.pricingTitle}>Ponentes y asistentes</h3>
+                                <div className={styles.pricingAmount}>Registro digital</div>
+                                <ul className={styles.pricingFeatures}>
+                                    {getAccessHighlights(null).map((item) => (
+                                        <li key={item}><FiCheck size={20} color="#ffc107" /> {item}</li>
+                                    ))}
+                                </ul>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <Link className={styles.pricingBtn} to="/register">Crear cuenta e inscribirme</Link>
+                                    <Link className={styles.pricingBtn} style={{ background: '#0070ba' }} to="/login">Ya tengo cuenta</Link>
+                                </div>
+                            </div>
+
+                            <div className={styles.pricingCard}>
+                                <h3 className={styles.pricingTitle}>Soporte de inscripción</h3>
+                                <div className={styles.pricingAmount}>Canal oficial</div>
+                                <ul className={styles.pricingFeatures}>
+                                    <li><FiCheck size={20} color="#ffc107" /> Atención para participantes internacionales</li>
+                                    <li><FiCheck size={20} color="#ffc107" /> Gestión de certificados y consultas</li>
+                                    <li><FiCheck size={20} color="#ffc107" /> Acompañamiento del equipo CONIITI</li>
+                                </ul>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <a className={styles.pricingBtn} href="mailto:coniiti@ucatolica.edu.co">Escribir a soporte</a>
+                                    <Link className={styles.pricingBtn} style={{ background: '#0070ba' }} to="/agenda">Explorar agenda</Link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </section>
         </div>
     );

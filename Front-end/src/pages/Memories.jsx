@@ -12,7 +12,7 @@ export default function PlaceholderPage({ title }) {
             fontFamily: 'var(--font-display)'
         }}>
             <h1 style={{ color: '#000000ff', fontSize: '3rem' }}>{title}</h1>
-            <p style={{ color: '#000000ff', fontSize: '1.5rem', opacity: 0.7 }}>en desarrollo :)</p>
+            <p style={{ color: '#000000ff', fontSize: '1.5rem', opacity: 0.7 }}>Contenido en desarrollo.</p>
         </div>
     );
 }

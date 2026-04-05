@@ -5,7 +5,6 @@
 # ============================================================
 
 from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl
 
 
 class Settings(BaseSettings):
@@ -27,24 +26,8 @@ class Settings(BaseSettings):
 
     # --- CORS ---
     FRONTEND_URL: str = "http://localhost:3000"
-
-    # --- Microsoft OAuth ---
-    MICROSOFT_CLIENT_ID: str = ""
-    MICROSOFT_CLIENT_SECRET: str = ""
-    MICROSOFT_TENANT_ID: str = "common"
-    MICROSOFT_REDIRECT_URI: str = "http://localhost:8000/auth/oauth/microsoft/callback"
-
-    # --- Google OAuth ---
-    GOOGLE_CLIENT_ID: str = ""
-    GOOGLE_CLIENT_SECRET: str = ""
-    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/oauth/google/callback"
-
-    # --- SMTP (correo OTP) ---
-    SMTP_HOST: str = "smtp.gmail.com"
-    SMTP_PORT: int = 587
-    SMTP_USER: str = ""
-    SMTP_PASSWORD: str = ""
-    EMAIL_FROM_NAME: str = "CONIITI 2026"
+    AUTH_SERVICE_URL: str = "http://auth-service:8000"
+    USERS_SERVICE_URL: str = "http://users-service:8000"
 
     class Config:
         env_file = ".env"

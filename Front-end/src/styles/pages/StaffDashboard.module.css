@@ -8,6 +8,111 @@
     width: 100%;
 }
 
+.pageHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.pageHeader h1 {
+    font-size: 1.75rem;
+    color: var(--color-primary-dark);
+    margin-bottom: 0.25rem;
+}
+
+.pageHeader p {
+    font-size: 0.95rem;
+    color: var(--color-text-muted, #888);
+}
+
+.tabs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(31, 105, 182, 0.08);
+}
+
+.tabButton {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.8rem 1.2rem;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--color-text-muted, #64748b);
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.tabButton:hover {
+    color: var(--color-primary);
+}
+
+.tabActive,
+.tabButtonActive {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    border-bottom: 3px solid var(--color-primary);
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.supervisionBadge {
+    margin-left: auto;
+    color: var(--color-text-muted, #666);
+    font-weight: 600;
+}
+
+.actionBar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 1rem;
+}
+
+.primaryBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.4rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+    white-space: nowrap;
+}
+
+.primaryBtn:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+}
+
+.error {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #b91c1c;
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--color-text-muted, #888);
+}
+
 /* ── Encabezado del panel ── */
 .header {
     display: flex;
@@ -296,11 +401,25 @@
 
 /* ── Responsivo ── */
 @media (max-width: 768px) {
+    .pageHeader {
+        align-items: flex-start;
+    }
+
+    .tabs {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .supervisionBadge {
+        margin-left: 0;
+    }
+
     .header {
         flex-direction: column;
         align-items: flex-start;
     }
 
+    .primaryBtn,
     .newBtn {
         width: 100%;
         justify-content: center;

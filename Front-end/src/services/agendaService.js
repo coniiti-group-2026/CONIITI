@@ -1,12 +1,14 @@
 // ============================================================
 // Servicio de Agenda — CONIITI Front-end
 // Capa de acceso a datos para las sesiones del congreso.
-// Consume la API REST del back-end FastAPI.
+// Consume la API REST de agenda-service a traves del gateway.
 // Mantiene la misma firma de funciones anterior para no
 // romper los hooks y componentes existentes.
 // ============================================================
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
+import { getApiBase, getJsonHeaders } from './apiConfig';
+
+const API_BASE = getApiBase();
 
 /**
  * Realiza una solicitud al API con manejo de errores centralizado.
@@ -19,15 +21,12 @@ async function apiFetch(path, options = {}) {
     const response = await fetch(`${API_BASE}${path}`, {
         ...options,
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
+        headers: getJsonHeaders(options),
     });
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail ?? 'Error al comunicarse con el servidor.');
+        throw new Error(errorData.detail ?? 'No pudimos cargar la información. Inténtalo nuevamente.');
     }
 
     if (response.status === 204) return null;
@@ -64,7 +63,7 @@ function buildQueryString(filters) {
  * @returns {Promise<Array>}
  */
 export async function getSessions() {
-    const data = await apiFetch('/sessions');
+    const data = await apiFetch('/agenda');
     return data.sessions ?? [];
 }
 
@@ -91,10 +90,10 @@ export async function filterSessions({ day, modality, eventType, room, search } 
         day,
         modality,
         event_type: eventType,
-        room,
+        salon: room,
         search,
     });
-    const data = await apiFetch(`/sessions${qs}`);
+    const data = await apiFetch(`/agenda${qs}`);
     return data.sessions ?? [];
 }
 
@@ -105,7 +104,7 @@ export async function filterSessions({ day, modality, eventType, room, search } 
  * @returns {Promise<object>}
  */
 export async function getSessionById(sessionId) {
-    return apiFetch(`/sessions/${sessionId}`);
+    return apiFetch(`/agenda/${sessionId}`);
 }
 
 /**
@@ -128,11 +127,11 @@ export function getConferenceDays() {
 // =============================================================
 
 export async function getRegisteredSessions() {
-    return apiFetch('/sessions/me/registered');    
+    return apiFetch('/agenda/me/registered');    
 }
 
 export async function toggleRegistration(sessionId) {
-    return apiFetch(`/sessions/${sessionId}/register`, {
+    return apiFetch(`/agenda/${sessionId}/register`, {
         method: 'POST',
     });
 }
@@ -149,7 +148,7 @@ export async function toggleRegistration(sessionId) {
  * @returns {Promise<object>}
  */
 export async function createSession(data) {
-    return apiFetch('/sessions', {
+    return apiFetch('/agenda', {
         method: 'POST',
         body: JSON.stringify(data),
     });
@@ -163,7 +162,7 @@ export async function createSession(data) {
  * @returns {Promise<object>}
  */
 export async function updateSession(sessionId, data) {
-    return apiFetch(`/sessions/${sessionId}`, {
+    return apiFetch(`/agenda/${sessionId}`, {
         method: 'PUT',
         body: JSON.stringify(data),
     });
@@ -175,7 +174,7 @@ export async function updateSession(sessionId, data) {
  * @param {string} sessionId - UUID de la sesión
  */
 export async function deleteSession(sessionId) {
-    return apiFetch(`/sessions/${sessionId}`, {
+    return apiFetch(`/agenda/${sessionId}`, {
         method: 'DELETE',
     });
 }
@@ -187,7 +186,7 @@ export async function deleteSession(sessionId) {
  * @returns {Promise<object>}
  */
 export async function toggleLinkVerified(sessionId) {
-    return apiFetch(`/sessions/${sessionId}/verify-link`, {
+    return apiFetch(`/agenda/${sessionId}/verify-link`, {
         method: 'PATCH',
     });
 }
@@ -202,7 +201,6 @@ export async function toggleLinkVerified(sessionId) {
  * NOTA: En esta versión, el modelo de ponentes aún no
  * tiene su propia tabla en el back-end. Se retorna null.
  *
- * @param {string} id - ID del ponente
  * @returns {null}
  */
 export function getSpeakerById() {

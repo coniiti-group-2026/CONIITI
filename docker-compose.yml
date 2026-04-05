@@ -1,0 +1,265 @@
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: api-gateway
+    command:
+      - "--configfile=/etc/traefik/traefik.yml"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - ./traefik:/etc/traefik
+    networks:
+      - coniiti_net
+
+  frontend:
+    build:
+      context: ./Front-end
+    container_name: frontend
+    restart: unless-stopped
+    networks:
+      - coniiti_net
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: shared-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - coniiti_net
+
+  analytics-mongo:
+    image: mongo:7
+    container_name: analytics-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpassword
+    ports:
+      - "27017:27017"
+    volumes:
+      - analytics_mongo_data:/data/db
+    networks:
+      - coniiti_net
+
+  users-db:
+    image: postgres:16
+    container_name: users-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: usersdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - users_data:/var/lib/postgresql/data
+    networks:
+      - coniiti_net
+
+  auth-db:
+    image: postgres:16
+    container_name: auth-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: authdb
+    ports:
+      - "5434:5432"
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    networks:
+      - coniiti_net
+
+  agenda-db:
+    image: postgres:16
+    container_name: agenda-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: agenda_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - agenda_data:/var/lib/postgresql/data
+    networks:
+      - coniiti_net
+
+  notifications-db:
+    image: postgres:16
+    container_name: notifications-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: notificationsdb
+    ports:
+      - "5436:5432"
+    volumes:
+      - notifications_data:/var/lib/postgresql/data
+    networks:
+      - coniiti_net
+
+  payments-db:
+    image: postgres:16
+    container_name: payments-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: paymentsdb
+    ports:
+      - "5437:5432"
+    volumes:
+      - payments_data:/var/lib/postgresql/data
+    networks:
+      - coniiti_net
+
+  auth-service:
+    build:
+      context: ./microservices/auth-service
+    container_name: auth-service
+    restart: unless-stopped
+    env_file:
+      - ./microservices/auth-service/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@auth-db:5432/authdb
+      JWT_SECRET_KEY: supersecreto123
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      OAUTH_STATE_EXPIRE_MINUTES: 10
+      RESET_PASSWORD_TOKEN_EXPIRE_MINUTES: 30
+      USERS_SERVICE_URL: http://users-service:8000
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: user
+      RABBITMQ_PASS: password
+      RABBITMQ_EXCHANGE: coniiti_events
+      INTERNAL_SERVICE_TOKEN: coniiti-internal-token
+      FRONTEND_URL: http://localhost
+    depends_on:
+      - auth-db
+      - users-service
+      - rabbitmq
+    networks:
+      - coniiti_net
+
+  users-service:
+    build:
+      context: ./microservices/users-service
+    container_name: users-service
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@users-db:5432/usersdb
+      AUTH_SERVICE_URL: http://auth-service:8000
+      JWT_SECRET_KEY: supersecreto123
+      JWT_ALGORITHM: HS256
+      INTERNAL_SERVICE_TOKEN: coniiti-internal-token
+    depends_on:
+      - users-db
+    networks:
+      - coniiti_net
+
+  agenda-service:
+    build:
+      context: ./microservices/agenda-service
+    container_name: agenda-service
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://admin:adminpassword@agenda-db:5432/agenda_db
+      SECRET_KEY: supersecreto123
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: user
+      RABBITMQ_PASS: password
+      RABBITMQ_EXCHANGE: coniiti_events
+    depends_on:
+      - agenda-db
+      - rabbitmq
+    networks:
+      - coniiti_net
+
+  analytics-service:
+    build:
+      context: ./microservices/analytics-service
+    container_name: analytics-service
+    restart: unless-stopped
+    environment:
+      MONGO_URI: mongodb://admin:adminpassword@analytics-mongo:27017/?authSource=admin
+      MONGO_DB_NAME: analytics_db
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: user
+      RABBITMQ_PASS: password
+      RABBITMQ_EXCHANGE: coniiti_events
+      RABBITMQ_QUEUE: analytics_queue
+      RABBITMQ_BINDING_KEY: "#"
+    depends_on:
+      - analytics-mongo
+      - rabbitmq
+    networks:
+      - coniiti_net
+
+  files-service:
+    build:
+      context: ./microservices/files-service
+    container_name: files-service
+    restart: unless-stopped
+    environment:
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - files_uploads:/app/uploads
+    networks:
+      - coniiti_net
+
+  notifications-service:
+    build:
+      context: ./microservices/notifications-service
+    container_name: notifications-service
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@notifications-db:5432/notificationsdb
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: user
+      RABBITMQ_PASS: password
+      RABBITMQ_EXCHANGE: coniiti_events
+      RABBITMQ_QUEUE: notifications_queue
+      RABBITMQ_BINDING_KEY: "#"
+    depends_on:
+      - notifications-db
+      - rabbitmq
+    networks:
+      - coniiti_net
+
+  payments-service:
+    build:
+      context: ./microservices/payments-service
+    container_name: payments-service
+    restart: unless-stopped
+    env_file:
+      - ./microservices/payments-service/.env
+    environment:
+      PAYMENTS_DATABASE_URL: postgresql://postgres:postgres@payments-db:5432/paymentsdb
+      PAYMENT_PROVIDER_MODE: live
+      PUBLIC_APP_URL: http://localhost
+    depends_on:
+      - payments-db
+    networks:
+      - coniiti_net
+
+networks:
+  coniiti_net:
+    driver: bridge
+
+volumes:
+  analytics_mongo_data:
+  users_data:
+  auth_data:
+  agenda_data:
+  notifications_data:
+  payments_data:
+  files_uploads:

@@ -10,43 +10,40 @@ import {
     FiAlertTriangle,
     FiLogIn,
 } from 'react-icons/fi';
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState } from 'react';
+
 import { AuthContext } from '../context/AuthContext';
 import StatusBadge from './StatusBadge';
 import VirtualGatekeeper from './VirtualGatekeeper';
 import styles from '../styles/components/SessionCard.module.css';
 
-/** Colores de track: mapea el valor del enum a una clase CSS */
 const TRACK_CLASS = {
     'Inteligencia Artificial': styles.trackIA,
-    'Ciberseguridad': styles.trackCiber,
+    Ciberseguridad: styles.trackCiber,
     'Internet de las Cosas': styles.trackIOT,
     'Desarrollo de Software': styles.trackDev,
     'Ciencia de Datos': styles.trackDatos,
     'Innovación y Tendencias': styles.trackInnova,
 };
 
-/** Clases para el badge de tipo de evento */
 const EVENT_CLASS = {
-    'Conferencia': styles.etConferencia,
-    'Taller': styles.etTaller,
-    'Simposio': styles.etSimposio,
-    'Panel': styles.etPanel,
+    Conferencia: styles.etConferencia,
+    Taller: styles.etTaller,
+    Simposio: styles.etSimposio,
+    Panel: styles.etPanel,
 };
 
-/** Calcula el % de ocupación y devuelve el estado visual */
 function cuposInfo(totales = 0, inscritos = 0) {
     const disponibles = totales - inscritos;
     const pct = totales > 0 ? Math.round((inscritos / totales) * 100) : 0;
-    let estado = 'disponible'; // verde
+    let estado = 'disponible';
+
     if (pct >= 100) estado = 'lleno';
     else if (pct >= 80) estado = 'casi-lleno';
+
     return { disponibles, pct, estado };
 }
 
-/**
- * SessionCard — renderiza una sesión de agenda con todos los detalles.
- */
 export default function SessionCard({
     session,
     index,
@@ -57,13 +54,6 @@ export default function SessionCard({
 }) {
     const { user } = useContext(AuthContext);
     const [showAuthHint, setShowAuthHint] = useState(false);
-    const [localInscritos, setLocalInscritos] = useState(session.inscritos || 0);
-
-    // Sincroniza con el props.session por si hay un refetch desde el servidor
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setLocalInscritos(session.inscritos || 0);
-    }, [session.inscritos]);
 
     const {
         titulo,
@@ -83,47 +73,42 @@ export default function SessionCard({
         descripcion,
         cupos_totales = 0,
     } = session;
+    const inscritosActuales = session.inscritos || 0;
 
     const lastUpdated = new Date(timestamp_actualizacion).toLocaleTimeString(
         'es-CO',
-        { hour: '2-digit', minute: '2-digit' }
+        { hour: '2-digit', minute: '2-digit' },
     );
 
-    const { disponibles, pct, estado } = cuposInfo(cupos_totales, localInscritos);
+    const { disponibles, pct, estado } = cuposInfo(cupos_totales, inscritosActuales);
     const agotado = estado === 'lleno';
 
-    /** Maneja el clic en Pre-inscribirse: bloquea si no hay sesión */
     const handleRegisterClick = () => {
         if (!user) {
             setShowAuthHint(true);
             setTimeout(() => setShowAuthHint(false), 4000);
             return;
         }
+
         if (!agotado && onToggleRegister) {
             onToggleRegister(session.id);
-            // Optimistic Update
-            setLocalInscritos(prev => isRegistered ? Math.max(0, prev - 1) : prev + 1);
         }
     };
-    
-    /** Maneja el clic en cancelar inscripción desde "Mis Conferencias" */
+
     const handleCancelRegistration = () => {
         if (onToggleRegister) {
             onToggleRegister(session.id);
-            setLocalInscritos(prev => Math.max(0, prev - 1));
         }
-    }
+    };
 
     return (
         <article
             className={`${styles.card} ${agotado ? styles.cardFull : ''}`}
             style={{ animationDelay: `${index * 80}ms` }}
         >
-            {/* Barra de acento superior coloreada por track */}
             <div className={`${styles.accentBar} ${TRACK_CLASS[track] ?? ''}`} />
 
             <div className={styles.body}>
-                {/* Track + Tipo de Evento + Estado logístico */}
                 <div className={styles.topRow}>
                     <div className={styles.topLeft}>
                         <span className={`${styles.track} ${TRACK_CLASS[track] ?? ''}`}>
@@ -142,13 +127,9 @@ export default function SessionCard({
                     />
                 </div>
 
-                {/* Título */}
                 <h3 className={styles.title}>{titulo}</h3>
-
-                {/* Descripción */}
                 <p className={styles.description}>{descripcion}</p>
 
-                {/* Barra de cupos */}
                 {cupos_totales > 0 && (
                     <div className={styles.cuposWrapper}>
                         <div className={styles.cuposHeader}>
@@ -158,9 +139,8 @@ export default function SessionCard({
                             </span>
                             <span className={`${styles.cuposCount} ${styles[`cupos_${estado.replace('-', '')}`]}`}>
                                 {agotado
-                                    ? '⚠ Cupos agotados'
-                                    : `${disponibles} de ${cupos_totales} disponibles`
-                                }
+                                    ? 'Cupos agotados'
+                                    : `${disponibles} de ${cupos_totales} disponibles`}
                             </span>
                         </div>
                         <div className={styles.cuposBarBg}>
@@ -172,20 +152,19 @@ export default function SessionCard({
                     </div>
                 )}
 
-                {/* Grid de meta-datos */}
                 <div className={styles.metaGrid}>
                     <div className={styles.metaItem}>
                         <FiClock className={styles.metaIcon} />
                         <div>
                             <div className={styles.metaLabel}>Horario</div>
-                            <div className={styles.metaValue}>{hora_inicio} – {hora_fin}</div>
+                            <div className={styles.metaValue}>{hora_inicio} - {hora_fin}</div>
                         </div>
                     </div>
 
                     <div className={styles.metaItem}>
                         <FiMapPin className={styles.metaIcon} />
                         <div>
-                            <div className={styles.metaLabel}>Salas</div>
+                            <div className={styles.metaLabel}>Sala</div>
                             <div className={styles.metaValue}>{salon}</div>
                         </div>
                     </div>
@@ -214,7 +193,6 @@ export default function SessionCard({
                     </div>
                 </div>
 
-                {/* Pie: Enlace virtual + timestamp */}
                 <div className={styles.footer}>
                     <VirtualGatekeeper
                         modalidad={modalidad}
@@ -229,16 +207,15 @@ export default function SessionCard({
                 </div>
             </div>
 
-            {/* Botón pre-inscripción / validar asistencia */}
             {mode === 'mis-conferencias' ? (
                 <div className={styles.myConfActions}>
                     <button className={`${styles.actionBtn} ${styles.validateBtn}`}>
                         <FiCheckCircle /> Validar asistencia
                     </button>
                     <button
-                        className={`${styles.cancelBtn}`}
+                        className={styles.cancelBtn}
                         onClick={handleCancelRegistration}
-                        title="Cancelar pre-inscripción"
+                        title="Cancelar inscripción"
                     >
                         Cancelar inscripción
                     </button>
@@ -246,24 +223,22 @@ export default function SessionCard({
             ) : (
                 <button
                     className={`${styles.actionBtn} ${showAuthHint
-                        ? styles.fullBtn // Usamos el rojo de "Sin cupos" para el alerta
+                        ? styles.fullBtn
                         : agotado
                             ? styles.fullBtn
                             : isRegistered
                                 ? styles.registeredBtn
-                                : styles.registerBtn
-                        }`}
+                                : styles.registerBtn}`}
                     onClick={handleRegisterClick}
                     disabled={(agotado && !isRegistered) || showAuthHint}
                 >
-                    {showAuthHint 
+                    {showAuthHint
                         ? <><FiLogIn /> Inicia sesión para inscribirte</>
                         : agotado && !isRegistered
-                            ? <><FiAlertTriangle /> Sin cupos</>
+                            ? <><FiAlertTriangle /> Sin cupos disponibles</>
                             : isRegistered
-                                ? <><FiCheckCircle /> Pre-inscrito</>
-                                : <><FiCalendar /> Pre-inscribirse</>
-                    }
+                                ? <><FiCheckCircle /> Preinscrito</>
+                                : <><FiCalendar /> Preinscribirse</>}
                 </button>
             )}
         </article>

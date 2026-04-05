@@ -1,19 +1,19 @@
 # ============================================================
-# Esquemas de Usuario — CONIITI API
-# Define los contratos de entrada/salida para operaciones
-# CRUD sobre usuarios (principalmente cuentas staff).
+# Esquemas de Usuario - CONIITI API
+# Contratos usados por el panel de superusuario para gestionar
+# cuentas staff a traves del monolito como fachada.
 # ============================================================
 
 import uuid
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 
-from app.models.user import UserRole, AuthProvider
+from pydantic import BaseModel, EmailStr, Field
+
+from app.models.user import UserRole
 
 
 class UserCreate(BaseModel):
-    """Datos para crear una cuenta staff desde el panel del superusuario."""
     full_name: str = Field(..., min_length=2, max_length=255)
     email: EmailStr
     institution: Optional[str] = Field(None, max_length=255)
@@ -22,37 +22,28 @@ class UserCreate(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    """Datos actualizables de un usuario. Todos los campos son opcionales."""
     full_name: Optional[str] = Field(None, min_length=2, max_length=255)
     institution: Optional[str] = Field(None, max_length=255)
     is_active: Optional[bool] = None
     role: Optional[UserRole] = None
+    password: Optional[str] = Field(None, min_length=8)
 
 
 class UserRead(BaseModel):
-    """Representación pública de un usuario (sin contraseña)."""
-    id: uuid.UUID
+    id: str | uuid.UUID
     full_name: str
     email: str
-    institution: Optional[str]
+    institution: Optional[str] = None
     role: UserRole
-    auth_provider: AuthProvider
     is_active: bool
-    is_verified: bool
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
+    created_at: Optional[datetime] = None
 
 
 class UserListItem(BaseModel):
-    """Representación compacta para listados de usuarios."""
-    id: uuid.UUID
+    id: str | uuid.UUID
     full_name: str
     email: str
+    institution: Optional[str] = None
     role: UserRole
     is_active: bool
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
+    created_at: Optional[datetime] = None
