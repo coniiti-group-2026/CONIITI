@@ -7,6 +7,12 @@
     padding-top: 1.5rem;
 }
 
+.speakerModalSection {
+    margin-top: 0.75rem;
+    padding-top: 1rem;
+    border-top-color: rgba(226, 232, 240, 0.9);
+}
+
 .title {
     margin: 0 0 0.75rem;
     font-size: 0.9rem;
@@ -17,7 +23,6 @@
     gap: 6px;
 }
 
-/* Aviso cuando la sesion aun no existe */
 .hint {
     margin: 0 0 0.75rem;
     font-size: 0.8rem;
@@ -25,7 +30,10 @@
     font-style: italic;
 }
 
-/* Fila de documento existente */
+.speakerModalHint {
+    color: #b7c7da;
+}
+
 .docList {
     display: flex;
     flex-direction: column;
@@ -42,9 +50,19 @@
     padding: 0.5rem 0.75rem;
 }
 
+.speakerModalDocRow {
+    background: linear-gradient(135deg, rgba(23, 65, 112, 0.92) 0%, rgba(13, 43, 78, 0.96) 100%);
+    border: 1px solid rgba(212, 160, 23, 0.2);
+    box-shadow: 0 10px 24px rgba(4, 16, 31, 0.24);
+}
+
 .docIcon {
     color: #94a3b8;
     flex-shrink: 0;
+}
+
+.speakerModalDocIcon {
+    color: #c7d7ea;
 }
 
 .docLink {
@@ -52,6 +70,11 @@
     font-size: 0.85rem;
     color: #334155;
     text-decoration: none;
+}
+
+.speakerModalDocLink {
+    color: #eff6ff;
+    font-weight: 500;
 }
 
 .docLink:hover {
@@ -65,9 +88,18 @@
     color: #dc2626;
     padding: 2px;
     line-height: 1;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
-/* Formulario de subida */
+.speakerModalActionBtn {
+    color: var(--color-accent-light);
+}
+
+.speakerModalActionBtn:hover {
+    color: #fff;
+    transform: translateY(-1px);
+}
+
 .uploadArea {
     margin-top: 0.75rem;
     background: #f1f5f9;

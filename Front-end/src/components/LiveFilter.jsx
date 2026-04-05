@@ -3,6 +3,14 @@ import { FiSearch } from 'react-icons/fi';
 import { SESSION_MODALITY, SESSION_EVENT_TYPE } from '../types/session';
 import styles from '../styles/components/LiveFilter.module.css';
 
+const ROOM_OPTIONS = [
+    { value: '', label: 'Todas' },
+    { value: 'Auditorio CE4', label: 'CE4' },
+    { value: 'Sala M\u00faltiple', label: 'M\u00faltiple' },
+    { value: 'Auditorio Principal', label: 'Principal' },
+    { value: 'Sala Virtual', label: 'Virtual' },
+];
+
 export default function LiveFilter({
     days,
     activeDay,
@@ -23,7 +31,7 @@ export default function LiveFilter({
 
     return (
         <div className={styles.filterBar}>
-            <div className={styles.dayTabs} role="tablist" aria-label="Días del congreso">
+            <div className={styles.dayTabs} role="tablist" aria-label="D\u00edas del congreso">
                 {days.map((day) => (
                     <button
                         key={day.value}
@@ -59,7 +67,7 @@ export default function LiveFilter({
             </div>
 
             <div className={styles.selectWrapper}>
-                <label className={styles.selectLabel}>Tipo de actividad</label>
+                <label className={styles.selectLabel}>Actividad</label>
                 <select
                     className={styles.select}
                     value={activeEventType ?? ''}
@@ -72,18 +80,18 @@ export default function LiveFilter({
                 </select>
             </div>
 
-            <div className={styles.selectWrapper}>
+            <div className={`${styles.selectWrapper} ${styles.roomWrapper}`}>
                 <label className={styles.selectLabel}>Sala</label>
                 <select
-                    className={styles.select}
+                    className={`${styles.select} ${styles.roomSelect}`}
                     value={activeRoom ?? ''}
                     onChange={(event) => onRoomChange(event.target.value || null)}
                 >
-                    <option value="">Todas</option>
-                    <option value="Auditorio CE4">Auditorio CE4</option>
-                    <option value="Sala Múltiple">Sala Múltiple</option>
-                    <option value="Auditorio Principal">Auditorio principal</option>
-                    <option value="Sala Virtual">Sala virtual</option>
+                    {ROOM_OPTIONS.map((room) => (
+                        <option key={room.value || 'all'} value={room.value}>
+                            {room.label}
+                        </option>
+                    ))}
                 </select>
             </div>
 
