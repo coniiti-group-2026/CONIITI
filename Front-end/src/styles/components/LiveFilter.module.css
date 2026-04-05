@@ -10,7 +10,6 @@
     margin-bottom: var(--space-6);
 }
 
-/* — Pestañas de día — */
 .dayTabs {
     display: flex;
     gap: var(--space-2);
@@ -47,14 +46,12 @@
     border-color: var(--color-primary-light);
 }
 
-/* — Separador — */
 .separator {
     width: 1px;
     height: 28px;
     background-color: var(--color-border);
 }
 
-/* — Selector de modalidad — */
 .selectWrapper {
     position: relative;
     display: inline-flex;
@@ -94,13 +91,23 @@
     outline: none;
 }
 
+.roomWrapper {
+    flex-shrink: 0;
+}
 
-/* Filtro por busqueda */
+.roomWrapper .selectLabel {
+    margin-right: var(--space-1);
+}
+
+.roomSelect {
+    width: 8.5rem;
+    min-width: 8.5rem;
+}
+
 .searchWrapper {
     position: relative;
-    margin-left: auto;
-    /*hace que se pegue al borde derecho */
-    width: 130px;
+    margin-left: 0;
+    width: 150px;
 }
 
 .searchIcon {
@@ -124,14 +131,12 @@
     outline: none;
 }
 
-/* Estilo CONIITI: Borde dorado al hacer click */
 .searchInput:focus {
     border-color: var(--color-accent);
     background-color: #fff;
     box-shadow: 0 0 0 4px rgba(212, 160, 23, 0.1);
 }
 
-/* Ajuste responsivo: si la pantalla es pequeña, el buscador baja y ocupa todo el ancho */
 @media (max-width: 900px) {
     .searchWrapper {
         margin-left: 0;
@@ -139,8 +144,6 @@
     }
 }
 
-
-/* — Responsivo — */
 @media (max-width: 640px) {
     .filterBar {
         flex-direction: column;
@@ -159,5 +162,10 @@
 
     .selectWrapper {
         justify-content: center;
+    }
+
+    .roomSelect {
+        width: 100%;
+        min-width: 0;
     }
 }

@@ -52,7 +52,7 @@ export default function SpeakerModal({ speaker, onClose }) {
                 <div className={styles.body}>
                     <h3 className={styles.bioTitle}>Sobre el ponente</h3>
                     <p className={styles.bio}>
-                        {descripcion_ponente || 'No hay descripción disponible para este ponente.'}
+                        {descripcion_ponente || 'No hay descripci\u00f3n disponible para este ponente.'}
                     </p>
 
                     <h3 className={styles.bioTitle} style={{ marginTop: '1.5rem' }}>Materiales del ponente</h3>
@@ -61,6 +61,8 @@ export default function SpeakerModal({ speaker, onClose }) {
                         sessionId={null}
                         sessionExists
                         canManage={false}
+                        showTitle={false}
+                        variant="speakerModal"
                     />
 
                     <Link to="/conferencistas" onClick={onClose} className={styles.speakerLink}>

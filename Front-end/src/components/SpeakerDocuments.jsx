@@ -4,8 +4,14 @@ import { FiDownload, FiFileText, FiTrash2, FiUploadCloud } from 'react-icons/fi'
 import { useSpeakerDocuments } from '../hooks/useDocuments';
 import styles from '../styles/components/SpeakerDocuments.module.css';
 
-
-export default function SpeakerDocuments({ ponente, sessionId, sessionExists, canManage = true }) {
+export default function SpeakerDocuments({
+    ponente,
+    sessionId,
+    sessionExists,
+    canManage = true,
+    showTitle = true,
+    variant = 'default',
+}) {
     const { documents, loading, addDocument, removeDocument } = useSpeakerDocuments({
         speakerName: sessionExists ? ponente : null,
         sessionId: sessionExists ? sessionId : null,
@@ -14,6 +20,7 @@ export default function SpeakerDocuments({ ponente, sessionId, sessionExists, ca
     const [docTitle, setDocTitle] = useState('');
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState('');
+    const isSpeakerModal = variant === 'speakerModal';
 
     const handleUpload = async (event) => {
         event.preventDefault();
@@ -42,7 +49,7 @@ export default function SpeakerDocuments({ ponente, sessionId, sessionExists, ca
     };
 
     const handleDelete = async (documentId) => {
-        if (!window.confirm('¿Eliminar este documento del ponente?')) return;
+        if (!window.confirm('\u00bfEliminar este documento del ponente?')) return;
 
         try {
             await removeDocument(documentId);
@@ -52,37 +59,64 @@ export default function SpeakerDocuments({ ponente, sessionId, sessionExists, ca
     };
 
     return (
-        <div className={styles.section}>
-            <h4 className={styles.title}>
-                <FiFileText size={14} /> Materiales del ponente
-            </h4>
+        <div className={`${styles.section} ${isSpeakerModal ? styles.speakerModalSection : ''}`}>
+            {showTitle && (
+                <h4 className={styles.title}>
+                    <FiFileText size={14} /> Materiales del ponente
+                </h4>
+            )}
 
             {!sessionExists && (
-                <p className={styles.hint}>
-                    Guarda primero la sesión para poder adjuntar materiales al ponente.
+                <p className={`${styles.hint} ${isSpeakerModal ? styles.speakerModalHint : ''}`}>
+                    Guarda primero la sesi\u00f3n para poder adjuntar materiales al ponente.
                 </p>
             )}
 
             {sessionExists && (
                 <>
-                    {loading && <p className={styles.hint}>Cargando documentos...</p>}
+                    {loading && (
+                        <p className={`${styles.hint} ${isSpeakerModal ? styles.speakerModalHint : ''}`}>
+                            Cargando documentos...
+                        </p>
+                    )}
 
                     {!loading && documents.length === 0 && (
-                        <p className={styles.hint}>Aún no hay materiales cargados para este ponente.</p>
+                        <p className={`${styles.hint} ${isSpeakerModal ? styles.speakerModalHint : ''}`}>
+                            A\u00fan no hay materiales cargados para este ponente.
+                        </p>
                     )}
 
                     <div className={styles.docList}>
                         {documents.map((doc) => (
-                            <div key={doc.id} className={styles.docRow}>
-                                <FiFileText size={13} className={styles.docIcon} />
+                            <div
+                                key={doc.id}
+                                className={`${styles.docRow} ${isSpeakerModal ? styles.speakerModalDocRow : ''}`}
+                            >
+                                <FiFileText
+                                    size={13}
+                                    className={`${styles.docIcon} ${isSpeakerModal ? styles.speakerModalDocIcon : ''}`}
+                                />
                                 <a href={doc.file_url} target="_blank" rel="noreferrer" className={styles.docLink}>
-                                    {doc.titulo}
+                                    <span className={isSpeakerModal ? styles.speakerModalDocLink : ''}>
+                                        {doc.titulo}
+                                    </span>
                                 </a>
-                                <a href={doc.file_url} target="_blank" rel="noreferrer" className={styles.deleteBtn} title="Abrir documento">
+                                <a
+                                    href={doc.file_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className={`${styles.deleteBtn} ${isSpeakerModal ? styles.speakerModalActionBtn : ''}`}
+                                    title="Abrir documento"
+                                >
                                     <FiDownload size={13} />
                                 </a>
                                 {canManage && (
-                                    <button type="button" className={styles.deleteBtn} onClick={() => handleDelete(doc.id)} title="Eliminar documento">
+                                    <button
+                                        type="button"
+                                        className={`${styles.deleteBtn} ${isSpeakerModal ? styles.speakerModalActionBtn : ''}`}
+                                        onClick={() => handleDelete(doc.id)}
+                                        title="Eliminar documento"
+                                    >
                                         <FiTrash2 size={13} />
                                     </button>
                                 )}
@@ -97,7 +131,7 @@ export default function SpeakerDocuments({ ponente, sessionId, sessionExists, ca
                                 <input
                                     value={docTitle}
                                     onChange={(event) => setDocTitle(event.target.value)}
-                                    placeholder="Título del material"
+                                    placeholder="T\u00edtulo del material"
                                     className={styles.titleInput}
                                 />
                                 <input
@@ -106,7 +140,12 @@ export default function SpeakerDocuments({ ponente, sessionId, sessionExists, ca
                                     onChange={(event) => setDocFile(event.target.files?.[0] ?? null)}
                                     className={styles.fileInput}
                                 />
-                                <button type="button" onClick={handleUpload} disabled={uploading} className={styles.uploadBtn}>
+                                <button
+                                    type="button"
+                                    onClick={handleUpload}
+                                    disabled={uploading}
+                                    className={styles.uploadBtn}
+                                >
                                     <FiUploadCloud size={13} />
                                     {uploading ? 'Subiendo...' : 'Adjuntar'}
                                 </button>
