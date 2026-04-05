@@ -42,29 +42,39 @@ const FALLBACK_SPEAKERS = [
     },
 ];
 
+const COUNTDOWN_TARGET = new Date('October 1, 2026 00:00:00').getTime();
+
+function calculateTimeLeft(now) {
+    const difference = COUNTDOWN_TARGET - now;
+
+    if (difference <= 0) return {};
+
+    return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+    };
+}
+
 
 function Countdown() {
-    const calculateTimeLeft = () => {
-        const targetDate = new Date('October 1, 2026 00:00:00').getTime();
-        const now = Date.now();
-        const difference = targetDate - now;
-
-        if (difference <= 0) return {};
-
-        return {
-            days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-            hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-            minutes: Math.floor((difference / 1000 / 60) % 60),
-            seconds: Math.floor((difference / 1000) % 60),
-        };
-    };
-
-    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+    const [timeLeft, setTimeLeft] = useState(null);
 
     useEffect(() => {
-        const timer = setTimeout(() => setTimeLeft(calculateTimeLeft()), 1000);
-        return () => clearTimeout(timer);
-    });
+        const updateTimeLeft = () => setTimeLeft(calculateTimeLeft(Date.now()));
+        const initialTimer = setTimeout(updateTimeLeft, 0);
+        const intervalId = setInterval(updateTimeLeft, 1000);
+
+        return () => {
+            clearTimeout(initialTimer);
+            clearInterval(intervalId);
+        };
+    }, []);
+
+    if (timeLeft === null) {
+        return <div className={styles.countdownContainer}><h2>Cargando contador...</h2></div>;
+    }
 
     if (!timeLeft.days && timeLeft.days !== 0) {
         return <div className={styles.countdownContainer}><h2>El Congreso ha comenzado.</h2></div>;

@@ -1,28 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FiX } from 'react-icons/fi';
 
 import styles from '../styles/components/StaffFormModal.module.css';
 
+function buildInitialForm(staffMember) {
+    if (!staffMember) {
+        return {
+            full_name: '',
+            email: '',
+            institution: '',
+            password: '',
+        };
+    }
+
+    return {
+        full_name: staffMember.full_name ?? '',
+        email: staffMember.email ?? '',
+        institution: staffMember.institution ?? '',
+        password: '',
+    };
+}
+
 export default function StaffFormModal({ staffMember, onSave, onClose }) {
     const isEditing = Boolean(staffMember);
-
-    const [form, setForm] = useState({
-        full_name: '',
-        email: '',
-        institution: '',
-        password: '',
-    });
-
-    useEffect(() => {
-        if (staffMember) {
-            setForm({
-                full_name: staffMember.full_name ?? '',
-                email: staffMember.email ?? '',
-                institution: staffMember.institution ?? '',
-                password: '',
-            });
-        }
-    }, [staffMember]);
+    const [form, setForm] = useState(() => buildInitialForm(staffMember));
 
     const handleChange = (event) => {
         const { name, value } = event.target;

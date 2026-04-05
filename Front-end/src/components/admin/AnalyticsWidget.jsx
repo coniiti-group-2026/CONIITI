@@ -2,36 +2,7 @@ import { useEffect, useState } from 'react';
 import { FiActivity, FiPieChart } from 'react-icons/fi';
 
 import { getAnalyticsStats } from '../../services/analyticsService';
-
-
-const EVENT_LABELS = {
-    'usuario.registrado': 'Registros de usuarios',
-    'user.registered': 'Registros de usuarios',
-    'otp.enviado': 'Códigos enviados',
-    'otp.sent': 'Códigos enviados',
-    'notification.sent': 'Notificaciones enviadas',
-    'notificacion.enviada': 'Notificaciones enviadas',
-    'session.created': 'Sesiones creadas',
-    'session.updated': 'Sesiones actualizadas',
-    'speaker.updated': 'Cambios en ponentes',
-    'checkout.created': 'Pagos iniciados',
-    'payment.created': 'Pagos iniciados',
-};
-
-export function formatEventLabel(value) {
-    const normalized = String(value ?? '').trim().toLowerCase();
-
-    if (!normalized) {
-        return 'Otros movimientos';
-    }
-
-    if (EVENT_LABELS[normalized]) {
-        return EVENT_LABELS[normalized];
-    }
-
-    const readable = normalized.replace(/[._-]+/g, ' ').trim();
-    return readable.charAt(0).toUpperCase() + readable.slice(1);
-}
+import { formatEventLabel } from './analyticsUtils';
 
 export default function AnalyticsWidget({ stats, loading = false, error = '' }) {
     if (loading) {
@@ -71,7 +42,7 @@ export default function AnalyticsWidget({ stats, loading = false, error = '' }) 
 
                 <div>
                     <p style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#64748b', margin: '0 0 0.5rem 0' }}>
-                        <FiPieChart /> Distribución por tipo
+                        <FiPieChart /> Distribucion por tipo
                     </p>
                     {analytics.breakdown_by_type?.length ? (
                         <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#334155' }}>
@@ -83,7 +54,7 @@ export default function AnalyticsWidget({ stats, loading = false, error = '' }) 
                         </ul>
                     ) : (
                         <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>
-                            Todavía no hay movimientos para mostrar.
+                            Todavia no hay movimientos para mostrar.
                         </p>
                     )}
                 </div>

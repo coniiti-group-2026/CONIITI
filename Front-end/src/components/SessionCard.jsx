@@ -10,7 +10,7 @@ import {
     FiAlertTriangle,
     FiLogIn,
 } from 'react-icons/fi';
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState } from 'react';
 
 import { AuthContext } from '../context/AuthContext';
 import StatusBadge from './StatusBadge';
@@ -54,11 +54,6 @@ export default function SessionCard({
 }) {
     const { user } = useContext(AuthContext);
     const [showAuthHint, setShowAuthHint] = useState(false);
-    const [localInscritos, setLocalInscritos] = useState(session.inscritos || 0);
-
-    useEffect(() => {
-        setLocalInscritos(session.inscritos || 0);
-    }, [session.inscritos]);
 
     const {
         titulo,
@@ -78,13 +73,14 @@ export default function SessionCard({
         descripcion,
         cupos_totales = 0,
     } = session;
+    const inscritosActuales = session.inscritos || 0;
 
     const lastUpdated = new Date(timestamp_actualizacion).toLocaleTimeString(
         'es-CO',
         { hour: '2-digit', minute: '2-digit' },
     );
 
-    const { disponibles, pct, estado } = cuposInfo(cupos_totales, localInscritos);
+    const { disponibles, pct, estado } = cuposInfo(cupos_totales, inscritosActuales);
     const agotado = estado === 'lleno';
 
     const handleRegisterClick = () => {
@@ -96,14 +92,12 @@ export default function SessionCard({
 
         if (!agotado && onToggleRegister) {
             onToggleRegister(session.id);
-            setLocalInscritos((prev) => (isRegistered ? Math.max(0, prev - 1) : prev + 1));
         }
     };
 
     const handleCancelRegistration = () => {
         if (onToggleRegister) {
             onToggleRegister(session.id);
-            setLocalInscritos((prev) => Math.max(0, prev - 1));
         }
     };
 

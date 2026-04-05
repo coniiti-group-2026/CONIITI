@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FiStar, FiX } from 'react-icons/fi';
 
 import SpeakerDocuments from './SpeakerDocuments';
@@ -33,13 +33,13 @@ const EMPTY_FORM = {
     cupos_totales: 0,
 };
 
+function buildInitialForm(session) {
+    return session ? { ...EMPTY_FORM, ...session } : EMPTY_FORM;
+}
+
 
 export default function SessionFormModal({ session, onSave, onClose }) {
-    const [form, setForm] = useState(EMPTY_FORM);
-
-    useEffect(() => {
-        setForm(session ? { ...EMPTY_FORM, ...session } : EMPTY_FORM);
-    }, [session]);
+    const [form, setForm] = useState(() => buildInitialForm(session));
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
