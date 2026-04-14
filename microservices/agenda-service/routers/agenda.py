@@ -1,6 +1,6 @@
 import uuid
 from typing import Optional, List
-from fastapi import APIRouter, Depends, Query, status, Request
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session as DBSession
 from database import get_db
 from schemas.agenda import (
@@ -8,9 +8,13 @@ from schemas.agenda import (
     SessionRegistrationResponse
 )
 from services import agenda_service
-from utils.security import get_current_user_id, require_staff
+from utils.security import get_current_user_id, require_staff_or_superuser
+from repositories.agenda_repository import AgendaRepository
 
 router = APIRouter(tags=["Agenda del Congreso"])
+
+def get_agenda_repo(db: DBSession = Depends(get_db)) -> AgendaRepository:
+    return AgendaRepository(db)
 
 @router.get("/", response_model=SessionListResponse)
 def list_sessions(
@@ -20,10 +24,10 @@ def list_sessions(
     event_type: Optional[str] = Query(None),
     salon: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
-    db: DBSession = Depends(get_db),
+    repo: AgendaRepository = Depends(get_agenda_repo),
 ):
     sessions = agenda_service.list_sessions(
-        db, day=day, modality=modality, track=track,
+        repo, day=day, modality=modality, track=track,
         event_type=event_type, salon=salon, search=search,
     )
     return SessionListResponse(total=len(sessions), sessions=sessions)
@@ -31,90 +35,59 @@ def list_sessions(
 @router.get("/speakers", summary="Listar ponentes únicos")
 def list_speakers(
     principal_only: bool = Query(False),
-    db: DBSession = Depends(get_db),
+    repo: AgendaRepository = Depends(get_agenda_repo),
 ):
-    from models.agenda import AgendaSession
-    query = db.query(AgendaSession)
-    if principal_only:
-        query = query.filter(AgendaSession.es_conferencista_principal == True)
-    sessions = query.order_by(AgendaSession.ponente).all()
-
-    seen = {}
-    for s in sessions:
-        name = s.ponente
-        if name not in seen or (s.foto_ponente_url and not seen[name].get("foto_ponente_url")):
-            seen[name] = {
-                "ponente": s.ponente,
-                "afiliacion": s.afiliacion,
-                "descripcion_ponente": s.descripcion_ponente,
-                "foto_ponente_url": s.foto_ponente_url,
-                "es_conferencista_principal": s.es_conferencista_principal,
-                "sesiones": []
-            }
-        seen[name]["sesiones"].append({
-            "id": str(s.id),
-            "titulo": s.titulo,
-            "dia": s.dia,
-            "hora_inicio": s.hora_inicio,
-        })
-    return list(seen.values())
+    return agenda_service.get_unique_speakers(repo, principal_only=principal_only)
 
 @router.get("/{session_id}", response_model=SessionRead)
-def get_session(session_id: uuid.UUID, db: DBSession = Depends(get_db)):
-    return agenda_service.get_session_by_id_or_raise(session_id, db)
+def get_session(session_id: uuid.UUID, repo: AgendaRepository = Depends(get_agenda_repo)):
+    return agenda_service.get_session_by_id_or_raise(session_id, repo)
 
 @router.post("/", response_model=SessionRead, status_code=status.HTTP_201_CREATED)
 def create_session(
     data: SessionCreate,
-    db: DBSession = Depends(get_db),
-    user_id: str = Depends(require_staff),
+    repo: AgendaRepository = Depends(get_agenda_repo),
+    user_id: str = Depends(require_staff_or_superuser),
 ):
-    return agenda_service.create_session(data, uuid.UUID(user_id), db)
+    return agenda_service.create_session(data, uuid.UUID(user_id), repo)
 
 @router.put("/{session_id}", response_model=SessionRead)
 def update_session(
     session_id: uuid.UUID,
     data: SessionUpdate,
-    db: DBSession = Depends(get_db),
-    user_id: str = Depends(require_staff),
+    repo: AgendaRepository = Depends(get_agenda_repo),
+    user_id: str = Depends(require_staff_or_superuser),
 ):
-    session = agenda_service.get_session_by_id_or_raise(session_id, db)
-    return agenda_service.update_session(session, data, db)
+    return agenda_service.update_session(session_id, data, repo)
 
 @router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_session(
     session_id: uuid.UUID,
-    db: DBSession = Depends(get_db),
-    user_id: str = Depends(require_staff),
+    repo: AgendaRepository = Depends(get_agenda_repo),
+    user_id: str = Depends(require_staff_or_superuser),
 ):
-    session = agenda_service.get_session_by_id_or_raise(session_id, db)
-    agenda_service.delete_session(session, db)
+    agenda_service.delete_session(session_id, repo)
 
 @router.post("/{session_id}/register", response_model=SessionRegistrationResponse)
 def toggle_registration(
     session_id: uuid.UUID,
-    db: DBSession = Depends(get_db),
+    repo: AgendaRepository = Depends(get_agenda_repo),
     user_id: str = Depends(get_current_user_id),
 ):
-    session = agenda_service.get_session_by_id_or_raise(session_id, db)
-    registered = agenda_service.toggle_registration(session, uuid.UUID(user_id), db)
-    return SessionRegistrationResponse(registered=registered, session_id=session.id)
+    registered = agenda_service.toggle_registration(session_id, uuid.UUID(user_id), repo)
+    return SessionRegistrationResponse(registered=registered, session_id=session_id)
 
 @router.get("/me/registered", response_model=List[SessionRead])
 def get_my_registered_sessions(
-    db: DBSession = Depends(get_db),
+    repo: AgendaRepository = Depends(get_agenda_repo),
     user_id: str = Depends(get_current_user_id),
 ):
-    return agenda_service.get_user_registered_sessions(uuid.UUID(user_id), db)
+    return agenda_service.get_user_registered_sessions(uuid.UUID(user_id), repo)
 
 @router.patch("/{session_id}/verify-link", response_model=SessionRead)
 def toggle_link_verified(
     session_id: uuid.UUID,
-    db: DBSession = Depends(get_db),
-    user_id: str = Depends(require_staff),
+    repo: AgendaRepository = Depends(get_agenda_repo),
+    user_id: str = Depends(require_staff_or_superuser),
 ):
-    session = agenda_service.get_session_by_id_or_raise(session_id, db)
-    session.link_verificado = not session.link_verificado
-    db.commit()
-    db.refresh(session)
-    return session
+    return agenda_service.toggle_link_verified(session_id, repo)

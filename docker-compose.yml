@@ -139,6 +139,12 @@ services:
     restart: unless-stopped
     env_file:
       - ./microservices/agenda-service/.env
+    environment:
+      - DATABASE_URL=postgresql://admin:adminpassword@agenda-db:5432/agenda_db
+      - SECRET_KEY=supersecreto123
+      - RABBITMQ_HOST=shared-rabbitmq
+      - RABBITMQ_USER=user
+      - RABBITMQ_PASS=password
     depends_on:
       - agenda-db
       - rabbitmq

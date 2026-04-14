@@ -2,8 +2,9 @@ import uuid
 import enum
 from datetime import datetime, timezone
 from sqlalchemy import (
-    Column, String, Boolean, DateTime, Enum, Integer, Text, Table
+    Column, String, Boolean, DateTime, Enum, Integer, Text, Table, ForeignKey, UniqueConstraint
 )
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from database import Base
 
@@ -41,6 +42,26 @@ session_registrations = Table(
     Column("registered_at", DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 )
 
+class Speaker(Base):
+    """Dominio independiente para resolver redundancia de datos de Conferencistas."""
+    __tablename__ = "speakers"
+    __table_args__ = (
+        UniqueConstraint('nombre', 'afiliacion', name='uix_speaker_nombre_afiliacion'),
+    )
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    nombre = Column(String(255), nullable=False, index=True)
+    afiliacion = Column(String(255), nullable=False, default="")
+    descripcion = Column(Text, nullable=True)
+    foto_url = Column(String(1000), nullable=True)
+    es_principal = Column(Boolean, nullable=False, default=False)
+    
+    sesiones = relationship("AgendaSession", back_populates="speaker")
+
+    def __repr__(self) -> str:
+        return f"<Speaker id={self.id} nombre={self.nombre}>"
+
+
 class AgendaSession(Base):
     __tablename__ = "agenda_sessions"
 
@@ -48,11 +69,32 @@ class AgendaSession(Base):
     titulo = Column(String(500), nullable=False, index=True)
     descripcion = Column(Text, nullable=True)
     
-    ponente = Column(String(255), nullable=False)
-    afiliacion = Column(String(255), nullable=True)
-    descripcion_ponente = Column(Text, nullable=True)
-    foto_ponente_url = Column(String(1000), nullable=True)
-    es_conferencista_principal = Column(Boolean, nullable=False, default=False)
+    # El Ponente ahora vive en su propio Micro-Dominio 
+    speaker_id = Column(UUID(as_uuid=True), ForeignKey("speakers.id"), nullable=False)
+    speaker = relationship("Speaker", back_populates="sesiones")
+    
+    # Propiedades dinámicas de compatibilidad "hacia atrás" para preservar contratos JSON limpios en Swagger y Pydantic.
+    @property
+    def ponente(self) -> str:
+        return self.speaker.nombre if self.speaker else ""
+
+    @property
+    def afiliacion(self):
+        if not self.speaker:
+            return None
+        return self.speaker.afiliacion if self.speaker.afiliacion.strip() != "" else None
+
+    @property
+    def descripcion_ponente(self) -> str:
+        return self.speaker.descripcion if self.speaker else None
+
+    @property
+    def foto_ponente_url(self) -> str:
+        return self.speaker.foto_url if self.speaker else None
+
+    @property
+    def es_conferencista_principal(self) -> bool:
+        return self.speaker.es_principal if self.speaker else False
     
     track = Column(Enum(SessionTrack), nullable=False)
     event_type = Column(Enum(SessionEventType), nullable=False)

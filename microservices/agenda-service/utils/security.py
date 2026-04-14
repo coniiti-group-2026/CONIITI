@@ -4,7 +4,9 @@ from fastapi import HTTPException, Request, status
 from jose import JWTError, jwt
 
 
-SECRET_KEY = os.getenv("SECRET_KEY", "supersecreto123")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise ValueError("Missing SECRET_KEY environment variable. Default insecure fallback removed.")
 ALGORITHM = "HS256"
 
 
@@ -35,30 +37,37 @@ def _extract_token(request: Request) -> str:
 
 
 def get_current_user_id(request: Request) -> str:
+    """Extrae el ID del usuario del token, solo valida autenticación (Authentication)."""
     payload = decode_token(_extract_token(request))
     user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token invalido.",
+            detail="Token invalido: subject no encontrado.",
         )
     return user_id
 
 
-def require_staff(request: Request) -> str:
+def require_staff_or_superuser(request: Request) -> str:
+    """Valida que el JWT emitido por la capa de identidad contenga los claims autorizados.
+    
+    agenda-service simplemente consume y valida estos literales para proteger sus rutas.
+    No redefine, ni es dueño, ni conoce el catálogo oficial completo de usuarios del negocio.
+    """
     payload = decode_token(_extract_token(request))
     role = payload.get("role")
-
+    
     if role not in ("staff", "superuser"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acceso denegado. Se requiere rol de staff o superior.",
+            detail="Acceso denegado. Se requiere un nivel de usuario staff o superior.",
         )
 
     user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token invalido.",
+            detail="Token invalido: subject no encontrado.",
         )
+
     return user_id
