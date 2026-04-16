@@ -23,6 +23,15 @@ def _handle_http_error(exc: httpx.HTTPError, detail: str) -> None:
     ) from exc
 
 
+def _safe_json(response: httpx.Response) -> dict[str, Any]:
+    try:
+        if not response.content:
+            return {}
+        return response.json()
+    except (ValueError, TypeError, httpx.HTTPError):
+        return {}
+
+
 def _request_users_service(
     method: str,
     path: str,
@@ -76,13 +85,13 @@ def create_profile(
 
     try:
         response = _request_users_service("POST", "/internal/profiles", json=payload)
-        response.raise_for_status()
-        return response.json()
+        return _safe_json(response)
     except httpx.HTTPStatusError as exc:
         if exc.response is not None:
+            data = _safe_json(exc.response)
             raise HTTPException(
                 status_code=exc.response.status_code,
-                detail=exc.response.json().get("detail", "No se pudo crear el perfil del usuario."),
+                detail=data.get("detail", "No se pudo crear el perfil del usuario."),
             ) from exc
         _handle_http_error(exc, "No se pudo crear el perfil del usuario.")
     except httpx.HTTPError as exc:
@@ -92,8 +101,7 @@ def create_profile(
 def get_profile(user_id: str) -> dict[str, Any]:
     try:
         response = _request_users_service("GET", f"/internal/profiles/{user_id}")
-        response.raise_for_status()
-        return response.json()
+        return _safe_json(response)
     except httpx.HTTPStatusError as exc:
         if exc.response is not None and exc.response.status_code == 404:
             raise HTTPException(status_code=404, detail="Perfil de usuario no encontrado.") from exc
@@ -105,13 +113,13 @@ def get_profile(user_id: str) -> dict[str, Any]:
 def update_profile(user_id: str, payload: dict[str, Any]) -> dict[str, Any]:
     try:
         response = _request_users_service("PATCH", f"/internal/profiles/{user_id}", json=payload)
-        response.raise_for_status()
-        return response.json()
+        return _safe_json(response)
     except httpx.HTTPStatusError as exc:
         if exc.response is not None:
+            data = _safe_json(exc.response)
             raise HTTPException(
                 status_code=exc.response.status_code,
-                detail=exc.response.json().get("detail", "No se pudo actualizar el perfil."),
+                detail=data.get("detail", "No se pudo actualizar el perfil."),
             ) from exc
         _handle_http_error(exc, "No se pudo actualizar el perfil.")
     except httpx.HTTPError as exc:

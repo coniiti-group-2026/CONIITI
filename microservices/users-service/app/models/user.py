@@ -11,7 +11,11 @@ class User(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     full_name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
-    role = Column(Enum(UserRole), nullable=False, default=UserRole.EXTERNAL)
+    role = Column(
+        Enum(UserRole, native_enum=False, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=UserRole.EXTERNAL,
+    )
     institution = Column(String, nullable=True)
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(
