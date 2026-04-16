@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, String
 
-from app.database.connection import Base
+from app.database import Base
 
 
 class OTPPurpose(str, enum.Enum):

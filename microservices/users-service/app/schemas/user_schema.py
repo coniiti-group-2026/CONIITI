@@ -4,10 +4,15 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
+from app.models.roles import UserRole
+
 def _normalize_role(value: str | None) -> str | None:
     if value is None:
         return value
-    return value.strip().lower()
+    val = value.strip().lower()
+    if val not in [r.value for r in UserRole]:
+        raise ValueError(f"El rol debe ser uno de: {[r.value for r in UserRole]}")
+    return val
 
 
 class ProfileCreateRequest(BaseModel):

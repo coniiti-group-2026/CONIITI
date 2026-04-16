@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { FiActivity, FiPieChart } from 'react-icons/fi';
 
 import { getAnalyticsStats } from '../../services/analyticsService';
-import { formatEventLabel } from './analyticsUtils';
+import { formatEventLabel } from '../../utils/analyticsUtils';
 
 export default function AnalyticsWidget({ stats, loading = false, error = '' }) {
     if (loading) {

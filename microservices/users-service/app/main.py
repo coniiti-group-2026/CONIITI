@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.database.connection import Base, engine
-from app.routes.users import router
+from app.database import Base, engine
+from app.api.users import router
 
 
 DATABASE_READY_ATTEMPTS = 15

@@ -5,7 +5,7 @@ from fastapi import Depends, FastAPI
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from .consumer import start_consumer
+from app.messaging.consumer import start_consumer
 from .database import Base, SessionLocal, engine, get_db
 from .models import NotificationEvent
 

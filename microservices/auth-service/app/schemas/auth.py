@@ -59,8 +59,8 @@ class RegisterRequest(BaseModel):
     @classmethod
     def validate_role(cls, value: str) -> str:
         normalized = _non_empty(value).lower()
-        if normalized not in {"student", "external"}:
-            raise ValueError("El auto-registro solo permite roles student o external.")
+        if normalized not in {"university_community", "external"}:
+            raise ValueError("El auto-registro solo permite roles university_community o external.")
         return normalized
 
 

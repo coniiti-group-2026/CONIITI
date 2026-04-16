@@ -15,7 +15,7 @@ let restoreSessionPromise = null;
  * @property {string}  id
  * @property {string}  full_name
  * @property {string}  email
- * @property {string}  role       - 'superuser' | 'staff' | 'student' | 'external'
+ * @property {string}  role       - 'superuser' | 'staff' | 'university_community' | 'external'
  * @property {boolean} is_verified
  * @property {boolean} is_active
  */

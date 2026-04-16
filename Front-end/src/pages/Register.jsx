@@ -164,7 +164,7 @@ export default function Register() {
                             onChange={handleChange}
                             required
                         >
-                            <option value="student">Comunidad interna (estudiante / docente)</option>
+                            <option value="university_community">Comunidad interna (estudiante / docente)</option>
                             <option value="external">Externo</option>
                         </select>
                     </div>

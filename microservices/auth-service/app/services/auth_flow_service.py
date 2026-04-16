@@ -19,14 +19,16 @@ from app.schemas.auth import (
     RegisterResponse,
     ResetPasswordRequest,
 )
-from app.security.jwt import (
+from app.utils.jwt import (
     clear_access_cookie,
     clear_oauth_state_cookie,
     generate_oauth_state,
     set_access_cookie,
     set_oauth_state_cookie,
 )
-from app.services import auth_service, email_service, event_service, oauth_service, otp_service, users_client
+from app.services import auth_service, otp_service
+from app.clients import email_service, oauth_service, users_client
+from app.messaging import event_service
 
 
 FRONTEND_ORIGIN_COOKIE = "frontend_origin"
@@ -193,12 +195,14 @@ def _build_otp_challenge_response(user, profile: dict, delivery: dict[str, str |
             or "No pudimos enviar el correo. Usa el codigo temporal mostrado para continuar."
         )
 
+    _debug = str(delivery.get("debug_otp")) if delivery.get("debug_otp") and settings.ENVIRONMENT == "development" else None
+
     return LoginResponse(
         message=message,
         requires_otp=True,
         purpose=OTPPurpose.LOGIN,
         delivery_mode=str(delivery.get("delivery_mode")) if delivery.get("delivery_mode") else None,
-        debug_otp=str(delivery.get("debug_otp")) if delivery.get("debug_otp") else None,
+        debug_otp=_debug,
         user_id=user.id,
         email=user.email,
         full_name=profile["full_name"],
@@ -295,7 +299,7 @@ def register(payload: RegisterRequest, db: Session) -> RegisterResponse:
         requires_otp=True,
         purpose=OTPPurpose.REGISTER,
         delivery_mode=str(delivery.get("delivery_mode")) if delivery.get("delivery_mode") else None,
-        debug_otp=str(delivery.get("debug_otp")) if delivery.get("debug_otp") else None,
+        debug_otp=str(delivery.get("debug_otp")) if delivery.get("debug_otp") and settings.ENVIRONMENT == "development" else None,
     )
 
 

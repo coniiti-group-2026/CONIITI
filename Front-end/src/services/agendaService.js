@@ -67,17 +67,6 @@ export async function getSessions() {
     return data.sessions ?? [];
 }
 
-/**
- * Retorna todas las sesiones de forma síncrona.
- * NOTA: Reemplazado por getSessions() asincrónico.
- * Conservado por compatibilidad con StaffDashboard.
- *
- * @deprecated Usar getSessions() en su lugar
- */
-export function getAllSessions() {
-    console.warn('[agendaService] getAllSessions() está deprecado. Usar getSessions().');
-    return [];
-}
 
 /**
  * Filtra sesiones por día, modalidad, tipo de evento y búsqueda de texto.

@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
 
-from app.database.connection import Base
+from app.database import Base
 
 
 class PasswordResetToken(Base):
