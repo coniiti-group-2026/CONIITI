@@ -15,7 +15,7 @@ import {
 import { FiActivity, FiBell, FiCalendar, FiUsers } from 'react-icons/fi';
 
 import AnalyticsWidget from './AnalyticsWidget';
-import { formatEventLabel } from './analyticsUtils';
+import { formatEventLabel } from '../../utils/analyticsUtils';
 import { getAnalyticsStats, getNotificationEvents } from '../../services/analyticsService';
 import { getSessions } from '../../services/agendaService';
 import { listStaff } from '../../services/userService';

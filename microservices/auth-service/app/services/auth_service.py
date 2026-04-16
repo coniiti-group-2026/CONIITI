@@ -14,7 +14,7 @@ from app.schemas.auth import (
     InternalUserUpdateRequest,
     RegisterRequest,
 )
-from app.security.jwt import create_access_token, hash_password, verify_password
+from app.utils.jwt import create_access_token, hash_password, verify_password
 
 
 def get_user_by_email(email: str, db: Session) -> AuthUser | None:

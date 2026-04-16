@@ -5,9 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import inspect, text
 
 from app.config import settings
-from app.database.connection import Base, engine
+from app.database import Base, engine
 from app.models import AuthUser, OTPCode, PasswordResetToken  # noqa: F401
-from app.routes.auth import router as auth_router
+from app.api.auth import router as auth_router
 
 
 DATABASE_READY_ATTEMPTS = 15

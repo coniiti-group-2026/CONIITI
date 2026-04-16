@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, String
 
-from app.database.connection import Base
+from app.database import Base
 
 
 class AuthUser(Base):

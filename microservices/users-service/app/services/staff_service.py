@@ -5,7 +5,8 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.schemas.user_schema import ProfileCreateRequest, StaffCreateRequest, StaffUpdateRequest
-from app.services import auth_client, profile_service
+from app.clients import auth_client
+from app.services import profile_service
 
 
 def _staff_auth_create_payload(user: StaffCreateRequest) -> dict[str, Any]:
@@ -62,14 +63,18 @@ def create_staff_account(user: StaffCreateRequest, db: Session):
     except HTTPException as exc:
         try:
             auth_client.delete_auth_account(auth_user["user_id"])
-        except Exception:
-            pass
+        except Exception as rollback_exc:  # noqa: BLE001
+            import logging
+            logging.getLogger(__name__).warning(
+                "Rollback fallido al eliminar cuenta auth para user %s: %s",
+                auth_user.get("user_id"), rollback_exc,
+            )
         raise exc
 
 
 def update_staff_account(user_id: str, user_data: StaffUpdateRequest, db: Session):
     user = profile_service.get_user_or_404(user_id, db)
-    if user.role.strip().lower() != "staff":
+    if user.role != "staff":
         raise HTTPException(status_code=404, detail="Cuenta staff no encontrada.")
 
     auth_payload = _staff_auth_update_payload(user_data)
@@ -87,7 +92,7 @@ def update_staff_account(user_id: str, user_data: StaffUpdateRequest, db: Sessio
 
 def delete_staff_account(user_id: str, db: Session) -> None:
     user = profile_service.get_user_or_404(user_id, db)
-    if user.role.strip().lower() != "staff":
+    if user.role != "staff":
         raise HTTPException(status_code=404, detail="Cuenta staff no encontrada.")
 
     profile_service.delete_profile_record(user, db)

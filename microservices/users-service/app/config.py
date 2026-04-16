@@ -1,5 +1,8 @@
 import os
 
+_WEAK_SECRETS = {"change-me", "supersecreto123", "coniiti-internal-token", ""}
+_ENV = os.getenv("ENVIRONMENT", "development")
+
 
 class Settings:
     DATABASE_URL = os.getenv(
@@ -16,3 +19,9 @@ class Settings:
 
 
 settings = Settings()
+
+if _ENV == "production":
+    if settings.JWT_SECRET_KEY in _WEAK_SECRETS:
+        raise ValueError("JWT_SECRET_KEY no puede ser un valor por defecto en produccion.")
+    if settings.INTERNAL_SERVICE_TOKEN in _WEAK_SECRETS:
+        raise ValueError("INTERNAL_SERVICE_TOKEN no puede ser un valor por defecto en produccion.")
