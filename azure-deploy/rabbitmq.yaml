@@ -1,0 +1,19 @@
+properties:
+  configuration:
+    ingress:
+      external: false
+      targetPort: 5672
+      transport: tcp
+      allowInsecure: false
+  template:
+    containers:
+      - image: rabbitmq:3-management-alpine
+        name: shared-rabbitmq
+        env:
+          - name: RABBITMQ_DEFAULT_USER
+            value: user
+          - name: RABBITMQ_DEFAULT_PASS
+            value: password
+        resources:
+          cpu: 0.5
+          memory: 1.0Gi

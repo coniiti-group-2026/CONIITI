@@ -1,0 +1,30 @@
+properties:
+  configuration:
+    ingress:
+      external: false
+      targetPort: 5432
+      transport: tcp
+      allowInsecure: false
+  template:
+    containers:
+      - image: docker.io/bitnamilegacy/postgresql:13
+        name: agenda-db
+        env:
+          - name: POSTGRESQL_DATABASE
+            value: agenda_db
+          - name: POSTGRESQL_USERNAME
+            value: admin
+          - name: POSTGRESQL_PASSWORD
+            value: coniitipassword
+          - name: ALLOW_EMPTY_PASSWORD
+            value: "no"
+        resources:
+          cpu: 0.5
+          memory: 1.0Gi
+        volumeMounts:
+          - volumeName: agenda-storage
+            mountPath: /bitnami/postgresql
+    volumes:
+      - name: agenda-storage
+        storageType: AzureFile
+        storageName: agenda-storage-final
