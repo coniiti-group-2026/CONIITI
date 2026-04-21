@@ -17,7 +17,9 @@ ENV/
 # ── Variables de entorno (NO subir credenciales) ──
 .env
 .env.*
-*.local
+**/.env
+**/.env.*
+microservices/*/.env
 
 # ── Python compilado ──
 __pycache__/

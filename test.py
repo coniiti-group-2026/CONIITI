@@ -1,0 +1,1 @@
+C:\Users\User\Desktop\CONIITI>  "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\\..\python.exe" -IBm azure.cli containerapp exec -n users-service -g coniiti --command "bash -c "echo -e 'import socket\ntry:\n s=socket.create_connection((\" "users-db\,5432),timeout=5)\n print(\CONNECTED\)\n print(s.recv(100))\nexcept Exception as e:\n print(\ERROR:\, e)'
