@@ -1,0 +1,14 @@
+providers:
+  file:
+    filename: /etc/traefik/dynamic.azure.yml
+    watch: false
+
+entryPoints:
+  web:
+    address: ":80"
+
+log:
+  level: INFO
+
+api:
+  dashboard: false

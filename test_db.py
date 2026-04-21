@@ -1,0 +1,1 @@
+C:\Users\User\Desktop\CONIITI>  "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\\..\python.exe" -IBm azure.cli containerapp exec -n auth-service -g coniiti --command "bash -c "echo 'from sqlalchemy import create_engine; engine=create_engine(\" "postgresql://admin:coniitipassword@auth-db:5432/auth_db\); print(\Connected!\ if engine.connect() else \\)' ; python test_db.py""

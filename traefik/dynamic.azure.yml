@@ -1,0 +1,180 @@
+http:
+  routers:
+    auth-file:
+      rule: "PathPrefix(`/api/auth`)"
+      entryPoints:
+        - web
+      service: auth-svc
+      middlewares:
+        - cors-api
+        - strip-auth
+      priority: 310
+
+    users-file:
+      rule: "PathPrefix(`/api/users`)"
+      entryPoints:
+        - web
+      service: users-svc
+      middlewares:
+        - cors-api
+        - strip-users
+      priority: 300
+
+    agenda-file:
+      rule: "PathPrefix(`/api/agenda`)"
+      entryPoints:
+        - web
+      service: agenda-svc
+      middlewares:
+        - cors-api
+        - strip-agenda
+      priority: 290
+
+    notifications-file:
+      rule: "PathPrefix(`/api/notifications`)"
+      entryPoints:
+        - web
+      service: notifications-svc
+      middlewares:
+        - cors-api
+        - strip-notifications
+      priority: 280
+
+    analytics-file:
+      rule: "PathPrefix(`/api/analytics`)"
+      entryPoints:
+        - web
+      service: analytics-svc
+      middlewares:
+        - cors-api
+        - strip-analytics
+      priority: 270
+
+    files-file:
+      rule: "PathPrefix(`/api/files`)"
+      entryPoints:
+        - web
+      service: files-svc
+      middlewares:
+        - cors-api
+        - strip-files
+      priority: 260
+
+    payments-file:
+      rule: "PathPrefix(`/api/payments`)"
+      entryPoints:
+        - web
+      service: payments-svc
+      middlewares:
+        - cors-api
+        - strip-payments
+      priority: 250
+
+    frontend-file:
+      rule: "PathPrefix(`/`)"
+      entryPoints:
+        - web
+      service: frontend-svc
+      priority: 1
+
+  middlewares:
+    cors-api:
+      headers:
+        accessControlAllowCredentials: true
+        accessControlAllowHeaders:
+          - "*"
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        accessControlAllowOriginList:
+          - "*" 
+        accessControlMaxAge: 600
+        addVaryHeader: true
+
+    strip-auth:
+      stripPrefix:
+        prefixes:
+          - /api/auth
+
+    strip-users:
+      stripPrefix:
+        prefixes:
+          - /api/users
+
+    strip-agenda:
+      stripPrefix:
+        prefixes:
+          - /api/agenda
+
+    strip-notifications:
+      stripPrefix:
+        prefixes:
+          - /api/notifications
+
+    strip-analytics:
+      stripPrefix:
+        prefixes:
+          - /api/analytics
+
+    strip-files:
+      stripPrefix:
+        prefixes:
+          - /api/files
+
+    strip-payments:
+      stripPrefix:
+        prefixes:
+          - /api/payments
+
+  services:
+    auth-svc:
+      loadBalancer:
+        passHostHeader: false
+        servers:
+          - url: "http://auth-service"
+
+    users-svc:
+      loadBalancer:
+        passHostHeader: false
+        servers:
+          - url: "http://users-service"
+
+    agenda-svc:
+      loadBalancer:
+        passHostHeader: false
+        servers:
+          - url: "http://agenda-service"
+
+    notifications-svc:
+      loadBalancer:
+        passHostHeader: false
+        servers:
+          - url: "http://notifications-service"
+
+    analytics-svc:
+      loadBalancer:
+        passHostHeader: false
+        servers:
+          - url: "http://analytics-service"
+
+    files-svc:
+      loadBalancer:
+        passHostHeader: false
+        servers:
+          - url: "http://files-service"
+
+    payments-svc:
+      loadBalancer:
+        passHostHeader: false
+        servers:
+          - url: "http://payments-service"
+
+    frontend-svc:
+      loadBalancer:
+        passHostHeader: false
+        servers:
+          - url: "http://frontend"

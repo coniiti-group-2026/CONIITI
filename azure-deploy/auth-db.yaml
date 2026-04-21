@@ -21,10 +21,4 @@ properties:
         resources:
           cpu: 0.5
           memory: 1.0Gi
-        volumeMounts:
-          - volumeName: auth-storage
-            mountPath: /bitnami/postgresql
-    volumes:
-      - name: auth-storage
-        storageType: AzureFile
-        storageName: auth-storage-final
+

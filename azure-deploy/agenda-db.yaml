@@ -21,10 +21,4 @@ properties:
         resources:
           cpu: 0.5
           memory: 1.0Gi
-        volumeMounts:
-          - volumeName: agenda-storage
-            mountPath: /bitnami/postgresql
-    volumes:
-      - name: agenda-storage
-        storageType: AzureFile
-        storageName: agenda-storage-final
+
