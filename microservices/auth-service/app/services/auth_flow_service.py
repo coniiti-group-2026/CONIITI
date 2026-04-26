@@ -275,13 +275,21 @@ def register(payload: RegisterRequest, db: Session) -> RegisterResponse:
         auth_service.delete_user(user, db)
         raise exc
 
-    code = otp_service.generate_otp(user, OTPPurpose.REGISTER, db)
-    delivery = email_service.send_otp_email(
-        to_email=user.email,
-        full_name=user.full_name,
-        code=code,
-        purpose=OTPPurpose.REGISTER.value,
-    )
+    try:
+        code = otp_service.generate_otp(user, OTPPurpose.REGISTER, db)
+        delivery = email_service.send_otp_email(
+            to_email=user.email,
+            full_name=user.full_name,
+            code=code,
+            purpose=OTPPurpose.REGISTER.value,
+        )
+    except HTTPException:
+        try:
+            users_client.delete_profile(user.id)
+        except HTTPException:
+            pass
+        auth_service.delete_user(user, db)
+        raise
 
     register_message = "Cuenta creada. Se envio un codigo de verificacion a tu correo electronico."
     if not delivery.get("delivered"):

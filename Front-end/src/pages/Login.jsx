@@ -20,6 +20,10 @@ function getDestinationForUser(userData) {
     return userData.role === 'superuser' ? '/superusuario' : userData.role === 'staff' ? '/staff' : '/';
 }
 
+function hasValidEmailFormat(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
 export default function Login() {
     const { user, setUser } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -117,6 +121,12 @@ export default function Login() {
         setInfoMessage('');
         setIsLoading(true);
         setIsRestoringOAuthSession(false);
+
+        if (!hasValidEmailFormat(email)) {
+            setError('Ingresa un correo electronico valido.');
+            setIsLoading(false);
+            return;
+        }
 
         if (rememberMe) {
             localStorage.setItem('coniiti_saved_email', email);

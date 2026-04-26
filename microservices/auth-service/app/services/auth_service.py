@@ -47,10 +47,15 @@ def register_user(payload: RegisterRequest, db: Session) -> AuthUser:
 
 def authenticate_user(email: str, password: str, db: Session) -> AuthUser:
     user = get_user_by_email(email, db)
-    if not user or not verify_password(password, user.password_hash):
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No existe una cuenta registrada con ese correo.",
+        )
+    if not verify_password(password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenciales invalidas.",
+            detail="La contrasena es incorrecta.",
         )
     if not user.is_active:
         raise HTTPException(
