@@ -119,14 +119,19 @@ export default function Login() {
         e.preventDefault();
         setError('');
         setInfoMessage('');
-        setIsLoading(true);
         setIsRestoringOAuthSession(false);
 
         if (!hasValidEmailFormat(email)) {
             setError('Ingresa un correo electronico valido.');
-            setIsLoading(false);
             return;
         }
+
+        if (password.length < 8) {
+            setError('La contrasena debe tener al menos 8 caracteres.');
+            return;
+        }
+
+        setIsLoading(true);
 
         if (rememberMe) {
             localStorage.setItem('coniiti_saved_email', email);

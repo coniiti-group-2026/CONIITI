@@ -49,6 +49,42 @@ function buildOtpDebugStorageKey(email, purpose) {
     return `coniiti_otp_debug_${String(email || '').toLowerCase()}_${purpose || 'login'}`;
 }
 
+function getValidationErrorMessage(errorItem) {
+    const field = Array.isArray(errorItem?.loc) ? errorItem.loc[errorItem.loc.length - 1] : '';
+
+    if (field === 'password' || field === 'new_password') {
+        return 'La contrasena debe tener al menos 8 caracteres.';
+    }
+
+    if (field === 'email') {
+        return 'Ingresa un correo electronico valido.';
+    }
+
+    if (field === 'code') {
+        return 'El codigo OTP debe tener 6 digitos.';
+    }
+
+    return typeof errorItem?.msg === 'string' ? errorItem.msg : null;
+}
+
+function getApiErrorMessage(errorData) {
+    if (typeof errorData.detail === 'string') {
+        return errorData.detail;
+    }
+
+    if (Array.isArray(errorData.detail)) {
+        const validationMessage = errorData.detail
+            .map(getValidationErrorMessage)
+            .find(Boolean);
+
+        if (validationMessage) {
+            return validationMessage;
+        }
+    }
+
+    return 'No se pudo completar la solicitud. Intentalo de nuevo.';
+}
+
 function hasSessionHint() {
     if (typeof document === 'undefined') {
         return true;
@@ -95,7 +131,7 @@ async function apiFetch(path, options = {}) {
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail ?? 'No se pudo completar la solicitud. Inténtalo de nuevo.');
+        throw new Error(getApiErrorMessage(errorData));
     }
 
     if (response.status === 204) return null;
