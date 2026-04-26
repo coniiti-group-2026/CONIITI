@@ -1,0 +1,24 @@
+properties:
+  configuration:
+    ingress:
+      external: false
+      targetPort: 5432
+      transport: tcp
+      allowInsecure: false
+  template:
+    scale:
+      minReplicas: 0
+      maxReplicas: 1
+    containers:
+      - image: ucatolicaconiiti.azurecr.io/shared-db:latest
+        name: shared-db
+        env:
+          - name: POSTGRES_USER
+            value: admin
+          - name: POSTGRES_PASSWORD
+            value: adminpassword
+          - name: POSTGRES_DB
+            value: default_db
+        resources:
+          cpu: 0.5
+          memory: 1.0Gi

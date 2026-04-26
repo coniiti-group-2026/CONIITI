@@ -1,0 +1,28 @@
+properties:
+  configuration:
+    ingress:
+      external: false
+      targetPort: 27017
+      transport: tcp
+      allowInsecure: false
+  template:
+    scale:
+      minReplicas: 0
+      maxReplicas: 1
+    containers:
+      - image: docker.io/bitnami/mongodb:latest
+        name: analytics-mongo
+        env:
+          - name: MONGODB_ADVERTISED_HOSTNAME
+            value: analytics-mongo
+          - name: MONGODB_ROOT_PASSWORD
+            value: adminpassword
+          - name: MONGODB_USERNAME
+            value: admin
+          - name: MONGODB_PASSWORD
+            value: adminpassword
+          - name: MONGODB_DATABASE
+            value: analytics_db
+        resources:
+          cpu: 0.5
+          memory: 1.0Gi

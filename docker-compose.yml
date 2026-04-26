@@ -1,4 +1,9 @@
+version: "3.8"
+
 services:
+  # ==========================================
+  # INFRAESTRUCTURA UNIFICADA (Ahorro Extremo)
+  # ==========================================
   traefik:
     image: traefik:v2.10
     container_name: api-gateway
@@ -8,24 +13,28 @@ services:
       - "80:80"
     volumes:
       - ./traefik:/etc/traefik
+    deploy:
+      resources:
+        limits:
+          memory: 64M
     networks:
       - coniiti_net
 
-  frontend:
-    build:
-      context: ./Front-end
-    container_name: frontend
-    restart: unless-stopped
-    networks:
-      - coniiti_net
-
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: shared-rabbitmq
+  shared-db:
+    image: postgres:16-alpine
+    container_name: shared-db
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: default_db
+    volumes:
+      - shared_postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    deploy:
+      resources:
+        limits:
+          memory: 256M
     networks:
       - coniiti_net
 
@@ -38,176 +47,139 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: adminpassword
     volumes:
       - analytics_mongo_data:/data/db
+    deploy:
+      resources:
+        limits:
+          memory: 128M
     networks:
       - coniiti_net
 
-  users-db:
-    image: postgres:16
-    container_name: users-db
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: shared-rabbitmq
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: usersdb
-    ports:
-      - "5433:5432"
-    volumes:
-      - users_data:/var/lib/postgresql/data
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    deploy:
+      resources:
+        limits:
+          memory: 128M
     networks:
       - coniiti_net
 
-  auth-db:
-    image: postgres:16
-    container_name: auth-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: authdb
-    ports:
-      - "5434:5432"
-    volumes:
-      - auth_data:/var/lib/postgresql/data
-    networks:
-      - coniiti_net
-
-  agenda-db:
-    image: postgres:16
-    container_name: agenda-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: adminpassword
-      POSTGRES_DB: agenda_db
-    ports:
-      - "5435:5432"
-    volumes:
-      - agenda_data:/var/lib/postgresql/data
-    networks:
-      - coniiti_net
-
-  notifications-db:
-    image: postgres:16
-    container_name: notifications-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: notificationsdb
-    ports:
-      - "5436:5432"
-    volumes:
-      - notifications_data:/var/lib/postgresql/data
-    networks:
-      - coniiti_net
-
-  payments-db:
-    image: postgres:16
-    container_name: payments-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: paymentsdb
-    ports:
-      - "5437:5432"
-    volumes:
-      - payments_data:/var/lib/postgresql/data
-    networks:
-      - coniiti_net
-
+  # ==========================================
+  # MICROSERVICIOS (Optimizados)
+  # ==========================================
   auth-service:
-    build:
-      context: ./microservices/auth-service
+    build: ./microservices/auth-service
     container_name: auth-service
-    restart: unless-stopped
-    env_file:
-      - ./microservices/auth-service/.env
+    environment:
+      - DATABASE_URL=postgresql://admin:adminpassword@shared-db:5432/authdb
+    deploy:
+      resources:
+        limits:
+          memory: 64M
     depends_on:
-      - auth-db
-      - users-service
-      - rabbitmq
+      - shared-db
     networks:
       - coniiti_net
 
   users-service:
-    build:
-      context: ./microservices/users-service
+    build: ./microservices/users-service
     container_name: users-service
-    restart: unless-stopped
-    env_file:
-      - ./microservices/users-service/.env
+    environment:
+      - DATABASE_URL=postgresql://admin:adminpassword@shared-db:5432/usersdb
+    deploy:
+      resources:
+        limits:
+          memory: 64M
     depends_on:
-      - users-db
+      - shared-db
     networks:
       - coniiti_net
 
   agenda-service:
-    build:
-      context: ./microservices/agenda-service
+    build: ./microservices/agenda-service
     container_name: agenda-service
-    restart: unless-stopped
-    env_file:
-      - ./microservices/agenda-service/.env
     environment:
-      - DATABASE_URL=postgresql://admin:adminpassword@agenda-db:5432/agenda_db
-      - SECRET_KEY=supersecreto123
+      - DATABASE_URL=postgresql://admin:adminpassword@shared-db:5432/agenda_db
       - RABBITMQ_HOST=shared-rabbitmq
       - RABBITMQ_USER=user
       - RABBITMQ_PASS=password
+    deploy:
+      resources:
+        limits:
+          memory: 64M
     depends_on:
-      - agenda-db
+      - shared-db
       - rabbitmq
-    networks:
-      - coniiti_net
-
-  analytics-service:
-    build:
-      context: ./microservices/analytics-service
-    container_name: analytics-service
-    restart: unless-stopped
-    env_file:
-      - ./microservices/analytics-service/.env
-    depends_on:
-      - analytics-mongo
-      - rabbitmq
-    networks:
-      - coniiti_net
-
-  files-service:
-    build:
-      context: ./microservices/files-service
-    container_name: files-service
-    restart: unless-stopped
-    env_file:
-      - ./microservices/files-service/.env
-    volumes:
-      - files_uploads:/app/uploads
     networks:
       - coniiti_net
 
   notifications-service:
-    build:
-      context: ./microservices/notifications-service
+    build: ./microservices/notifications-service
     container_name: notifications-service
-    restart: unless-stopped
-    env_file:
-      - ./microservices/notifications-service/.env
+    environment:
+      - DATABASE_URL=postgresql://admin:adminpassword@shared-db:5432/notificationsdb
+      - RABBITMQ_HOST=shared-rabbitmq
+    deploy:
+      resources:
+        limits:
+          memory: 64M
     depends_on:
-      - notifications-db
+      - shared-db
       - rabbitmq
     networks:
       - coniiti_net
 
   payments-service:
-    build:
-      context: ./microservices/payments-service
+    build: ./microservices/payments-service
     container_name: payments-service
-    restart: unless-stopped
-    env_file:
-      - ./microservices/payments-service/.env
+    environment:
+      - DATABASE_URL=postgresql://admin:adminpassword@shared-db:5432/paymentsdb
+    deploy:
+      resources:
+        limits:
+          memory: 64M
     depends_on:
-      - payments-db
+      - shared-db
+    networks:
+      - coniiti_net
+
+  analytics-service:
+    build: ./microservices/analytics-service
+    container_name: analytics-service
+    environment:
+      - MONGO_URI=mongodb://admin:adminpassword@analytics-mongo:27017
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    depends_on:
+      - analytics-mongo
+    networks:
+      - coniiti_net
+
+  files-service:
+    build: ./microservices/files-service
+    container_name: files-service
+    volumes:
+      - files_uploads:/app/uploads
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    networks:
+      - coniiti_net
+
+  frontend:
+    build: ./Front-end
+    container_name: frontend
+    deploy:
+      resources:
+        limits:
+          memory: 32M
     networks:
       - coniiti_net
 
@@ -216,10 +188,6 @@ networks:
     driver: bridge
 
 volumes:
+  shared_postgres_data:
   analytics_mongo_data:
-  users_data:
-  auth_data:
-  agenda_data:
-  notifications_data:
-  payments_data:
   files_uploads:
