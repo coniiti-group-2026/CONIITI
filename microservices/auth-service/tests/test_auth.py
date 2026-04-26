@@ -37,6 +37,7 @@ sys.modules.setdefault(
 
 from urllib.parse import parse_qs, urlparse
 
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -137,6 +138,39 @@ def test_register_success():
     assert data["user_id"]
     assert data["requires_otp"] is True
     assert data["purpose"] == "register"
+
+
+def test_register_rolls_back_when_otp_email_fails():
+    def _raise_otp_failure(**kwargs):
+        raise HTTPException(status_code=503, detail="No fue posible enviar el codigo de verificacion.")
+
+    original_send_otp_email = email_service.send_otp_email
+    email_service.send_otp_email = _raise_otp_failure
+
+    try:
+        response = client.post(
+            "/register",
+            json={
+                "email": "rollback@coniiti.edu",
+                "password": "ClaveSegura123",
+                "full_name": "Rollback User",
+                "role": "external",
+            },
+        )
+    finally:
+        email_service.send_otp_email = original_send_otp_email
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == "No fue posible enviar el codigo de verificacion."
+
+    db = TestingSessionLocal()
+    try:
+        user = db.query(AuthUser).filter(AuthUser.email == "rollback@coniiti.edu").first()
+        otp_codes = db.query(OTPCode).all()
+        assert user is None
+        assert otp_codes == []
+    finally:
+        db.close()
 
 
 def test_login_success():
@@ -293,7 +327,20 @@ def test_login_failure_with_invalid_password():
     )
 
     assert response.status_code == 401
-    assert response.json()["detail"] == "Credenciales invalidas."
+    assert response.json()["detail"] == "La contrasena es incorrecta."
+
+
+def test_login_failure_with_unknown_email():
+    response = client.post(
+        "/login",
+        json={
+            "email": "unknown@coniiti.edu",
+            "password": "ClaveSegura123",
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "No existe una cuenta registrada con ese correo."
 
 
 def test_forgot_and_reset_password_flow():
