@@ -190,6 +190,7 @@ function AppLayout() {
                             <Route path="/register" element={<Register />} />
                             <Route path="/verificar-otp" element={<OTPVerification />} />
                             <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
+                            <Route path="/reset-password" element={<ResetPassword />} />
                             <Route path="/restablecer-contrasena" element={<ResetPassword />} />
                             <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
