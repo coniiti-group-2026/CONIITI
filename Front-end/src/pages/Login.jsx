@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
 import { FaGoogle, FaMicrosoft } from 'react-icons/fa';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { AuthContext } from '../context/AuthContext';
 import {
     cacheOtpDebugInfo,
@@ -31,6 +32,7 @@ export default function Login() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -245,16 +247,28 @@ export default function Login() {
                     </div>
                     <div className={styles.inputGroup}>
                         <label htmlFor="login-password">Contraseña</label>
-                        <input
-                            type="password"
-                            id="login-password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Tu contraseña"
-                            required
-                            autoComplete="current-password"
-                            disabled={isLoading || isRestoringOAuthSession}
-                        />
+                        <div className={styles.passwordField}>
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                id="login-password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Tu contraseña"
+                                required
+                                autoComplete="current-password"
+                                disabled={isLoading || isRestoringOAuthSession}
+                            />
+                            <button
+                                type="button"
+                                className={styles.passwordToggle}
+                                onClick={() => setShowPassword((value) => !value)}
+                                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                                title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                                disabled={isLoading || isRestoringOAuthSession}
+                            >
+                                {showPassword ? <FiEyeOff /> : <FiEye />}
+                            </button>
+                        </div>
                     </div>
 
                     <div className={styles.rememberRow}>
