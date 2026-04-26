@@ -14,20 +14,20 @@ import styles from '../styles/pages/DynamicPage.module.css';
 const contactCards = [
     {
         icon: <FiMapPin />,
-        title: 'Ubicacion',
-        text: 'Bogota, carrera 13 # 47 - 30',
-        detail: 'Universidad Catolica de Colombia, Centro de Convenciones, sede 4.',
+        title: 'Ubicación',
+        text: 'Bogotá, carrera 13 # 47 - 30',
+        detail: 'Universidad Católica de Colombia, Centro de Convenciones, sede 4.',
     },
     {
         icon: <FiMail />,
-        title: 'Correo electronico',
+        title: 'Correo electrónico',
         text: 'coniiti@ucatolica.edu.co',
         detail: 'Canal principal para preguntas generales e inscripciones.',
         link: 'mailto:coniiti@ucatolica.edu.co',
     },
     {
         icon: <FiPhone />,
-        title: 'Telefonos',
+        title: 'Teléfonos',
         text: 'PBX: (601) 4433700',
         detail: 'Extensiones: 3130 / 3160 / 3190',
     },
@@ -35,7 +35,7 @@ const contactCards = [
 
 const quickQuestions = [
     'Inscripciones y registro al congreso.',
-    'Agenda, horarios y actividades academicas.',
+    'Agenda, horarios y actividades académicas.',
     'Soporte para participantes, ponentes y autores.',
 ];
 
@@ -48,7 +48,7 @@ export default function Contactos() {
                     <h1>Contacto</h1>
                     <p>
                         Estamos disponibles para orientar tus consultas sobre inscripciones, agenda,
-                        participacion academica y soporte general del congreso.
+                        participación académica y soporte general del congreso.
                     </p>
                 </div>
                 <a className={styles.heroAction} href="mailto:coniiti@ucatolica.edu.co">
@@ -76,15 +76,15 @@ export default function Contactos() {
                         ))}
                     </div>
 
-                    <aside className={styles.mapPanel} aria-label="Referencia de ubicacion">
+                    <aside className={styles.mapPanel} aria-label="Referencia de ubicación">
                         <div className={styles.mapVisual}>
                             <FiMap />
-                            <span>Universidad Catolica de Colombia</span>
+                            <span>Universidad Católica de Colombia</span>
                             <strong>Centro de Convenciones, sede 4</strong>
                         </div>
                         <div className={styles.mapFooter}>
                             <FiMapPin />
-                            <span>Bogota, carrera 13 # 47 - 30</span>
+                            <span>Bogotá, carrera 13 # 47 - 30</span>
                         </div>
                     </aside>
                 </section>
@@ -96,8 +96,8 @@ export default function Contactos() {
                             <h2>Horarios y canal de consulta</h2>
                         </div>
                         <p>
-                            Puedes escribir al correo institucional para recibir orientacion sobre el
-                            proceso de participacion. Las respuestas se atienden por los canales oficiales
+                            Puedes escribir al correo institucional para recibir orientación sobre el
+                            proceso de participación. Las respuestas se atienden por los canales oficiales
                             de la universidad y del congreso.
                         </p>
                         <a className={styles.primaryButton} href="mailto:coniiti@ucatolica.edu.co">
@@ -109,7 +109,7 @@ export default function Contactos() {
                     <article className={styles.infoPanel}>
                         <div className={styles.panelTitle}>
                             <FiHelpCircle />
-                            <h2>Preguntas rapidas</h2>
+                            <h2>Preguntas rápidas</h2>
                         </div>
                         <div className={styles.quickList}>
                             {quickQuestions.map((question) => (
