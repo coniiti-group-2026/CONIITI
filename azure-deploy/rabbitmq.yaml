@@ -6,6 +6,9 @@ properties:
       transport: tcp
       allowInsecure: false
   template:
+    scale:
+      minReplicas: 0
+      maxReplicas: 1
     containers:
       - image: rabbitmq:3-management-alpine
         name: shared-rabbitmq

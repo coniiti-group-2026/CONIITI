@@ -29,6 +29,7 @@ jobs:
     name: 🔍 Detectar cambios
     runs-on: ubuntu-latest
     outputs:
+      shared-db:          ${{ steps.filter.outputs.shared-db }}
       frontend:           ${{ steps.filter.outputs.frontend }}
       agenda-service:     ${{ steps.filter.outputs.agenda-service }}
       analytics-service:  ${{ steps.filter.outputs.analytics-service }}
@@ -47,6 +48,8 @@ jobs:
         id: filter
         with:
           filters: |
+            shared-db:
+              - 'postgres-init/**'
             frontend:
               - 'Front-end/**'
             agenda-service:
@@ -108,7 +111,35 @@ jobs:
           imageToDeploy: ${{ env.ACR_LOGIN_SERVER }}/frontend:${{ github.sha }}
 
   # ──────────────────────────────────────────────────────────
-  # JOB 3: Build & Push de cada microservicio (Python/FastAPI)
+  # JOB 3: Build & Push de la Base de Datos Compartida
+  # ──────────────────────────────────────────────────────────
+  deploy-shared-db:
+    name: 🗄️ Deploy shared-db
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.shared-db == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Login en ACR
+        run: az acr login --name ucatolicaconiiti
+      - name: Build & Push
+        run: |
+          TAG=${{ env.ACR_LOGIN_SERVER }}/shared-db:${{ github.sha }}
+          docker build -t "$TAG" -t "${{ env.ACR_LOGIN_SERVER }}/shared-db:latest" ./postgres-init
+          docker push "$TAG"
+          docker push "${{ env.ACR_LOGIN_SERVER }}/shared-db:latest"
+      - name: Actualizar Container App
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          resourceGroup: ${{ env.RESOURCE_GROUP }}
+          containerAppName: shared-db
+          imageToDeploy: ${{ env.ACR_LOGIN_SERVER }}/shared-db:${{ github.sha }}
+
+  # ──────────────────────────────────────────────────────────
+  # JOB 4: Build & Push de cada microservicio (Python/FastAPI)
   # Cada job solo se activa si su carpeta fue modificada.
   # ──────────────────────────────────────────────────────────
 
@@ -296,6 +327,7 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs:
+      - deploy-shared-db
       - deploy-frontend
       - deploy-agenda-service
       - deploy-analytics-service
