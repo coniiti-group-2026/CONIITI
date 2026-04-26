@@ -2,75 +2,88 @@
 
 .page {
     min-height: 100vh;
-    background: #f8f9fa; /* Gris muy claro web */
+    background:
+        radial-gradient(circle at top left, rgba(212, 160, 23, 0.1), transparent 28rem),
+        linear-gradient(180deg, #f8fafc 0%, #eef3f8 100%);
     padding-bottom: 5rem;
     font-family: inherit;
-    color: #333333;
+    color: var(--color-text);
 }
 
 /* ── HERO BANNER SUBPÁGINAS (PREMIUM) ── */
 .hero {
-    background: linear-gradient(135deg, #0d2b4e 0%, #001f3f 100%);
-    padding: 3.5rem 2rem;
-    text-align: center;
+    background:
+        radial-gradient(circle at 88% 18%, rgba(212, 160, 23, 0.28), transparent 17rem),
+        linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+    padding: 4.5rem 2rem;
+    text-align: left;
     position: relative;
     overflow: hidden;
+    border-bottom: 1px solid rgba(212, 160, 23, 0.3);
 }
 
 .hero::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle at 50% 120%, rgba(13, 110, 253, 0.2), transparent 60%);
+    inset: 0;
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(120deg, rgba(0, 0, 0, 0.55), transparent 70%);
     pointer-events: none;
 }
 
 .heroContent {
-    max-width: 800px;
-    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
 }
 
 .heroContent h1 {
-    font-size: 3rem;
+    font-size: clamp(2.25rem, 4vw, 3.6rem);
     margin-bottom: 1rem;
     font-weight: 800;
     color: #ffffff;
-    letter-spacing: -0.5px;
+    letter-spacing: 0;
 }
 
 .heroContent p {
     font-size: 1.1rem;
-    color: #e2e8f0;
+    color: rgba(226, 232, 240, 0.92);
     line-height: 1.6;
+    max-width: 680px;
+    margin: 0;
 }
 
 /* ── CONTENEDORES Y LISTAS FULL WIDTH ── */
 .container {
-    max-width: 95%; /* Pantalla Expandida */
-    margin: 2rem auto 0;
-    padding: 0 4rem; /* Margen respirable a los lados */
+    width: min(1180px, calc(100% - 2rem));
+    margin: 2.5rem auto 0;
+    padding: 0;
 }
 
 /* Layout de Info Cards (Para Acerca/Contacto) */
 .contactGrid, .aboutGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.1rem;
 }
 
 .card {
     background: #ffffff;
-    border-radius: 12px;
-    padding: 3rem 2rem;
-    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 10px;
+    padding: 1.5rem;
+    border: 1px solid rgba(13, 43, 78, 0.08);
     text-align: left;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 14px 34px rgba(9, 29, 54, 0.07);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(13, 110, 253, 0.08); /* Glow de acento premium */
+    transform: translateY(-4px);
+    border-color: rgba(212, 160, 23, 0.35);
+    box-shadow: 0 20px 42px rgba(9, 29, 54, 0.12);
 }
 
 /* Modificadores para que la tarjeta sea idéntica al CMS Panel */
@@ -124,38 +137,395 @@
 }
 
 .iconWrapper {
-    width: 50px;
-    height: 50px;
-    background: #e9ecef;
-    color: #0d6efd;
-    border-radius: 4px;
+    width: 46px;
+    height: 46px;
+    background: rgba(212, 160, 23, 0.13);
+    color: var(--color-accent-dark);
+    border: 1px solid rgba(212, 160, 23, 0.28);
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.4rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .card h2 {
     font-size: 1.3rem;
-    color: #212529;
-    margin-bottom: 1rem;
+    color: var(--color-primary);
+    margin-bottom: 0.7rem;
     font-weight: 700;
 }
 
 .card p, .card a {
-    color: #495057;
+    color: var(--color-text-secondary);
     line-height: 1.6;
-    margin: 0.5rem 0;
+    margin: 0.35rem 0;
     text-decoration: none;
     font-size: 1rem;
 }
 
 .card a {
-    color: #0d6efd;
+    color: var(--color-primary-light);
+    font-weight: 700;
 }
 .card a:hover {
     text-decoration: underline;
+}
+
+.heroSplit {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 2rem;
+}
+
+.heroSplit .heroContent {
+    width: min(760px, 100%);
+    margin: 0 auto 0 max(1rem, calc((100vw - 1180px) / 2));
+}
+
+.eyebrow,
+.sectionLabel {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    color: var(--color-accent);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.eyebrow {
+    margin-bottom: 0.8rem;
+}
+
+.heroPanel,
+.heroAction {
+    position: relative;
+    z-index: 1;
+    margin-right: max(1rem, calc((100vw - 1180px) / 2));
+}
+
+.heroPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    min-width: 270px;
+    padding: 1.35rem;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(212, 160, 23, 0.36);
+    border-radius: 12px;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(10px);
+}
+
+.heroPanel span,
+.heroPanel small {
+    color: rgba(255, 255, 255, 0.76);
+}
+
+.heroPanel strong {
+    color: var(--color-accent-light);
+    font-size: 1.45rem;
+}
+
+.heroAction,
+.primaryButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: 44px;
+    padding: 0.75rem 1.15rem;
+    color: var(--color-primary-dark);
+    background: linear-gradient(135deg, var(--color-accent-light), var(--color-accent));
+    border-radius: var(--radius-full);
+    font-weight: 800;
+    box-shadow: 0 14px 28px rgba(212, 160, 23, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.heroAction:hover,
+.primaryButton:hover {
+    color: var(--color-primary-dark);
+    transform: translateY(-2px);
+    filter: brightness(1.03);
+    box-shadow: 0 18px 36px rgba(212, 160, 23, 0.36);
+}
+
+.introBand,
+.whySection,
+.infoPanel,
+.mapPanel {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(13, 43, 78, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 16px 38px rgba(9, 29, 54, 0.08);
+}
+
+.introBand {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
+    gap: 2rem;
+    align-items: start;
+    padding: 1.75rem;
+    border-left: 5px solid var(--color-accent);
+}
+
+.introBand h2,
+.sectionHeading h2,
+.whyContent h2,
+.infoPanel h2 {
+    margin: 0.45rem 0 0;
+    color: var(--color-primary);
+    font-size: clamp(1.45rem, 2.5vw, 2rem);
+    letter-spacing: 0;
+}
+
+.introBand p,
+.whyContent p,
+.infoPanel p {
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+    margin: 0;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 1.2rem 0 2.5rem;
+}
+
+.statCard {
+    display: grid;
+    gap: 0.35rem;
+    min-height: 138px;
+    padding: 1.2rem;
+    background: #fff;
+    border: 1px solid rgba(13, 43, 78, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(9, 29, 54, 0.07);
+}
+
+.statIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    color: var(--color-primary);
+    background: rgba(13, 43, 78, 0.06);
+    border-radius: 10px;
+}
+
+.statCard strong {
+    color: var(--color-primary);
+    font-size: 1.45rem;
+    line-height: 1.1;
+}
+
+.statCard span {
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+}
+
+.sectionBlock {
+    margin-top: 2.5rem;
+}
+
+.sectionHeading {
+    max-width: 760px;
+    margin-bottom: 1.25rem;
+}
+
+.featureCard {
+    min-height: 100%;
+    padding: 1.35rem;
+    background: #fff;
+    border: 1px solid rgba(13, 43, 78, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(9, 29, 54, 0.07);
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.featureCard:hover,
+.contactCard:hover {
+    transform: translateY(-3px);
+    border-color: rgba(212, 160, 23, 0.35);
+    box-shadow: 0 18px 38px rgba(9, 29, 54, 0.11);
+}
+
+.featureCard h3,
+.contactCard h2 {
+    margin: 0 0 0.55rem;
+    color: var(--color-primary);
+    font-size: 1.12rem;
+}
+
+.featureCard p,
+.contactCard p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.62;
+}
+
+.whySection {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.95fr) minmax(0, 1.05fr);
+    gap: 1.5rem;
+    align-items: center;
+    margin-top: 2.5rem;
+    padding: 1.75rem;
+    background:
+        radial-gradient(circle at top right, rgba(212, 160, 23, 0.13), transparent 18rem),
+        #fff;
+}
+
+.benefitList,
+.quickList {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.benefitItem,
+.quickItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.85rem 0.95rem;
+    color: var(--color-text);
+    background: rgba(13, 43, 78, 0.04);
+    border: 1px solid rgba(13, 43, 78, 0.06);
+    border-radius: 10px;
+}
+
+.benefitItem svg,
+.quickItem svg,
+.panelTitle svg {
+    flex: 0 0 auto;
+    color: var(--color-accent-dark);
+    margin-top: 0.1rem;
+}
+
+.contactLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);
+    gap: 1.25rem;
+    align-items: stretch;
+}
+
+.contactCards {
+    display: grid;
+    gap: 1rem;
+}
+
+.contactCard {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.2rem;
+    background: #fff;
+    border: 1px solid rgba(13, 43, 78, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(9, 29, 54, 0.07);
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.contactCard .iconWrapper {
+    margin: 0;
+}
+
+.contactCard a,
+.contactMain {
+    display: inline-flex;
+    margin: 0 0 0.35rem;
+    color: var(--color-primary);
+    font-weight: 800;
+}
+
+.contactCard a:hover {
+    color: var(--color-accent-dark);
+}
+
+.mapPanel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 100%;
+}
+
+.mapVisual {
+    display: flex;
+    flex: 1;
+    min-height: 300px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 2rem;
+    text-align: center;
+    color: #fff;
+    background:
+        linear-gradient(135deg, rgba(9, 29, 54, 0.92), rgba(13, 43, 78, 0.9)),
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 18px);
+}
+
+.mapVisual svg {
+    width: 54px;
+    height: 54px;
+    color: var(--color-accent-light);
+}
+
+.mapVisual span {
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.mapVisual strong {
+    color: #fff;
+    font-size: 1.3rem;
+}
+
+.mapFooter {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 1rem 1.15rem;
+    color: var(--color-primary);
+    background: #fff;
+    border-top: 1px solid rgba(13, 43, 78, 0.08);
+    font-weight: 700;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+}
+
+.infoPanel {
+    padding: 1.4rem;
+}
+
+.panelTitle {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.8rem;
+}
+
+.panelTitle h2 {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.primaryButton {
+    margin-top: 1.1rem;
+    width: fit-content;
 }
 
 /* ── CMS GRID DE TARJETAS (Galerias, Conferencistas, etc.) ── */
@@ -312,4 +682,78 @@
 
 .modalFoot button:hover {
     background: #0b5ed7;
+}
+
+@media (max-width: 900px) {
+    .heroSplit,
+    .introBand,
+    .whySection,
+    .contactLayout,
+    .infoGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .heroSplit .heroContent,
+    .heroPanel,
+    .heroAction {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .heroPanel {
+        width: min(100%, 420px);
+    }
+
+    .statsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mapVisual {
+        min-height: 240px;
+    }
+}
+
+@media (max-width: 640px) {
+    .page {
+        padding-bottom: 3rem;
+    }
+
+    .hero {
+        padding: 3rem 1rem;
+    }
+
+    .container {
+        width: min(100% - 1rem, 1180px);
+        margin-top: 1rem;
+    }
+
+    .introBand,
+    .whySection,
+    .infoPanel {
+        padding: 1.1rem;
+    }
+
+    .statsGrid,
+    .aboutGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .statCard {
+        min-height: auto;
+    }
+
+    .contactCard {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .mapVisual {
+        min-height: 220px;
+        padding: 1.4rem;
+    }
+
+    .heroAction,
+    .primaryButton {
+        width: 100%;
+    }
 }
