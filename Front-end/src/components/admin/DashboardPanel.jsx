@@ -42,6 +42,14 @@ function buildSessionSummary(sessions) {
     };
 }
 
+function formatEventDate(value) {
+    if (!value) return '-';
+    return new Intl.DateTimeFormat('es-CO', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+    }).format(new Date(value));
+}
+
 export default function DashboardPanel() {
     const [analytics, setAnalytics] = useState(null);
     const [notifications, setNotifications] = useState([]);
@@ -228,6 +236,30 @@ export default function DashboardPanel() {
                         )}
                     </div>
                 </div>
+            </div>
+
+            <div className={styles.eventsCard}>
+                <div className={styles.eventsHeader}>
+                    <h3>Últimos 10 eventos de RabbitMQ</h3>
+                    <span>{notifications.length} eventos</span>
+                </div>
+
+                {notifications.length === 0 ? (
+                    <div className={styles.emptyEvents}>Aún no hay eventos registrados.</div>
+                ) : (
+                    <div className={styles.eventsList}>
+                        {notifications.map((event) => (
+                            <div className={styles.eventItem} key={event.event_id}>
+                                <div className={styles.eventMeta}>
+                                    <span className={styles.routingKey}>{formatEventLabel(event.routing_key)}</span>
+                                    <span className={styles.eventStatus}>{event.status}</span>
+                                    <time>{formatEventDate(event.processed_at)}</time>
+                                </div>
+                                <p>{event.action_summary}</p>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

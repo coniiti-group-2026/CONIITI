@@ -6,6 +6,7 @@ import styles from '../styles/components/SessionFormModal.module.css';
 import {
     SESSION_EVENT_TYPE,
     SESSION_MODALITY,
+    SESSION_ROOMS,
     SESSION_STATUS,
     SESSION_TRACK,
 } from '../types/session';
@@ -143,7 +144,12 @@ export default function SessionFormModal({ session, onSave, onClose }) {
 
                             <div className={styles.fieldGroup}>
                                 <label>Salon *</label>
-                                <input name="salon" value={form.salon} onChange={handleChange} required placeholder="Ej: Auditorio A" />
+                                <select name="salon" value={form.salon} onChange={handleChange} required>
+                                    <option value="" disabled>Selecciona una sala</option>
+                                    {Object.values(SESSION_ROOMS).map((room) => (
+                                        <option key={room} value={room}>{room}</option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className={styles.fieldGroup}>

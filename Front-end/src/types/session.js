@@ -27,9 +27,8 @@ export const SESSION_EVENT_TYPE = Object.freeze({
 });
 
 export const SESSION_ROOMS = Object.freeze({
-    AUDITORIO_CE4: 'Auditorio CE4',
-    SALA_MULTIPLE: 'Sala Múltiple',
-    AUDITORIO_PPAL: 'Auditorio Principal',
-    SALA_VIRTUAL: 'Sala Virtual 1',
-    SALA_VIRTUAL_2: 'Sala Virtual 2',
+    SEDE_4: 'SEDE 4',
+    PARANINFO: 'Paraninfo',
+    TORRES: 'Torres',
+    P3_SALA_COMPT: 'P3_SALA_COMPT',
 });

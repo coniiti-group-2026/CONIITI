@@ -79,6 +79,40 @@
     box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.15);
 }
 
+.passwordField {
+    position: relative;
+}
+
+.passwordField input {
+    padding-right: 2.75rem;
+}
+
+.passwordToggle {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-primary, #0D2B4E);
+    cursor: pointer;
+    transform: translateY(-50%);
+}
+
+.passwordToggle:hover {
+    color: var(--color-accent, #D4A017);
+}
+
+.passwordToggle:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 /* ── Botón principal ── */
 .submitBtn {
     width: 100%;

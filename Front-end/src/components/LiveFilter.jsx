@@ -1,14 +1,11 @@
 import { FiSearch } from 'react-icons/fi';
 
-import { SESSION_MODALITY, SESSION_EVENT_TYPE } from '../types/session';
+import { SESSION_MODALITY, SESSION_EVENT_TYPE, SESSION_ROOMS } from '../types/session';
 import styles from '../styles/components/LiveFilter.module.css';
 
 const ROOM_OPTIONS = [
     { value: '', label: 'Todas' },
-    { value: 'Auditorio CE4', label: 'CE4' },
-    { value: 'Sala M\u00faltiple', label: 'M\u00faltiple' },
-    { value: 'Auditorio Principal', label: 'Principal' },
-    { value: 'Sala Virtual', label: 'Virtual' },
+    ...Object.values(SESSION_ROOMS).map((room) => ({ value: room, label: room })),
 ];
 
 export default function LiveFilter({

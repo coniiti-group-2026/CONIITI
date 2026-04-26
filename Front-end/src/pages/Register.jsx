@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { loginParticlesConfig } from '../utils/particlesConfig';
 import { cacheOtpDebugInfo, register } from '../services/authService';
 import styles from '../styles/pages/Register.module.css';
@@ -21,6 +22,8 @@ export default function Register() {
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
         initParticlesEngine(async (engine) => {
@@ -172,29 +175,53 @@ export default function Register() {
                     <div className={styles.row}>
                         <div className={styles.inputGroup}>
                             <label htmlFor="reg-password">Contraseña* (mín. 8)</label>
-                            <input
-                                type="password"
-                                id="reg-password"
-                                name="password"
-                                value={form.password}
-                                onChange={handleChange}
-                                placeholder="Mínimo 8 caracteres"
-                                required
-                                autoComplete="new-password"
-                            />
+                            <div className={styles.passwordField}>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    id="reg-password"
+                                    name="password"
+                                    value={form.password}
+                                    onChange={handleChange}
+                                    placeholder="Mínimo 8 caracteres"
+                                    required
+                                    autoComplete="new-password"
+                                />
+                                <button
+                                    type="button"
+                                    className={styles.passwordToggle}
+                                    onClick={() => setShowPassword((value) => !value)}
+                                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                                    title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                                    disabled={isLoading}
+                                >
+                                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                                </button>
+                            </div>
                         </div>
                         <div className={styles.inputGroup}>
                             <label htmlFor="reg-confirmPassword">Confirmar contraseña*</label>
-                            <input
-                                type="password"
-                                id="reg-confirmPassword"
-                                name="confirmPassword"
-                                value={form.confirmPassword}
-                                onChange={handleChange}
-                                placeholder="Repite tu contraseña"
-                                required
-                                autoComplete="new-password"
-                            />
+                            <div className={styles.passwordField}>
+                                <input
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    id="reg-confirmPassword"
+                                    name="confirmPassword"
+                                    value={form.confirmPassword}
+                                    onChange={handleChange}
+                                    placeholder="Repite tu contraseña"
+                                    required
+                                    autoComplete="new-password"
+                                />
+                                <button
+                                    type="button"
+                                    className={styles.passwordToggle}
+                                    onClick={() => setShowConfirmPassword((value) => !value)}
+                                    aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                                    title={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                                    disabled={isLoading}
+                                >
+                                    {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
