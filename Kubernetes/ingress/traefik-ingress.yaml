@@ -1,0 +1,252 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik-ingress-controller
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: traefik-ingress-controller
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - endpoints
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses
+      - ingressclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses/status
+    verbs:
+      - update
+  - apiGroups:
+      - traefik.containo.us
+      - traefik.io
+    resources:
+      - ingressroutes
+      - ingressroutetcps
+      - ingressrouteudps
+      - middlewares
+      - middlewaretcps
+      - serverstransports
+      - tlsoptions
+      - tlsstores
+      - traefikservices
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: traefik-ingress-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: traefik-ingress-controller
+subjects:
+  - kind: ServiceAccount
+    name: traefik-ingress-controller
+    namespace: default
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: traefik
+  labels:
+    app: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      containers:
+        - name: traefik
+          image: traefik:v2.10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          args:
+            - --api.insecure
+            - --providers.kubernetesingress
+            - --providers.kubernetescrd
+            - --entrypoints.web.address=:80
+          ports:
+            - name: web
+              containerPort: 80
+            - name: dashboard
+              containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-service
+spec:
+  type: NodePort
+  selector:
+    app: traefik
+  ports:
+    - protocol: TCP
+      port: 80
+      name: web
+      targetPort: 80
+      nodePort: 30080
+    - protocol: TCP
+      port: 8080
+      name: dashboard
+      targetPort: 8080
+---
+# Middleware: quita /api/auth -> pod recibe /register, /login, etc.
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-auth-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /api/auth
+---
+# Middleware: quita /api/users -> pod recibe /users, etc.
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-users-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /api/users
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-agenda-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /api/agenda
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-notifications-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /api/notifications
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-payments-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /api/payments
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-analytics-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /api/analytics
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-files-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /api/files
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: coniiti-routes
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: PathPrefix(`/api/auth`)
+      kind: Rule
+      middlewares:
+        - name: strip-auth-prefix
+      services:
+        - name: auth-service
+          port: 80
+    - match: PathPrefix(`/api/users`)
+      kind: Rule
+      middlewares:
+        - name: strip-users-prefix
+      services:
+        - name: users-service
+          port: 80
+    - match: PathPrefix(`/api/agenda`)
+      kind: Rule
+      middlewares:
+        - name: strip-agenda-prefix
+      services:
+        - name: agenda-service
+          port: 80
+    - match: PathPrefix(`/api/notifications`)
+      kind: Rule
+      middlewares:
+        - name: strip-notifications-prefix
+      services:
+        - name: notifications-service
+          port: 80
+    - match: PathPrefix(`/api/payments`)
+      kind: Rule
+      middlewares:
+        - name: strip-payments-prefix
+      services:
+        - name: payments-service
+          port: 80
+    - match: PathPrefix(`/api/analytics`)
+      kind: Rule
+      middlewares:
+        - name: strip-analytics-prefix
+      services:
+        - name: analytics-service
+          port: 80
+    - match: PathPrefix(`/api/files`)
+      kind: Rule
+      middlewares:
+        - name: strip-files-prefix
+      services:
+        - name: files-service
+          port: 80
+    - match: PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: frontend-service
+          port: 80
