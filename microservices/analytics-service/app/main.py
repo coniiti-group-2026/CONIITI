@@ -1,6 +1,6 @@
 import asyncio
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import database, events_collection
@@ -31,8 +31,11 @@ async def startup_event():
 
 @app.get("/health")
 async def health_check():
-    await database.command("ping")
-    return {"status": "ok", "service": "analytics-service"}
+    try:
+        await database.command("ping")
+        return {"status": "ok", "service": "analytics-service", "database": "connected"}
+    except Exception as e:
+        raise HTTPException(status_code=503, detail="Conexión con base de datos fallida")
 
 
 @app.get("/")

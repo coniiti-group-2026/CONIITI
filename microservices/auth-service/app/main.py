@@ -2,6 +2,7 @@ import time
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import HTTPException
 from sqlalchemy import inspect, text
 
 from app.config import settings
@@ -74,6 +75,14 @@ app.add_middleware(
 
 app.include_router(auth_router)
 
+@app.get("/health")
+def health_check():
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        return {"status": "ok", "database": "connected"}
+    except Exception as e:
+        raise HTTPException(status_code=503, detail="Conexión con base de datos fallida")
 
 @app.get("/")
 def root():

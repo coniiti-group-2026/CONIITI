@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-db-deployment
+  labels:
+    app: payments-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payments-db
+  template:
+    metadata:
+      labels:
+        app: payments-db
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16-alpine
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "300m"
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: "admin"
+        - name: POSTGRES_PASSWORD
+          value: "adminpassword"
+        - name: POSTGRES_DB
+          value: "paymentsdb"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-db-service
+spec:
+  type: ClusterIP
+  selector:
+    app: payments-db
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432

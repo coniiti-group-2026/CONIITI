@@ -1,43 +1,20 @@
-name: CD - Deploy to Azure Container Apps
+name: CI - Build Frontend
 
-# ============================================================
-# Se activa únicamente en push a la rama principal.
-# ============================================================
 on:
   push:
     branches:
       - main
 
-# Evita que dos deploys corran en paralelo sobre el mismo entorno.
 concurrency:
   group: production-deploy
   cancel-in-progress: false
 
-# ============================================================
-# Variables de entorno globales del pipeline
-# ============================================================
-env:
-  ACR_LOGIN_SERVER: ucatolicaconiiti.azurecr.io
-  RESOURCE_GROUP: coniiti
-
 jobs:
-  # ──────────────────────────────────────────────────────────
-  # JOB 1: Detectar qué carpetas cambiaron en este push.
-  # Esto evita reconstruir servicios que no fueron modificados.
-  # ──────────────────────────────────────────────────────────
   detect-changes:
     name: 🔍 Detectar cambios
     runs-on: ubuntu-latest
     outputs:
-      shared-db:          ${{ steps.filter.outputs.shared-db }}
-      frontend:           ${{ steps.filter.outputs.frontend }}
-      agenda-service:     ${{ steps.filter.outputs.agenda-service }}
-      analytics-service:  ${{ steps.filter.outputs.analytics-service }}
-      auth-service:       ${{ steps.filter.outputs.auth-service }}
-      files-service:      ${{ steps.filter.outputs.files-service }}
-      notifications-service: ${{ steps.filter.outputs.notifications-service }}
-      payments-service:   ${{ steps.filter.outputs.payments-service }}
-      users-service:      ${{ steps.filter.outputs.users-service }}
+      frontend: ${{ steps.filter.outputs.frontend }}
 
     steps:
       - name: Checkout del código
@@ -48,31 +25,11 @@ jobs:
         id: filter
         with:
           filters: |
-            shared-db:
-              - 'postgres-init/**'
             frontend:
               - 'Front-end/**'
-            agenda-service:
-              - 'microservices/agenda-service/**'
-            analytics-service:
-              - 'microservices/analytics-service/**'
-            auth-service:
-              - 'microservices/auth-service/**'
-            files-service:
-              - 'microservices/files-service/**'
-            notifications-service:
-              - 'microservices/notifications-service/**'
-            payments-service:
-              - 'microservices/payments-service/**'
-            users-service:
-              - 'microservices/users-service/**'
 
-  # ──────────────────────────────────────────────────────────
-  # JOB 2: Build & Push del Frontend (React/Vite + Nginx)
-  # Solo se ejecuta si hubo cambios en Front-end/
-  # ──────────────────────────────────────────────────────────
-  deploy-frontend:
-    name: 🌐 Deploy Frontend
+  build-frontend:
+    name: 🌐 Build Frontend
     runs-on: ubuntu-latest
     needs: detect-changes
     if: needs.detect-changes.outputs.frontend == 'true'
@@ -81,270 +38,10 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      - name: Login en Azure
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Instalar dependencias
+        working-directory: ./Front-end
+        run: npm ci
 
-      - name: Login en ACR
-        run: az acr login --name ucatolicaconiiti
-
-      - name: Build & Push imagen Frontend
-        run: |
-          IMAGE_TAG=${{ env.ACR_LOGIN_SERVER }}/frontend:${{ github.sha }}
-          IMAGE_LATEST=${{ env.ACR_LOGIN_SERVER }}/frontend:latest
-
-          docker build \
-            --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
-            -t "$IMAGE_TAG" \
-            -t "$IMAGE_LATEST" \
-            ./Front-end
-
-          docker push "$IMAGE_TAG"
-          docker push "$IMAGE_LATEST"
-
-      - name: Actualizar Container App - Frontend
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: frontend
-          imageToDeploy: ${{ env.ACR_LOGIN_SERVER }}/frontend:${{ github.sha }}
-
-  # ──────────────────────────────────────────────────────────
-  # JOB 3: Build & Push de la Base de Datos Compartida
-  # ──────────────────────────────────────────────────────────
-  deploy-shared-db:
-    name: 🗄️ Deploy shared-db
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.shared-db == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Login en ACR
-        run: az acr login --name ucatolicaconiiti
-      - name: Build & Push
-        run: |
-          TAG=${{ env.ACR_LOGIN_SERVER }}/shared-db:${{ github.sha }}
-          docker build -t "$TAG" -t "${{ env.ACR_LOGIN_SERVER }}/shared-db:latest" ./postgres-init
-          docker push "$TAG"
-          docker push "${{ env.ACR_LOGIN_SERVER }}/shared-db:latest"
-      - name: Actualizar Container App
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: shared-db
-          imageToDeploy: ${{ env.ACR_LOGIN_SERVER }}/shared-db:${{ github.sha }}
-
-  # ──────────────────────────────────────────────────────────
-  # JOB 4: Build & Push de cada microservicio (Python/FastAPI)
-  # Cada job solo se activa si su carpeta fue modificada.
-  # ──────────────────────────────────────────────────────────
-
-  deploy-agenda-service:
-    name: 📅 Deploy agenda-service
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.agenda-service == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Login en ACR
-        run: az acr login --name ucatolicaconiiti
-      - name: Build & Push
-        run: |
-          TAG=${{ env.ACR_LOGIN_SERVER }}/agenda-service:${{ github.sha }}
-          docker build -t "$TAG" -t "${{ env.ACR_LOGIN_SERVER }}/agenda-service:latest" ./microservices/agenda-service
-          docker push "$TAG"
-          docker push "${{ env.ACR_LOGIN_SERVER }}/agenda-service:latest"
-      - name: Actualizar Container App
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: agenda-service
-          imageToDeploy: ${{ env.ACR_LOGIN_SERVER }}/agenda-service:${{ github.sha }}
-
-  deploy-analytics-service:
-    name: 📊 Deploy analytics-service
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.analytics-service == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Login en ACR
-        run: az acr login --name ucatolicaconiiti
-      - name: Build & Push
-        run: |
-          TAG=${{ env.ACR_LOGIN_SERVER }}/analytics-service:${{ github.sha }}
-          docker build -t "$TAG" -t "${{ env.ACR_LOGIN_SERVER }}/analytics-service:latest" ./microservices/analytics-service
-          docker push "$TAG"
-          docker push "${{ env.ACR_LOGIN_SERVER }}/analytics-service:latest"
-      - name: Actualizar Container App
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: analytics-service
-          imageToDeploy: ${{ env.ACR_LOGIN_SERVER }}/analytics-service:${{ github.sha }}
-
-  deploy-auth-service:
-    name: 🔐 Deploy auth-service
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.auth-service == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Login en ACR
-        run: az acr login --name ucatolicaconiiti
-      - name: Build & Push
-        run: |
-          TAG=${{ env.ACR_LOGIN_SERVER }}/auth-service:${{ github.sha }}
-          docker build -t "$TAG" -t "${{ env.ACR_LOGIN_SERVER }}/auth-service:latest" ./microservices/auth-service
-          docker push "$TAG"
-          docker push "${{ env.ACR_LOGIN_SERVER }}/auth-service:latest"
-      - name: Actualizar Container App
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: auth-service
-          imageToDeploy: ${{ env.ACR_LOGIN_SERVER }}/auth-service:${{ github.sha }}
-
-  deploy-files-service:
-    name: 📁 Deploy files-service
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.files-service == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Login en ACR
-        run: az acr login --name ucatolicaconiiti
-      - name: Build & Push
-        run: |
-          TAG=${{ env.ACR_LOGIN_SERVER }}/files-service:${{ github.sha }}
-          docker build -t "$TAG" -t "${{ env.ACR_LOGIN_SERVER }}/files-service:latest" ./microservices/files-service
-          docker push "$TAG"
-          docker push "${{ env.ACR_LOGIN_SERVER }}/files-service:latest"
-      - name: Actualizar Container App
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: files-service
-          imageToDeploy: ${{ env.ACR_LOGIN_SERVER }}/files-service:${{ github.sha }}
-
-  deploy-notifications-service:
-    name: 🔔 Deploy notifications-service
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.notifications-service == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Login en ACR
-        run: az acr login --name ucatolicaconiiti
-      - name: Build & Push
-        run: |
-          TAG=${{ env.ACR_LOGIN_SERVER }}/notifications-service:${{ github.sha }}
-          docker build -t "$TAG" -t "${{ env.ACR_LOGIN_SERVER }}/notifications-service:latest" ./microservices/notifications-service
-          docker push "$TAG"
-          docker push "${{ env.ACR_LOGIN_SERVER }}/notifications-service:latest"
-      - name: Actualizar Container App
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: notifications-service
-          imageToDeploy: ${{ env.ACR_LOGIN_SERVER }}/notifications-service:${{ github.sha }}
-
-  deploy-payments-service:
-    name: 💳 Deploy payments-service
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.payments-service == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Login en ACR
-        run: az acr login --name ucatolicaconiiti
-      - name: Build & Push
-        run: |
-          TAG=${{ env.ACR_LOGIN_SERVER }}/payments-service:${{ github.sha }}
-          docker build -t "$TAG" -t "${{ env.ACR_LOGIN_SERVER }}/payments-service:latest" ./microservices/payments-service
-          docker push "$TAG"
-          docker push "${{ env.ACR_LOGIN_SERVER }}/payments-service:latest"
-      - name: Actualizar Container App
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: payments-service
-          imageToDeploy: ${{ env.ACR_LOGIN_SERVER }}/payments-service:${{ github.sha }}
-
-  deploy-users-service:
-    name: 👤 Deploy users-service
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.users-service == 'true'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Login en ACR
-        run: az acr login --name ucatolicaconiiti
-      - name: Build & Push
-        run: |
-          TAG=${{ env.ACR_LOGIN_SERVER }}/users-service:${{ github.sha }}
-          docker build -t "$TAG" -t "${{ env.ACR_LOGIN_SERVER }}/users-service:latest" ./microservices/users-service
-          docker push "$TAG"
-          docker push "${{ env.ACR_LOGIN_SERVER }}/users-service:latest"
-      - name: Actualizar Container App
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: users-service
-          imageToDeploy: ${{ env.ACR_LOGIN_SERVER }}/users-service:${{ github.sha }}
-
-  # ──────────────────────────────────────────────────────────
-  # JOB FINAL: Notificación de resultado global del deploy
-  # Se ejecuta siempre, sin importar si algún job fue skipped.
-  # ──────────────────────────────────────────────────────────
-  notify-result:
-    name: ✅ Resumen del Deploy
-    runs-on: ubuntu-latest
-    if: always()
-    needs:
-      - deploy-shared-db
-      - deploy-frontend
-      - deploy-agenda-service
-      - deploy-analytics-service
-      - deploy-auth-service
-      - deploy-files-service
-      - deploy-notifications-service
-      - deploy-payments-service
-      - deploy-users-service
-    steps:
-      - name: Reportar estado final
-        run: |
-          echo "=============================================="
-          echo "  RESUMEN DEL PIPELINE CD - CONIITI"
-          echo "  Commit: ${{ github.sha }}"
-          echo "  Autor:  ${{ github.actor }}"
-          echo "  Rama:   ${{ github.ref_name }}"
-          echo "=============================================="
-          echo "Todos los jobs han finalizado."
-          echo "Revisa la pestaña 'Actions' de GitHub para ver"
-          echo "el resultado individual de cada despliegue."
+      - name: Build Frontend
+        working-directory: ./Front-end
+        run: npm run build

@@ -1,7 +1,7 @@
 import threading
 import time
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -43,9 +43,11 @@ def health_check():
     db = SessionLocal()
     try:
         total_events = db.query(NotificationEvent).count()
+        return {"status": "ok", "service": "notifications", "stored_events": total_events}
+    except Exception as e:
+        raise HTTPException(status_code=503, detail="Conexión con base de datos fallida")
     finally:
         db.close()
-    return {"status": "ok", "service": "notifications", "stored_events": total_events}
 
 
 @app.get("/events")
