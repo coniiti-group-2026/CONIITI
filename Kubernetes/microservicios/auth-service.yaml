@@ -5,7 +5,7 @@ metadata:
 data:
   DB_HOST: "auth-db-service"
   DB_PORT: "5432"
-  DB_NAME: "authdb"
+  DB_NAME: "auth"
   DB_USER: "admin"
   USERS_SERVICE_URL: "http://users-service"
   RABBITMQ_HOST: "rabbitmq-service"
