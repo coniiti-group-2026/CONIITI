@@ -31,13 +31,13 @@ git --version
 
 ## Configuracion Local
 
-El repositorio incluye `.env.example` con placeholders. Para usar valores propios en local:
+El repositorio incluye `.env.example` con placeholders. Para una demo local puedes omitir `.env.local` y el script usara defaults seguros de desarrollo. Para usar valores propios:
 
 ```powershell
 Copy-Item .env.example .env.local
 ```
 
-Edita `.env.local` solo en tu maquina. Ese archivo esta ignorado por Git y no debe contener credenciales reales de produccion. El script de Minikube puede funcionar sin `.env.local`, usando valores locales de desarrollo.
+Edita `.env.local` solo en tu maquina y reemplaza cualquier valor `replace-with-*`. Ese archivo esta ignorado por Git y no debe contener credenciales reales de produccion. El script de Minikube puede funcionar sin `.env.local`, usando valores locales de desarrollo.
 
 ## Opcion 1: Docker Compose
 

@@ -16,6 +16,11 @@ function Write-Step {
     Write-Host "==> $Message" -ForegroundColor Cyan
 }
 
+function Test-PlaceholderValue {
+    param([string]$Value)
+    return $Value -like "replace-with-*"
+}
+
 function Read-LocalEnv {
     if (Test-Path $EnvFile) {
         Get-Content $EnvFile | ForEach-Object {
@@ -25,7 +30,11 @@ function Read-LocalEnv {
             }
 
             $parts = $line.Split("=", 2)
-            [Environment]::SetEnvironmentVariable($parts[0].Trim(), $parts[1].Trim(), "Process")
+            $key = $parts[0].Trim()
+            $value = $parts[1].Trim()
+            if (-not (Test-PlaceholderValue $value)) {
+                [Environment]::SetEnvironmentVariable($key, $value, "Process")
+            }
         }
     }
 
@@ -61,7 +70,8 @@ function Read-LocalEnv {
     }
 
     foreach ($key in $defaults.Keys) {
-        if (-not [Environment]::GetEnvironmentVariable($key, "Process")) {
+        $currentValue = [Environment]::GetEnvironmentVariable($key, "Process")
+        if (-not $currentValue -or (Test-PlaceholderValue $currentValue)) {
             [Environment]::SetEnvironmentVariable($key, $defaults[$key], "Process")
         }
     }
