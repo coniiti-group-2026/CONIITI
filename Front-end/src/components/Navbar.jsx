@@ -29,6 +29,7 @@ const LINKS = [
     { name: 'Memorias', path: '/memorias' },
     { name: 'Acerca de', path: '/acerca-de' },
     { name: 'Contacto', path: '/contacto' },
+    { name: 'Estado', path: '/estado' },
 ];
 
 export default function Navbar({ registeredCount = 0 }) {

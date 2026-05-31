@@ -1,6 +1,9 @@
+import json
+import logging
 import time
+import uuid
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
 from sqlalchemy import inspect, text
@@ -74,6 +77,41 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+
+logging.basicConfig(level=logging.INFO)
+access_logger = logging.getLogger("coniiti.access")
+
+
+@app.middleware("http")
+async def structured_access_log(request: Request, call_next):
+    request_id = request.headers.get("x-request-id", str(uuid.uuid4()))
+    started_at = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        duration_ms = round((time.perf_counter() - started_at) * 1000, 2)
+        access_logger.exception(json.dumps({
+            "service": "auth-service",
+            "request_id": request_id,
+            "method": request.method,
+            "path": request.url.path,
+            "status_code": 500,
+            "duration_ms": duration_ms,
+            "error": str(exc),
+        }))
+        raise
+
+    duration_ms = round((time.perf_counter() - started_at) * 1000, 2)
+    response.headers["x-request-id"] = request_id
+    access_logger.info(json.dumps({
+        "service": "auth-service",
+        "request_id": request_id,
+        "method": request.method,
+        "path": request.url.path,
+        "status_code": response.status_code,
+        "duration_ms": duration_ms,
+    }))
+    return response
 
 @app.get("/health")
 def health_check():

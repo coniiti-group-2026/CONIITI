@@ -1,10 +1,43 @@
-import useContentSection from '../hooks/useContentSection';
+import { useEffect, useState } from 'react';
+
+import { fetchCommitteeMembers, getCommitteeFallback } from '../services/committeeService';
 import styles from '../styles/pages/DynamicPage.module.css';
 import PersonCard from '../components/PersonCard';
 
 
 export default function Comite() {
-    const { items: members, loading } = useContentSection('comite');
+    const [members, setMembers] = useState(() => getCommitteeFallback());
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadMembers() {
+            setLoading(true);
+            setError('');
+            try {
+                const data = await fetchCommitteeMembers();
+                if (!cancelled) {
+                    setMembers(data);
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    setError(err.message);
+                    setMembers(getCommitteeFallback());
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadMembers();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     return (
         <div className={styles.page}>
@@ -16,6 +49,12 @@ export default function Comite() {
             </div>
 
             <div className={styles.container}>
+                {error && (
+                    <div className={styles.empty}>
+                        <h3>Modo local sin API</h3>
+                        <p>{error}</p>
+                    </div>
+                )}
                 {loading ? (
                     <div className={styles.empty}>
                         <h3>Cargando</h3>

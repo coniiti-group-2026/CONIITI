@@ -15,6 +15,24 @@ from app.repositories.file_storage import (
 )
 
 
+ALLOWED_FILE_EXTENSIONS = {
+    "csv",
+    "doc",
+    "docx",
+    "gif",
+    "jpeg",
+    "jpg",
+    "pdf",
+    "png",
+    "ppt",
+    "pptx",
+    "txt",
+    "webp",
+    "xls",
+    "xlsx",
+}
+
+
 class FilesApplicationService:
     def __init__(
         self,
@@ -122,7 +140,11 @@ class FilesApplicationService:
         }
 
     async def upload_file(self, request: Request, file: UploadFile) -> dict:
-        file_extension = file.filename.split(".")[-1] if "." in file.filename else "bin"
+        original_name = file.filename or ""
+        file_extension = original_name.rsplit(".", 1)[-1].lower() if "." in original_name else ""
+        if not file_extension or file_extension not in ALLOWED_FILE_EXTENSIONS:
+            raise HTTPException(status_code=422, detail="Tipo de archivo no permitido.")
+
         unique_filename = f"{uuid.uuid4()}.{file_extension}"
         file_path = self._binary_storage.resolve_path(unique_filename)
 
@@ -135,7 +157,7 @@ class FilesApplicationService:
         asset = {
             "id": str(uuid.uuid4()),
             "filename": unique_filename,
-            "original_name": file.filename,
+            "original_name": original_name,
             "url": self._build_public_download_url(request, unique_filename),
             "content_type": file.content_type,
             "size_bytes": file_path.stat().st_size,

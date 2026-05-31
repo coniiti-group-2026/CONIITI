@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rabbitmq-deployment
+  name: rabbitmq
   labels:
     app: rabbitmq
 spec:
@@ -19,11 +19,11 @@ spec:
         image: rabbitmq:3-management-alpine
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "100m"
+            memory: "128Mi"
+            cpu: "50m"
           limits:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: "256Mi"
+            cpu: "250m"
         ports:
         - containerPort: 5672
         - containerPort: 15672
@@ -31,7 +31,10 @@ spec:
         - name: RABBITMQ_DEFAULT_USER
           value: "user"
         - name: RABBITMQ_DEFAULT_PASS
-          value: "password"
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: RABBITMQ_PASS
 ---
 apiVersion: v1
 kind: Service

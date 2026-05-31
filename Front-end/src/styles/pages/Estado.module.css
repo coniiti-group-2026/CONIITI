@@ -1,0 +1,174 @@
+.page {
+    min-height: 100vh;
+    padding: 2rem min(4vw, 3rem) 4rem;
+    background: #f6f8fb;
+    color: var(--color-text);
+}
+
+.hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    width: min(1180px, 100%);
+    margin: 0 auto 1.5rem;
+    padding: 2rem 0 1rem;
+    border-bottom: 1px solid rgba(13, 43, 78, 0.12);
+}
+
+.eyebrow {
+    display: inline-flex;
+    margin-bottom: 0.6rem;
+    color: var(--color-accent-dark);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.hero h1 {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.hero p {
+    max-width: 680px;
+    margin: 0.8rem 0 0;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.refreshButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 42px;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    background: var(--color-primary);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.refreshButton:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.summaryBand {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    width: min(1180px, 100%);
+    margin: 0 auto 1rem;
+}
+
+.summaryBand div,
+.card,
+.empty {
+    background: #fff;
+    border: 1px solid rgba(13, 43, 78, 0.08);
+    border-radius: 8px;
+    box-shadow: 0 12px 30px rgba(9, 29, 54, 0.07);
+}
+
+.summaryBand div {
+    display: grid;
+    gap: 0.25rem;
+    padding: 1.2rem;
+}
+
+.summaryBand strong {
+    color: var(--color-primary);
+    font-size: 1.45rem;
+}
+
+.summaryBand span {
+    color: var(--color-text-secondary);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem;
+    width: min(1180px, 100%);
+    margin: 0 auto;
+}
+
+.card {
+    padding: 1.1rem;
+}
+
+.cardHead {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+}
+
+.cardHead svg {
+    width: 24px;
+    height: 24px;
+}
+
+.ok .cardHead svg {
+    color: #15803d;
+}
+
+.down .cardHead svg {
+    color: #b91c1c;
+}
+
+.card h2 {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: 1.1rem;
+}
+
+.card dl {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+}
+
+.card dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.card dt {
+    color: var(--color-text-secondary);
+}
+
+.card dd {
+    margin: 0;
+    color: var(--color-text);
+    font-weight: 700;
+}
+
+.empty {
+    grid-column: 1 / -1;
+    padding: 3rem;
+    text-align: center;
+    color: var(--color-text-secondary);
+}
+
+@media (max-width: 720px) {
+    .hero,
+    .summaryBand {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        display: grid;
+        align-items: start;
+    }
+
+    .refreshButton {
+        width: 100%;
+        justify-content: center;
+    }
+}
