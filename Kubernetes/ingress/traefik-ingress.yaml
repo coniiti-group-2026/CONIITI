@@ -146,6 +146,15 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
+  name: strip-committees-prefix
+spec:
+  stripPrefix:
+    prefixes:
+      - /api/committees
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
   name: strip-agenda-prefix
 spec:
   stripPrefix:
@@ -207,6 +216,13 @@ spec:
       kind: Rule
       middlewares:
         - name: strip-users-prefix
+      services:
+        - name: users-service
+          port: 80
+    - match: PathPrefix(`/api/committees`)
+      kind: Rule
+      middlewares:
+        - name: strip-committees-prefix
       services:
         - name: users-service
           port: 80

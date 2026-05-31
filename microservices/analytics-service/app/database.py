@@ -3,7 +3,10 @@ import os
 import motor.motor_asyncio
 
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:adminpassword@analytics-mongo:27017/?authSource=admin")
+MONGO_URI = os.getenv(
+    "MONGO_URI",
+    "mongodb://admin:local-dev-mongo-password@analytics-mongo:27017/?authSource=admin",
+)
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "analytics_db")
 
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)

@@ -1,65 +1,85 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: agenda-db-pvc
+  name: shared-postgres-pvc
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 2Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shared-postgres-init
+data:
+  init-db.sql: |
+    CREATE DATABASE usersdb;
+    CREATE DATABASE authdb;
+    CREATE DATABASE agenda_db;
+    CREATE DATABASE notificationsdb;
+    CREATE DATABASE paymentsdb;
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: agenda-db-deployment
+  name: shared-postgres
   labels:
-    app: agenda-db
+    app: shared-postgres
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: agenda-db
+      app: shared-postgres
   template:
     metadata:
       labels:
-        app: agenda-db
+        app: shared-postgres
     spec:
       containers:
       - name: postgres
         image: postgres:16-alpine
         resources:
           requests:
-            memory: "128Mi"
+            memory: "192Mi"
             cpu: "50m"
           limits:
-            memory: "256Mi"
+            memory: "384Mi"
             cpu: "300m"
         ports:
         - containerPort: 5432
         env:
         - name: POSTGRES_USER
           value: "admin"
-        - name: POSTGRES_PASSWORD
-          value: "adminpassword"
         - name: POSTGRES_DB
-          value: "agenda_db"
+          value: "default_db"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: shared-postgres-secret
+              key: POSTGRES_PASSWORD
         volumeMounts:
         - name: postgres-data
           mountPath: /var/lib/postgresql/data
+        - name: postgres-init
+          mountPath: /docker-entrypoint-initdb.d
       volumes:
       - name: postgres-data
         persistentVolumeClaim:
-          claimName: agenda-db-pvc
+          claimName: shared-postgres-pvc
+      - name: postgres-init
+        configMap:
+          name: shared-postgres-init
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: agenda-db-service
+  name: shared-postgres-service
 spec:
   type: ClusterIP
   selector:
-    app: agenda-db
+    app: shared-postgres
   ports:
   - protocol: TCP
     port: 5432

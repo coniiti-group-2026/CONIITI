@@ -1,9 +1,4 @@
-version: "3.8"
-
 services:
-  # ==========================================
-  # INFRAESTRUCTURA UNIFICADA (Ahorro Extremo)
-  # ==========================================
   traefik:
     image: traefik:v2.10
     container_name: api-gateway
@@ -25,9 +20,9 @@ services:
     container_name: shared-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: adminpassword
-      POSTGRES_DB: default_db
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-dev-postgres-password}
+      POSTGRES_DB: ${POSTGRES_DEFAULT_DB:-default_db}
     volumes:
       - shared_postgres_data:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d
@@ -43,8 +38,8 @@ services:
     container_name: analytics-mongo
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: adminpassword
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-local-dev-mongo-password}
     volumes:
       - analytics_mongo_data:/data/db
     deploy:
@@ -59,8 +54,8 @@ services:
     container_name: shared-rabbitmq
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-local-dev-rabbitmq-password}
     deploy:
       resources:
         limits:
@@ -68,20 +63,38 @@ services:
     networks:
       - coniiti_net
 
-  # ==========================================
-  # MICROSERVICIOS (Optimizados)
-  # ==========================================
   auth-service:
     build: ./microservices/auth-service
     container_name: auth-service
     environment:
-      - DATABASE_URL=postgresql://admin:adminpassword@shared-db:5432/authdb
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/authdb
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-jwt-secret-change-me-32-chars}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-local-dev-internal-token}
+      USERS_SERVICE_URL: http://users-service:8000
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-local-dev-rabbitmq-password}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-coniiti_events}
+      SMTP_HOST: ${SMTP_HOST:-smtp.example.local}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-CONIITI}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost/api/auth/oauth/google/callback}
+      MICROSOFT_TENANT_ID: ${MICROSOFT_TENANT_ID:-common}
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
+      MICROSOFT_REDIRECT_URI: ${MICROSOFT_REDIRECT_URI:-http://localhost/api/auth/oauth/microsoft/callback}
     deploy:
       resources:
         limits:
-          memory: 64M
+          memory: 96M
     depends_on:
       - shared-db
+      - rabbitmq
     networks:
       - coniiti_net
 
@@ -89,13 +102,17 @@ services:
     build: ./microservices/users-service
     container_name: users-service
     environment:
-      - DATABASE_URL=postgresql://admin:adminpassword@shared-db:5432/usersdb
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/usersdb
+      AUTH_SERVICE_URL: http://auth-service:8000
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-jwt-secret-change-me-32-chars}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-local-dev-internal-token}
     deploy:
       resources:
         limits:
-          memory: 64M
+          memory: 96M
     depends_on:
       - shared-db
+      - auth-service
     networks:
       - coniiti_net
 
@@ -103,14 +120,15 @@ services:
     build: ./microservices/agenda-service
     container_name: agenda-service
     environment:
-      - DATABASE_URL=postgresql://admin:adminpassword@shared-db:5432/agenda_db
-      - RABBITMQ_HOST=shared-rabbitmq
-      - RABBITMQ_USER=user
-      - RABBITMQ_PASS=password
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/agenda_db
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-jwt-secret-change-me-32-chars}
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-local-dev-rabbitmq-password}
     deploy:
       resources:
         limits:
-          memory: 64M
+          memory: 96M
     depends_on:
       - shared-db
       - rabbitmq
@@ -121,12 +139,15 @@ services:
     build: ./microservices/notifications-service
     container_name: notifications-service
     environment:
-      - DATABASE_URL=postgresql://admin:adminpassword@shared-db:5432/notificationsdb
-      - RABBITMQ_HOST=shared-rabbitmq
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/notificationsdb
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-local-dev-rabbitmq-password}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-coniiti_events}
     deploy:
       resources:
         limits:
-          memory: 64M
+          memory: 96M
     depends_on:
       - shared-db
       - rabbitmq
@@ -137,11 +158,16 @@ services:
     build: ./microservices/payments-service
     container_name: payments-service
     environment:
-      - DATABASE_URL=postgresql://admin:adminpassword@shared-db:5432/paymentsdb
+      PAYMENTS_DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/paymentsdb
+      PAYMENT_PROVIDER_MODE: ${PAYMENT_PROVIDER_MODE:-mock}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET:-}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN:-}
     deploy:
       resources:
         limits:
-          memory: 64M
+          memory: 96M
     depends_on:
       - shared-db
     networks:
@@ -151,13 +177,19 @@ services:
     build: ./microservices/analytics-service
     container_name: analytics-service
     environment:
-      - MONGO_URI=mongodb://admin:adminpassword@analytics-mongo:27017
+      MONGO_URI: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-local-dev-mongo-password}@analytics-mongo:27017/${MONGO_DB_NAME:-analytics_db}?authSource=admin
+      MONGO_DB_NAME: ${MONGO_DB_NAME:-analytics_db}
+      RABBITMQ_HOST: shared-rabbitmq
+      RABBITMQ_USER: ${RABBITMQ_USER:-user}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-local-dev-rabbitmq-password}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE:-coniiti_events}
     deploy:
       resources:
         limits:
-          memory: 64M
+          memory: 96M
     depends_on:
       - analytics-mongo
+      - rabbitmq
     networks:
       - coniiti_net
 
@@ -169,7 +201,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 64M
+          memory: 96M
     networks:
       - coniiti_net
 
@@ -179,7 +211,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 32M
+          memory: 48M
     networks:
       - coniiti_net
 

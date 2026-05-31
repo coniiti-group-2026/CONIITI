@@ -3,18 +3,10 @@ kind: ConfigMap
 metadata:
   name: analytics-service-config
 data:
-  DB_HOST: "analytics-mongo-service"
-  DB_PORT: "27017"
   MONGO_DB_NAME: "analytics_db"
   RABBITMQ_HOST: "rabbitmq-service"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: analytics-service-secret
-type: Opaque
-stringData:
-  MONGO_URI: "mongodb://admin:adminpassword@analytics-mongo-service:27017/analytics_db?authSource=admin"
+  RABBITMQ_USER: "user"
+  RABBITMQ_EXCHANGE: "coniiti_events"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -35,15 +27,15 @@ spec:
       containers:
       - name: analytics-service
         image: analytics-service:latest
+        imagePullPolicy: IfNotPresent
         command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "50m"
+            memory: "64Mi"
+            cpu: "40m"
           limits:
-            memory: "256Mi"
-            cpu: "300m"
-        imagePullPolicy: IfNotPresent
+            memory: "176Mi"
+            cpu: "250m"
         ports:
         - containerPort: 8000
         envFrom:
@@ -53,19 +45,19 @@ spec:
             name: analytics-service-secret
         livenessProbe:
           httpGet:
-            path: /
+            path: /health
             port: 8000
           initialDelaySeconds: 30
           timeoutSeconds: 5
-          periodSeconds: 10
+          periodSeconds: 15
           failureThreshold: 6
         readinessProbe:
           httpGet:
-            path: /
+            path: /health
             port: 8000
           initialDelaySeconds: 15
           timeoutSeconds: 5
-          periodSeconds: 5
+          periodSeconds: 10
           failureThreshold: 6
 ---
 apiVersion: v1

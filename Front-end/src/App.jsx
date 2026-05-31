@@ -35,6 +35,7 @@ const StaffDashboard = lazy(() => import('./pages/StaffDashboard'));
 const SuperuserDashboard = lazy(() => import('./pages/SuperuserDashboard'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Estado = lazy(() => import('./pages/Estado'));
 
 export default function App() {
     return (
@@ -186,6 +187,7 @@ function AppLayout() {
                             <Route path="/autores" element={<Autores />} />
                             <Route path="/galerias" element={<Galerias />} />
                             <Route path="/paginas" element={<Pages />} />
+                            <Route path="/estado" element={<Estado />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
                             <Route path="/verificar-otp" element={<OTPVerification />} />

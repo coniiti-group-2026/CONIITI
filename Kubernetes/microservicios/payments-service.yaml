@@ -3,24 +3,8 @@ kind: ConfigMap
 metadata:
   name: payments-service-config
 data:
-  DB_HOST: "payments-db-service"
-  DB_PORT: "5432"
-  DB_NAME: "paymentsdb"
-  DB_USER: "admin"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: payments-service-secret
-type: Opaque
-stringData:
-  DB_PASSWORD: "adminpassword"
-  PAYMENTS_DATABASE_URL: "postgresql://admin:adminpassword@payments-db-service:5432/paymentsdb"
-  PAYMENT_PROVIDER_MODE: "live"
+  PAYMENT_PROVIDER_MODE: "mock"
   PUBLIC_APP_URL: "http://localhost"
-  PAYPAL_CLIENT_ID: "AZs7KpV8MGkfMDk0BBT415LvMYHiexF37cNpDLAauiNsPk6-ESS9ehFmJRFDJijD5qrR7aez74CF5nh8"
-  PAYPAL_CLIENT_SECRET: "EEaz7x6Tw3Ex8nxmypSC_-KfTU7Ny3g0SlBEJriluIPFT46gPvyg2zAK1NkJ7rDk1PGK0OiQ8GHZsKS1"
-  MP_ACCESS_TOKEN: "APP_USR-7850609746536602-040218-60d728be834cc490681ee1f5b3df0c6f-3311077426"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -41,15 +25,15 @@ spec:
       containers:
       - name: payments-service
         image: payments-service:latest
+        imagePullPolicy: IfNotPresent
         command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "50m"
+            memory: "64Mi"
+            cpu: "40m"
           limits:
-            memory: "256Mi"
-            cpu: "300m"
-        imagePullPolicy: IfNotPresent
+            memory: "176Mi"
+            cpu: "250m"
         ports:
         - containerPort: 8000
         envFrom:
@@ -61,14 +45,14 @@ spec:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 15
-          periodSeconds: 10
+          initialDelaySeconds: 20
+          periodSeconds: 15
         readinessProbe:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 5
+          initialDelaySeconds: 8
+          periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service

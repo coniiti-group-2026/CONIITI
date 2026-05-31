@@ -1,42 +1,120 @@
-name: CI/CD CONIITI - Control de Calidad
+name: CONIITI Local Delivery Validation
 
-# ---
 on:
   push:
     branches:
+      - main
       - desarrollo-rediseno
   pull_request:
     branches:
-      - desarrollo-rediseno
       - main
+      - desarrollo-rediseno
 
 jobs:
-  verificacion:
-    name: Revisión Automática
+  frontend:
+    name: Frontend lint, tests and build
     runs-on: ubuntu-latest
-
-    # le indica a GitHub que todo esto debe correr en la carpeta Frontend
     defaults:
       run:
         working-directory: ./Front-end
-
     steps:
-      - name: Descargar el código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: Front-end/package-lock.json
 
-      - name: Instalar dependencias
+      - name: Install dependencies
         run: npm ci
 
-      - name: Paso 1 - Ejecutar Linting
+      - name: Lint
         run: npm run lint
 
-      - name: Paso 2 - Pruebas Unitarias
-        run: npm run test
+      - name: Unit tests
+        run: npm test
 
-      - name: Paso 3 - Build Estricto
+      - name: Strict build
         run: npm run build:strict
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - auth-service
+          - users-service
+          - agenda-service
+          - payments-service
+    defaults:
+      run:
+        working-directory: ./microservices/${{ matrix.service }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pytest
+
+      - name: Run tests
+        env:
+          PYTHONPATH: .
+        run: python -m pytest -q
+
+  docker:
+    name: Docker image builds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build service images
+        run: |
+          docker build -t auth-service:ci ./microservices/auth-service
+          docker build -t users-service:ci ./microservices/users-service
+          docker build -t agenda-service:ci ./microservices/agenda-service
+          docker build -t notifications-service:ci ./microservices/notifications-service
+          docker build -t payments-service:ci ./microservices/payments-service
+          docker build -t analytics-service:ci ./microservices/analytics-service
+          docker build -t files-service:ci ./microservices/files-service
+          docker build -t frontend-app:ci ./Front-end
+
+  manifests:
+    name: Kubernetes and Compose validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate docker compose
+        run: docker compose config --quiet
+
+      - name: Validate Kubernetes YAML syntax
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyyaml
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          for path in Path("Kubernetes").rglob("*.yaml"):
+              docs = list(yaml.safe_load_all(path.read_text(encoding="utf-8")))
+              if not any(docs):
+                  raise SystemExit(f"{path} no contiene recursos YAML")
+          print("Kubernetes YAML OK")
+          PY

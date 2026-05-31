@@ -3,23 +3,8 @@ kind: ConfigMap
 metadata:
   name: agenda-service-config
 data:
-  DB_HOST: "agenda-db-service"
-  DB_PORT: "5432"
-  DB_NAME: "agenda_db"
-  DB_USER: "admin"
   RABBITMQ_HOST: "rabbitmq-service"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: agenda-service-secret
-type: Opaque
-stringData:
-  DB_PASSWORD: "adminpassword"
-  DATABASE_URL: "postgresql://admin:adminpassword@agenda-db-service:5432/agenda_db"
   RABBITMQ_USER: "user"
-  RABBITMQ_PASS: "password"
-  JWT_SECRET_KEY: "change-this-in-production-please"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -40,15 +25,15 @@ spec:
       containers:
       - name: agenda-service
         image: agenda-service:latest
+        imagePullPolicy: IfNotPresent
         command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "50m"
+            memory: "64Mi"
+            cpu: "40m"
           limits:
-            memory: "256Mi"
-            cpu: "300m"
-        imagePullPolicy: IfNotPresent
+            memory: "176Mi"
+            cpu: "250m"
         ports:
         - containerPort: 8000
         envFrom:
@@ -60,14 +45,14 @@ spec:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 15
-          periodSeconds: 10
+          initialDelaySeconds: 20
+          periodSeconds: 15
         readinessProbe:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 5
+          initialDelaySeconds: 8
+          periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
