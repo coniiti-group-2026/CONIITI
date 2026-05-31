@@ -4,7 +4,7 @@ metadata:
   name: files-uploads-pvc
 spec:
   accessModes:
-    - ReadWriteOnce # O ReadWriteMany si tienes almacenamiento compatible (NFS, Azure File)
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
@@ -16,7 +16,7 @@ metadata:
   labels:
     app: files-service
 spec:
-  replicas: 1 # Para evitar problemas de concurrencia con ReadWriteOnce en disco local, usar 1 réplica.
+  replicas: 1
   selector:
     matchLabels:
       app: files-service
@@ -28,8 +28,15 @@ spec:
       containers:
       - name: files-service
         image: files-service:latest
-        command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
         imagePullPolicy: IfNotPresent
+        command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+        resources:
+          requests:
+            memory: "48Mi"
+            cpu: "30m"
+          limits:
+            memory: "160Mi"
+            cpu: "200m"
         ports:
         - containerPort: 8000
         volumeMounts:
@@ -40,13 +47,13 @@ spec:
             path: /health
             port: 8000
           initialDelaySeconds: 15
-          periodSeconds: 10
+          periodSeconds: 15
         readinessProbe:
           httpGet:
             path: /health
             port: 8000
           initialDelaySeconds: 5
-          periodSeconds: 5
+          periodSeconds: 10
       volumes:
       - name: uploads-storage
         persistentVolumeClaim:

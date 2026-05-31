@@ -1,28 +1,23 @@
-# Usa una imagen oficial de Python ligera
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+ENV PIP_NO_CACHE_DIR=1
+
+COPY requirements.txt .
+RUN python -m venv /opt/venv \
+    && /opt/venv/bin/pip install --upgrade pip \
+    && /opt/venv/bin/pip install -r requirements.txt
+
 FROM python:3.11-slim
 
-# Evita que Python escriba archivos .pyc en el disco
-ENV PYTHONDONTWRITEBYTECODE 1
-# Evita que Python ponga en búfer la salida estándar (para ver logs en tiempo real)
-ENV PYTHONUNBUFFERED 1
+ENV PATH="/opt/venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-# Establecemos el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Instalamos dependencias del sistema necesarias para compilar paquetes (como psycopg2)
-RUN apt-get update \
-    && apt-get install -y gcc libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copiamos el archivo de requerimientos e instalamos
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copiamos el resto del código del microservicio
+COPY --from=builder /opt/venv /opt/venv
 COPY . .
 
-# Exponemos el puerto que usará uvicorn internamente
 EXPOSE 8000
-
-# Comando para arrancar la aplicación
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

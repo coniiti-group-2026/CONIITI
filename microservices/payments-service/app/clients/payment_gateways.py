@@ -14,7 +14,7 @@ PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID", "TEST_PAYPAL_CLIENT_ID")
 PAYPAL_CLIENT_SECRET = os.getenv("PAYPAL_CLIENT_SECRET", "TEST_PAYPAL_SECRET")
 PAYPAL_API_BASE = "https://api-m.sandbox.paypal.com"
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "TEST-placeholder-access-token")
-PAYMENT_PROVIDER_MODE = os.getenv("PAYMENT_PROVIDER_MODE", "live").strip().lower()
+PAYMENT_PROVIDER_MODE = os.getenv("PAYMENT_PROVIDER_MODE", "mock").strip().lower()
 PUBLIC_APP_URL = os.getenv("PUBLIC_APP_URL", "http://localhost").rstrip("/")
 
 _PAYMENT_PLACEHOLDERS = {"TEST_PAYPAL_CLIENT_ID", "TEST_PAYPAL_SECRET", "TEST-placeholder-access-token", ""}

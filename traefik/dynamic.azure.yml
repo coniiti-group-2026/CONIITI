@@ -20,6 +20,15 @@ http:
         - strip-users
       priority: 300
 
+    committees-file:
+      rule: "PathPrefix(`/api/committees`)"
+      entryPoints:
+        - web
+      service: users-svc
+      middlewares:
+        - strip-committees
+      priority: 295
+
     agenda-file:
       rule: "PathPrefix(`/api/agenda`)"
       entryPoints:
@@ -104,6 +113,11 @@ http:
       stripPrefix:
         prefixes:
           - /api/users
+
+    strip-committees:
+      stripPrefix:
+        prefixes:
+          - /api/committees
 
     strip-agenda:
       stripPrefix:

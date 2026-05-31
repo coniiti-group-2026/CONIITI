@@ -47,7 +47,8 @@ from app.config import settings
 from app.database import Base, get_db
 from app.main import app
 from app.models import AuthUser, OTPCode, OTPPurpose
-from app.services import email_service, event_service, oauth_service, users_client
+from app.clients import email_service, oauth_service, users_client
+from app.messaging import event_service
 
 
 engine = create_engine(

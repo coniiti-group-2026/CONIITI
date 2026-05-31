@@ -7,6 +7,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.models.otp_code import OTPCode
 from app.models.auth_user import AuthUser
 from app.models.password_reset_token import PasswordResetToken
 from app.schemas.auth import (
@@ -100,6 +101,10 @@ def get_or_create_oauth_user(email: str, full_name: str, db: Session) -> tuple[A
 
 
 def delete_user(user: AuthUser, db: Session) -> None:
+    db.query(OTPCode).filter(OTPCode.user_id == user.id).delete(synchronize_session=False)
+    db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user.id).delete(
+        synchronize_session=False
+    )
     db.delete(user)
     db.commit()
 

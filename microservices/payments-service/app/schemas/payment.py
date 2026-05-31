@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
@@ -6,9 +6,14 @@ from app.models.payment import PaymentStatus, PaymentRegion, PaymentProvider
 
 class PaymentCreate(BaseModel):
     user_id: UUID
-    amount: float
-    currency: Optional[str] = "COP"
+    amount: float = Field(..., gt=0)
+    currency: Optional[str] = Field(default="COP", min_length=3, max_length=3)
     payment_region: PaymentRegion
+
+    @field_validator("currency")
+    @classmethod
+    def normalize_currency(cls, value: str | None) -> str:
+        return (value or "COP").strip().upper()
 
 class PaymentResponse(BaseModel):
     id: UUID
