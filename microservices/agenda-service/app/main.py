@@ -5,6 +5,7 @@ import uuid
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy import text
 
 from app.database import Base, engine
@@ -41,6 +42,8 @@ app = FastAPI(
     version="1.0.0",
     description="Microservicio para la gestion de sesiones, ponencias y horarios del Congreso CONIITI.",
 )
+
+Instrumentator().instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,
