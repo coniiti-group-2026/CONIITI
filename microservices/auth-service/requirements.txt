@@ -10,3 +10,5 @@ python-jose[cryptography]==3.5.0
 pytest==8.4.2
 SQLAlchemy==2.0.44
 uvicorn
+prometheus-fastapi-instrumentator
+

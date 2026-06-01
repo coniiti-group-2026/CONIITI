@@ -7,3 +7,5 @@ pydantic-settings==2.1.0
 httpx==0.25.2
 mercadopago==2.2.3
 python-jose[cryptography]==3.3.0
+prometheus-fastapi-instrumentator
+
