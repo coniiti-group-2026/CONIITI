@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiUser, FiCheckCircle, FiXCircle, FiCalendar, FiUsers } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiUser, FiCheckCircle, FiXCircle, FiCalendar, FiUsers, FiSliders } from 'react-icons/fi';
 
 import { listStaff, createStaff, updateStaff, deleteStaff } from '../services/userService';
 import StaffFormModal from '../components/StaffFormModal';
 import StaffDashboard from './StaffDashboard';
+import GuestCountryPanel from '../components/admin/GuestCountryPanel';
 import styles from '../styles/pages/SuperuserDashboard.module.css';
 
 export default function SuperuserDashboard() {
@@ -20,6 +21,13 @@ export default function SuperuserDashboard() {
                     Operación general
                 </button>
                 <button
+                    className={`${styles.tab} ${activeTab === 'customization' ? styles.tabActive : ''}`}
+                    onClick={() => setActiveTab('customization')}
+                >
+                    <FiSliders style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
+                    Pais invitado
+                </button>
+                <button
                     className={`${styles.tab} ${activeTab === 'staff' ? styles.tabActive : ''}`}
                     onClick={() => setActiveTab('staff')}
                 >
@@ -29,6 +37,7 @@ export default function SuperuserDashboard() {
             </div>
 
             {activeTab === 'admin' && <StaffDashboard />}
+            {activeTab === 'customization' && <GuestCountryPanel />}
             {activeTab === 'staff' && <StaffPanel />}
         </div>
     );

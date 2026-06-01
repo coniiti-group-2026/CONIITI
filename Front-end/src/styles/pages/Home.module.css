@@ -36,8 +36,21 @@
 .heroOverlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 31, 63, 0.75); 
+    background:
+        linear-gradient(135deg, rgba(0, 31, 63, 0.78), rgba(0, 31, 63, 0.68)),
+        radial-gradient(circle at 12% 18%, rgba(var(--guest-color-one-rgb), 0.28), transparent 28%),
+        radial-gradient(circle at 86% 22%, rgba(var(--guest-color-three-rgb), 0.22), transparent 30%);
     z-index: 2;
+}
+
+.guestRibbon {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    height: 8px;
+    background: var(--guest-flag-gradient);
 }
 
 .heroContent {
@@ -54,14 +67,17 @@
 .badge {
     display: inline-block;
     padding: 0.4rem 1.2rem;
-    background: #ffc107;
-    color: #333;
+    background:
+        linear-gradient(135deg, rgba(9, 29, 54, 0.24), rgba(9, 29, 54, 0.18)),
+        linear-gradient(90deg, var(--guest-color-one), var(--guest-color-three));
+    color: #ffffff;
     border-radius: 4px;
     font-size: 0.85rem;
     font-weight: 700;
     text-transform: uppercase;
     margin-bottom: 1.5rem;
     letter-spacing: 1px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
 }
 
 .heroContent h1 {
@@ -488,6 +504,42 @@
 }
 @media (max-width: 600px) {
     .speakersGrid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 900px) and (max-width: 1366px) and (max-height: 768px) {
+    .hero {
+        height: calc(100vh - 68px);
+        min-height: 520px;
+    }
+
+    .badge {
+        margin-bottom: 1rem;
+    }
+
+    .heroContent h1 {
+        font-size: 3.2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .heroContent p {
+        font-size: 1rem;
+        margin-bottom: 1.1rem;
+    }
+
+    .countdownContainer {
+        margin-top: 1rem;
+        margin-bottom: 1.2rem;
+        gap: 1rem;
+    }
+
+    .countdownBox {
+        min-width: 78px;
+        padding: 0.75rem 1rem;
+    }
+
+    .countdownValue {
+        font-size: 1.8rem;
+    }
 }
 
 .centerBtn { text-align: center; }

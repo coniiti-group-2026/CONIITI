@@ -191,6 +191,45 @@
     }
 }
 
+@media (min-width: 900px) and (max-width: 1366px) and (max-height: 768px) {
+    .overlay {
+        align-items: flex-start;
+        padding: 0.75rem;
+    }
+
+    .modal {
+        max-width: 760px;
+        max-height: calc(100vh - 1.5rem);
+    }
+
+    .modalHeader {
+        padding: 1rem 1.25rem 0.75rem;
+    }
+
+    .modalBody {
+        padding: 1rem 1.25rem;
+    }
+
+    .grid {
+        gap: 0.8rem;
+    }
+
+    .fieldGroup input,
+    .fieldGroup select,
+    .fieldGroup textarea {
+        padding-top: 0.55rem;
+        padding-bottom: 0.55rem;
+    }
+
+    .fieldGroup textarea {
+        min-height: 64px;
+    }
+
+    .modalFooter {
+        padding: 0.8rem 1.25rem 1rem;
+    }
+}
+
 /* ── Preview de foto del ponente ── */
 .photoPreview {
     margin-top: 8px;
