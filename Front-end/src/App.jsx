@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { useState, useEffect, Suspense, lazy } from 'react';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { EventThemeProvider } from './context/EventThemeContext';
 import { getRegisteredSessions, toggleRegistration } from './services/agendaService';
 import styles from './styles/App.module.css';
 
@@ -40,9 +41,11 @@ const Estado = lazy(() => import('./pages/Estado'));
 export default function App() {
     return (
         <AuthProvider>
-            <BrowserRouter>
-                <AppLayout />
-            </BrowserRouter>
+            <EventThemeProvider>
+                <BrowserRouter>
+                    <AppLayout />
+                </BrowserRouter>
+            </EventThemeProvider>
         </AuthProvider>
     );
 }

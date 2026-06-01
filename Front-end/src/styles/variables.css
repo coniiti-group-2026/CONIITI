@@ -13,6 +13,15 @@
   --color-accent-light: #E8BA3A;
   --color-accent-dark: #B8890F;
 
+  /* -- Pais invitado / acentos configurables -- */
+  --guest-color-one: #009246;
+  --guest-color-two: #ffffff;
+  --guest-color-three: #ce2b37;
+  --guest-color-one-rgb: 0, 146, 70;
+  --guest-color-two-rgb: 255, 255, 255;
+  --guest-color-three-rgb: 206, 43, 55;
+  --guest-flag-gradient: linear-gradient(90deg, #009246 0 33%, #ffffff 33% 66%, #ce2b37 66% 100%);
+
   /* — Semántico — */
   --color-danger: #C41E2F;
   --color-danger-light: #F8D7DA;
@@ -85,5 +94,5 @@
 
   /* — Diseño — */
   --container-max: 1200px;
-  --header-height: 72px;
+  --header-height: 76px;
 }

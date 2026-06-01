@@ -15,6 +15,7 @@ import {
 
 import SpeakerCard from '../components/SpeakerCard';
 import { useAuth } from '../context/AuthContext';
+import { useEventTheme } from '../context/EventThemeContext';
 import { getApiBase } from '../services/apiConfig';
 import { createCheckout, PAYMENT_PLANS } from '../services/paymentService';
 import styles from '../styles/pages/Home.module.css';
@@ -200,6 +201,7 @@ function getAccessHighlights(user) {
 
 export default function Home() {
     const { user, isLoading } = useAuth();
+    const { theme } = useEventTheme();
     const [keynotes, setKeynotes] = useState([]);
     const [checkoutLoadingKey, setCheckoutLoadingKey] = useState('');
     const [checkoutError, setCheckoutError] = useState('');
@@ -246,9 +248,10 @@ export default function Home() {
                     <img src="/colosseum_italy_hero.png" alt="Colosseum Background Italy" fetchPriority="high" width="1920" height="1080" />
                 </div>
                 <div className={styles.heroOverlay}></div>
+                {theme.siteAccentsEnabled && <div className={styles.guestRibbon} aria-hidden="true" />}
 
                 <div className={styles.heroContent}>
-                    <span className={styles.badge}>Edición Italia 2026</span>
+                    <span className={styles.badge}>{theme.editionLabel}</span>
                     <h1>XI CONIITI 2026</h1>
                     <p>
                         {user
