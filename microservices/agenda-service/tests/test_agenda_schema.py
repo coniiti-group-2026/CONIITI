@@ -6,7 +6,7 @@ from pydantic import ValidationError
 import pytest
 
 from app.models.agenda import SessionEventType, SessionModality, SessionTrack
-from app.schemas.agenda import SessionCreate
+from app.schemas.agenda import SessionCreate, SessionUpdate
 
 
 def base_payload():
@@ -37,3 +37,38 @@ def test_session_create_requires_track():
 
     with pytest.raises(ValidationError):
         SessionCreate(**payload)
+
+
+def test_session_create_rejects_day_outside_conference_range():
+    payload = base_payload()
+    payload["dia"] = "2026-10-05"
+
+    with pytest.raises(ValidationError):
+        SessionCreate(**payload)
+
+
+def test_session_create_rejects_invalid_time_range():
+    payload = base_payload()
+    payload["hora_inicio"] = "10:00"
+    payload["hora_fin"] = "09:00"
+
+    with pytest.raises(ValidationError):
+        SessionCreate(**payload)
+
+
+def test_session_create_rejects_negative_capacity():
+    payload = base_payload()
+    payload["cupos_totales"] = -1
+
+    with pytest.raises(ValidationError):
+        SessionCreate(**payload)
+
+
+def test_session_update_rejects_invalid_virtual_link():
+    with pytest.raises(ValidationError):
+        SessionUpdate(link_virtual="javascript:alert(1)")
+
+
+def test_session_update_rejects_blank_required_text():
+    with pytest.raises(ValidationError):
+        SessionUpdate(titulo="   ")

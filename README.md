@@ -180,6 +180,17 @@ El workflow `.github/workflows/ci.yml` valida lint, pruebas, build frontend, aud
 - No hay secretos reales versionados para el despliegue local.
 - `.env.local` queda fuera de Git.
 - Kubernetes recibe secretos mediante `scripts/minikube-local.ps1`.
-- Las contrasenas de usuarios se almacenan con hashing adaptativo.
-- La autenticacion usa tokens JWT firmados.
+- Las contrasenas de usuarios se almacenan con hashing adaptativo mediante `passlib`.
+- La autenticacion usa tokens JWT firmados. El token de sesion viaja en cookie `HttpOnly` y los microservicios validan la firma con `JWT_SECRET_KEY`.
+- Los endpoints administrativos de archivos y contenido (`/api/files/upload`, `/api/files/assets/*`, `/api/files/documents/*`, `/api/files/content/cards/*`) requieren rol `staff` o `superuser`.
+- Los pagos requieren usuario autenticado. Un usuario normal solo puede crear o consultar pagos cuyo `user_id` coincida con el `sub` del JWT; `staff` y `superuser` pueden operar pagos de otros usuarios.
+- La agenda valida en servidor dias permitidos del congreso, formato y orden de horas, cupos no negativos y URLs virtuales `http/https`.
 - Cualquier credencial real que haya sido expuesta previamente debe revocarse fuera del repositorio.
+
+### Matriz de acceso
+
+| Rol | Permisos principales |
+| --- | --- |
+| `superuser` | Administracion completa de usuarios staff, comites, agenda, archivos/contenido y pagos. |
+| `staff` | Gestion operativa de agenda, archivos/contenido y pagos autorizados. |
+| `university_community` / `external` | Consulta publica, preinscripcion a sesiones propias y pagos propios. |

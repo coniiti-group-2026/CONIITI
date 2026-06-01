@@ -39,6 +39,9 @@ spec:
             cpu: "200m"
         ports:
         - containerPort: 8000
+        envFrom:
+        - secretRef:
+            name: files-service-secret
         volumeMounts:
         - name: uploads-storage
           mountPath: /app/uploads

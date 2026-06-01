@@ -1,8 +1,7 @@
 import uuid
 import enum
 from datetime import datetime
-from sqlalchemy import Column, String, Float, Enum, DateTime
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, Float, Enum, DateTime, Uuid
 
 from app.database import Base
 
@@ -23,9 +22,9 @@ class PaymentProvider(str, enum.Enum):
 class Payment(Base):
     __tablename__ = "payments"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     # No usamos ForeignKey cruzada para mantener el microservicio desacoplado
-    user_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    user_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
     
     amount = Column(Float, nullable=False)
     currency = Column(String(3), default="COP", nullable=False)

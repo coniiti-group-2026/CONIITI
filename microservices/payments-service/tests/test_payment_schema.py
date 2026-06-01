@@ -1,4 +1,7 @@
+import os
 from uuid import uuid4
+
+os.environ["PAYMENTS_DATABASE_URL"] = "sqlite://"
 
 import pytest
 from pydantic import ValidationError
