@@ -262,11 +262,16 @@ function New-KubernetesSecrets {
 
     Recreate-Secret "payments-service-secret" @(
         "PAYMENTS_DATABASE_URL=postgresql://$postgresUser`:$postgresPassword@shared-postgres-service:5432/paymentsdb",
+        "JWT_SECRET_KEY=$env:JWT_SECRET_KEY",
         "PAYMENT_PROVIDER_MODE=$env:PAYMENT_PROVIDER_MODE",
         "PUBLIC_APP_URL=$env:PUBLIC_APP_URL",
         "PAYPAL_CLIENT_ID=$env:PAYPAL_CLIENT_ID",
         "PAYPAL_CLIENT_SECRET=$env:PAYPAL_CLIENT_SECRET",
         "MP_ACCESS_TOKEN=$env:MP_ACCESS_TOKEN"
+    )
+
+    Recreate-Secret "files-service-secret" @(
+        "JWT_SECRET_KEY=$env:JWT_SECRET_KEY"
     )
 
     Recreate-Secret "analytics-service-secret" @(

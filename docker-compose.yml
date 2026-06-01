@@ -159,6 +159,7 @@ services:
     container_name: payments-service
     environment:
       PAYMENTS_DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-local-dev-postgres-password}@shared-db:5432/paymentsdb
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-jwt-secret-change-me-32-chars}
       PAYMENT_PROVIDER_MODE: ${PAYMENT_PROVIDER_MODE:-mock}
       PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost}
       PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID:-}
@@ -196,6 +197,8 @@ services:
   files-service:
     build: ./microservices/files-service
     container_name: files-service
+    environment:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-dev-jwt-secret-change-me-32-chars}
     volumes:
       - files_uploads:/app/uploads
     deploy:

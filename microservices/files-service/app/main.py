@@ -3,7 +3,7 @@ import logging
 import time
 import uuid
 
-from fastapi import FastAPI, File, Query, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
@@ -15,6 +15,7 @@ from app.schemas.file_schemas import (
     DocumentRead,
 )
 from app.services.file_service import build_default_files_service
+from app.utils.security import AuthenticatedUser, require_files_manager
 
 
 files_service = build_default_files_service()
@@ -82,7 +83,11 @@ def root():
 
 
 @app.post("/upload", response_model=AssetRead)
-async def upload_file(request: Request, file: UploadFile = File(...)):
+async def upload_file(
+    request: Request,
+    file: UploadFile = File(...),
+    _: AuthenticatedUser = Depends(require_files_manager),
+):
     return await files_service.upload_file(request, file)
 
 
@@ -92,7 +97,10 @@ def list_assets(limit: int = Query(default=50, ge=1, le=200)):
 
 
 @app.delete("/assets/{asset_id}", status_code=204)
-def delete_asset(asset_id: str):
+def delete_asset(
+    asset_id: str,
+    _: AuthenticatedUser = Depends(require_files_manager),
+):
     files_service.delete_asset(asset_id)
 
 
@@ -115,12 +123,18 @@ def list_documents(
 
 
 @app.post("/documents", response_model=DocumentRead, status_code=201)
-def create_document(payload: DocumentCreate):
+def create_document(
+    payload: DocumentCreate,
+    _: AuthenticatedUser = Depends(require_files_manager),
+):
     return files_service.create_document(payload)
 
 
 @app.delete("/documents/{document_id}", status_code=204)
-def delete_document(document_id: str):
+def delete_document(
+    document_id: str,
+    _: AuthenticatedUser = Depends(require_files_manager),
+):
     files_service.delete_document(document_id)
 
 
@@ -130,15 +144,25 @@ def list_content_cards(section: str, active_only: bool = Query(default=True)):
 
 
 @app.post("/content/cards", response_model=ContentCardRead, status_code=201)
-def create_content_card(payload: ContentCardCreate):
+def create_content_card(
+    payload: ContentCardCreate,
+    _: AuthenticatedUser = Depends(require_files_manager),
+):
     return files_service.create_content_card(payload)
 
 
 @app.put("/content/cards/{card_id}", response_model=ContentCardRead)
-def update_content_card(card_id: str, payload: ContentCardCreate):
+def update_content_card(
+    card_id: str,
+    payload: ContentCardCreate,
+    _: AuthenticatedUser = Depends(require_files_manager),
+):
     return files_service.update_content_card(card_id, payload)
 
 
 @app.delete("/content/cards/{card_id}", status_code=204)
-def delete_content_card(card_id: str):
+def delete_content_card(
+    card_id: str,
+    _: AuthenticatedUser = Depends(require_files_manager),
+):
     files_service.delete_content_card(card_id)
