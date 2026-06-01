@@ -8,6 +8,7 @@ htmlcov/
 venv/
 env/
 tests/
+uploads/
 *.db
 *.sqlite
 *.sqlite3

@@ -135,7 +135,11 @@ jobs:
           from pathlib import Path
           import yaml
 
-          for path in Path("Kubernetes").rglob("*.yaml"):
+          paths = sorted(Path("kubernetes").rglob("*.yaml"))
+          if not paths:
+              raise SystemExit("No se encontraron manifiestos YAML en kubernetes/")
+
+          for path in paths:
               docs = list(yaml.safe_load_all(path.read_text(encoding="utf-8")))
               if not any(docs):
                   raise SystemExit(f"{path} no contiene recursos YAML")
