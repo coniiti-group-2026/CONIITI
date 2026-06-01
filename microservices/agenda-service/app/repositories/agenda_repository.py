@@ -20,12 +20,18 @@ class AgendaRepository:
     ) -> List[AgendaSession]:
         query = self.db.query(AgendaSession).join(AgendaSession.speaker).options(contains_eager(AgendaSession.speaker))
         
-        if day: query = query.filter(AgendaSession.dia == day)
-        if modality: query = query.filter(AgendaSession.modalidad == modality)
-        if track: query = query.filter(AgendaSession.track == track)
-        if event_type: query = query.filter(AgendaSession.event_type == event_type)
-        if salon: query = query.filter(AgendaSession.salon == salon)
-        if principal_only: query = query.filter(Speaker.es_principal == True)
+        if day:
+            query = query.filter(AgendaSession.dia == day)
+        if modality:
+            query = query.filter(AgendaSession.modalidad == modality)
+        if track:
+            query = query.filter(AgendaSession.track == track)
+        if event_type:
+            query = query.filter(AgendaSession.event_type == event_type)
+        if salon:
+            query = query.filter(AgendaSession.salon == salon)
+        if principal_only:
+            query = query.filter(Speaker.es_principal.is_(True))
         
         if search:
             term = f"%{search.lower()}%"
@@ -40,7 +46,7 @@ class AgendaRepository:
     def get_all_speakers(self, principal_only: bool = False) -> List[Speaker]:
         query = self.db.query(Speaker).options(joinedload(Speaker.sesiones))
         if principal_only:
-            query = query.filter(Speaker.es_principal == True)
+            query = query.filter(Speaker.es_principal.is_(True))
         return query.all()
 
     def get_or_create_speaker(self, nombre: str, afiliacion: str, descripcion: str, foto_url: str, es_principal: bool) -> Speaker:
@@ -57,10 +63,13 @@ class AgendaRepository:
 
         if speaker:
             # Actualizamos información en caso de que un registro traiga foto o correcciones
-            if descripcion: speaker.descripcion = descripcion
-            if foto_url: speaker.foto_url = foto_url
+            if descripcion:
+                speaker.descripcion = descripcion
+            if foto_url:
+                speaker.foto_url = foto_url
             # Si en otra sesión sí figura como principal, actualizar el flag general
-            if es_principal: speaker.es_principal = True
+            if es_principal:
+                speaker.es_principal = True
         else:
             speaker = Speaker(
                 nombre=norm_nombre,

@@ -2,10 +2,10 @@ import uuid
 import enum
 from datetime import datetime, timezone
 from sqlalchemy import (
-    Column, String, Boolean, DateTime, Enum, Integer, Text, Table, ForeignKey, UniqueConstraint
+    Column, String, Boolean, DateTime, Enum, Integer, Text, Table, ForeignKey,
+    UniqueConstraint, Uuid,
 )
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 from app.database import Base
 
 class SessionStatus(str, enum.Enum):
@@ -37,8 +37,8 @@ class SessionEventType(str, enum.Enum):
 session_registrations = Table(
     "session_registrations",
     Base.metadata,
-    Column("user_id", UUID(as_uuid=True), primary_key=True),
-    Column("session_id", UUID(as_uuid=True), primary_key=True),
+    Column("user_id", Uuid(as_uuid=True), primary_key=True),
+    Column("session_id", Uuid(as_uuid=True), primary_key=True),
     Column("registered_at", DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 )
 
@@ -49,7 +49,7 @@ class Speaker(Base):
         UniqueConstraint('nombre', 'afiliacion', name='uix_speaker_nombre_afiliacion'),
     )
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     nombre = Column(String(255), nullable=False, index=True)
     afiliacion = Column(String(255), nullable=False, default="")
     descripcion = Column(Text, nullable=True)
@@ -65,12 +65,12 @@ class Speaker(Base):
 class AgendaSession(Base):
     __tablename__ = "agenda_sessions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     titulo = Column(String(500), nullable=False, index=True)
     descripcion = Column(Text, nullable=True)
     
     # El Ponente ahora vive en su propio Micro-Dominio 
-    speaker_id = Column(UUID(as_uuid=True), ForeignKey("speakers.id"), nullable=False)
+    speaker_id = Column(Uuid(as_uuid=True), ForeignKey("speakers.id"), nullable=False)
     speaker = relationship("Speaker", back_populates="sesiones")
     
     # Propiedades dinámicas de compatibilidad "hacia atrás" para preservar contratos JSON limpios en Swagger y Pydantic.
@@ -115,7 +115,7 @@ class AgendaSession(Base):
     inscritos = Column(Integer, nullable=False, default=0)
     
     # Auditoría desacoplada
-    created_by = Column(UUID(as_uuid=True), nullable=True) 
+    created_by = Column(Uuid(as_uuid=True), nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     def __repr__(self) -> str:

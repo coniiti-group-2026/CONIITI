@@ -167,13 +167,31 @@ cd microservices/auth-service
 python -m pytest -q
 ```
 
+Lint backend desde la raiz:
+
+```powershell
+ruff check microservices
+```
+
+Suite backend completa:
+
+```powershell
+foreach ($service in Get-ChildItem microservices -Directory) {
+  Push-Location $service.FullName
+  python -m pip install -r requirements.txt pytest
+  $env:PYTHONPATH='.'
+  python -m pytest -q
+  Pop-Location
+}
+```
+
 CI local de infraestructura:
 
 ```powershell
 docker compose config --quiet
 ```
 
-El workflow `.github/workflows/ci.yml` valida lint, pruebas, build frontend, auditoria npm, pruebas backend, builds Docker y sintaxis YAML. No realiza despliegue remoto por decision de alcance.
+El workflow `.github/workflows/ci.yml` valida lint, pruebas, build frontend, auditoria npm, lint backend con Ruff, pruebas en todos los microservicios, builds Docker y sintaxis YAML. No realiza despliegue remoto por decision de alcance.
 
 ## Seguridad
 

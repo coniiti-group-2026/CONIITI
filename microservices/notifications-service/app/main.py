@@ -82,7 +82,7 @@ def health_check():
     try:
         total_events = db.query(NotificationEvent).count()
         return {"status": "ok", "service": "notifications", "stored_events": total_events}
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=503, detail="Conexión con base de datos fallida")
     finally:
         db.close()
