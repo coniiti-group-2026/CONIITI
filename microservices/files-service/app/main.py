@@ -4,6 +4,7 @@ import time
 import uuid
 
 from fastapi import Depends, FastAPI, File, Query, Request, UploadFile
+from prometheus_fastapi_instrumentator import Instrumentator
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
@@ -21,6 +22,8 @@ from app.utils.security import AuthenticatedUser, require_files_manager
 files_service = build_default_files_service()
 
 app = FastAPI(title="Files Service", version="1.1.0")
+
+Instrumentator().instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,

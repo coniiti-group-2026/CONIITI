@@ -4,6 +4,7 @@ import time
 import uuid
 
 from fastapi import FastAPI, HTTPException, Request
+from prometheus_fastapi_instrumentator import Instrumentator
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
@@ -38,9 +39,11 @@ initialize_database()
 
 app = FastAPI(
     title="Payments Service",
-    description="Microservicio para la gestion de pagos del CONIITI",
+    description="Microservicio para la gestión de pagos del CONIITI",
     version="1.0.0",
 )
+
+Instrumentator().instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,

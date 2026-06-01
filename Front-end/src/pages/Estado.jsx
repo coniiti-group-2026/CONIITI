@@ -57,14 +57,14 @@ export default function Estado() {
                 <div>
                     <span className={styles.eyebrow}>Observabilidad local</span>
                     <h1>Estado del sistema</h1>
-                    <p>Disponibilidad basica de los servicios expuestos por Traefik en el entorno local.</p>
+                    <p>Disponibilidad básica de los servicios expuestos por Traefik en el entorno local.</p>
                 </div>
                 <button className={styles.refreshButton} onClick={loadStatus} disabled={loading}>
                     <FiRefreshCw />
                     Actualizar
                 </button>
             </section>
-
+            
             <section className={styles.summaryBand}>
                 <div>
                     <strong>{summary.healthy}/{summary.total || 7}</strong>
@@ -76,7 +76,7 @@ export default function Estado() {
                 </div>
                 <div>
                     <strong>{formatTimestamp(lastUpdated)}</strong>
-                    <span>ultima verificacion</span>
+                    <span>última verificación</span>
                 </div>
             </section>
 

@@ -5,6 +5,7 @@ import time
 import uuid
 
 from fastapi import FastAPI, HTTPException, Request
+from prometheus_fastapi_instrumentator import Instrumentator
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import database, events_collection
@@ -12,6 +13,8 @@ from app.messaging.consumer import start_consumer
 
 
 app = FastAPI(title="Analytics Service", version="1.0.0")
+
+Instrumentator().instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,
