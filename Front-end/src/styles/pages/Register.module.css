@@ -197,3 +197,54 @@
 @media (max-width: 768px) and (min-width: 521px) {
     .registerCard { max-width: 420px; }
 }
+
+@media (min-width: 900px) and (max-width: 1366px) and (max-height: 768px) {
+    .registerCard {
+        max-width: 540px;
+    }
+
+    .title {
+        font-size: 1.48rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+        margin-bottom: 1rem;
+    }
+
+    .form {
+        gap: 0.78rem;
+    }
+
+    .row {
+        gap: 0.75rem;
+    }
+
+    .inputGroup {
+        gap: 0.28rem;
+    }
+
+    .inputGroup input,
+    .inputGroup select {
+        padding-top: 0.58rem;
+        padding-bottom: 0.58rem;
+        font-size: 0.9rem;
+    }
+
+    .submitBtn {
+        padding: 0.68rem;
+        margin-top: 0.35rem;
+    }
+
+    .loginLink {
+        margin-top: 0.85rem;
+    }
+}
+
+@media (max-width: 390px) {
+    .registerCard {
+        max-width: 94vw;
+        padding-left: 1.1rem;
+        padding-right: 1.1rem;
+    }
+}
