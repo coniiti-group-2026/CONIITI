@@ -8,6 +8,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from prometheus_fastapi_instrumentator import Instrumentator
 from app.messaging.consumer import start_consumer
 from .database import Base, SessionLocal, engine, get_db
 from .models import NotificationEvent
@@ -39,6 +40,8 @@ def initialize_database() -> None:
 initialize_database()
 
 app = FastAPI(title="Notifications Service", version="1.0.0")
+
+Instrumentator().instrument(app).expose(app)
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 access_logger = logging.getLogger("coniiti.access")

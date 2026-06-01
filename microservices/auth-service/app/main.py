@@ -6,6 +6,7 @@ import uuid
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
+from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy import inspect, text
 
 from app.config import settings
@@ -59,8 +60,11 @@ initialize_database()
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Microservicio desacoplado para autenticacion de usuarios en CONIITI.",
+    description="Microservicio desacoplado para autenticación de usuarios en CONIITI.",
 )
+
+Instrumentator().instrument(app).expose(app)
+
 
 app.add_middleware(
     CORSMiddleware,
