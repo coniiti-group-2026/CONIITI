@@ -1,6 +1,6 @@
 # CONIITI
 
-Guia de ejecucion local para la plataforma de Gestion de Eventos y Comites. La entrega no despliega a staging ni produccion: todo queda reproducible en local con Docker Compose y Minikube usando Docker como driver.
+Guia de ejecucion local para la plataforma de Gestion de Eventos y Comites. Por alcance economico, la entrega no despliega a un staging remoto ni a produccion. En su lugar implementa un flujo reproducible de validacion continua y despliegue continuo local usando Docker Compose y Minikube con Docker como driver.
 
 ## Requisitos
 
@@ -41,7 +41,7 @@ Edita `.env.local` solo en tu maquina y reemplaza cualquier valor `replace-with-
 
 ## Opcion 1: Docker Compose
 
-Desde la raiz del proyecto:
+Desde la raiz del proyecto, este comando construye imagenes, crea la red interna, monta volumenes persistentes y levanta gateway, frontend, bases de datos, mensajeria y microservicios:
 
 ```powershell
 docker compose up --build
@@ -75,6 +75,8 @@ docker compose config --quiet
 docker compose down
 ```
 
+`docker compose ps` muestra la disponibilidad declarada por los `healthcheck` de Postgres, MongoDB, RabbitMQ, microservicios FastAPI y frontend. La aplicacion tambien expone una vista agregada en `http://localhost/estado`.
+
 Para borrar tambien volumenes locales:
 
 ```powershell
@@ -83,7 +85,9 @@ docker compose down -v
 
 ## Opcion 2: Minikube Local
 
-El comando unico de la entrega es:
+Minikube es el entorno de pruebas local tipo staging. Simula el despliegue continuo sin costos de nube: usa imagenes construidas localmente, Secrets de Kubernetes generados desde `.env.local` o defaults de desarrollo, manifests versionados y validacion de rollouts.
+
+El comando unico de despliegue local/staging local es:
 
 ```powershell
 .\scripts\minikube-local.ps1 all
@@ -114,6 +118,17 @@ Acciones disponibles:
 
 `open` imprime una URL como `http://127.0.0.1:8080` y deja un `kubectl port-forward` en segundo plano. `stop-forward` cierra ese tunel local. `clean` elimina los recursos CONIITI aplicados al cluster local, incluyendo PVCs definidos en los manifiestos.
 
+## CD Local Simulado
+
+El pipeline `.github/workflows/ci.yml` no publica a un proveedor externo. Esa decision evita costos de infraestructura, credenciales cloud y dependencias fuera del alcance academico. La intencion DevOps se cubre asi:
+
+1. En cada `push` o `pull_request`, GitHub Actions valida lint, pruebas frontend/backend, auditoria npm, builds Docker y sintaxis de Compose/Kubernetes.
+2. Si la validacion pasa, cualquier integrante puede ejecutar `docker compose up --build` para levantar todo el ecosistema local.
+3. Para una simulacion mas cercana a staging, `.\scripts\minikube-local.ps1 all` construye las imagenes, crea Secrets, aplica manifests de Kubernetes, valida rollouts y expone la aplicacion por port-forward.
+4. Los `.dockerignore` de cada contexto evitan copiar dependencias locales, caches, tests, archivos `.env`, bases SQLite y logs dentro de las imagenes.
+
+Este flujo reemplaza el CD remoto por un despliegue continuo local, auditable y reproducible con herramientas de contenedores y orquestacion vistas en clase.
+
 ## Arquitectura Local
 
 - Frontend: React/Vite.
@@ -135,6 +150,8 @@ Estado general desde la aplicacion:
 http://localhost/estado
 ```
 
+La pagina de estado consulta Auth, Users, Agenda, Files, Payments, Analytics y Notifications. Para cada servicio muestra disponibilidad, codigo HTTP, latencia y ultima verificacion; el resumen superior muestra disponibilidad global y latencia promedio.
+
 Comandos utiles en Kubernetes:
 
 ```powershell
@@ -146,7 +163,11 @@ kubectl describe pod <NOMBRE_DEL_POD>
 kubectl get events --sort-by=.lastTimestamp
 ```
 
-Los servicios FastAPI emiten logs JSON con `service`, `request_id`, `method`, `path`, `status_code` y `duration_ms`.
+Los servicios FastAPI emiten logs JSON con `service`, `request_id`, `method`, `path`, `status_code` y `duration_ms`. La convencion completa esta documentada en `docs/observabilidad.md`.
+
+## Matriz de Cumplimiento
+
+La matriz final de cumplimiento esta en `docs/matriz_cumplimiento.md`. Incluye requisito, evidencia en archivo/ruta y estado: `Cumple`, `Local` o `No aplica por alcance`.
 
 ## Pruebas
 
@@ -167,19 +188,55 @@ cd microservices/auth-service
 python -m pytest -q
 ```
 
+Lint backend desde la raiz:
+
+```powershell
+ruff check microservices
+```
+
+Suite backend completa:
+
+```powershell
+foreach ($service in Get-ChildItem microservices -Directory) {
+  Push-Location $service.FullName
+  python -m pip install -r requirements.txt pytest
+  $env:PYTHONPATH='.'
+  python -m pytest -q
+  Pop-Location
+}
+```
+
 CI local de infraestructura:
 
 ```powershell
 docker compose config --quiet
 ```
 
-El workflow `.github/workflows/ci.yml` valida lint, pruebas, build frontend, auditoria npm, pruebas backend, builds Docker y sintaxis YAML. No realiza despliegue remoto por decision de alcance.
+El workflow `.github/workflows/ci.yml` valida lint, pruebas, build frontend, auditoria npm, lint backend con Ruff, pruebas en todos los microservicios, builds Docker y sintaxis YAML. No realiza despliegue remoto por decision de alcance.
+
+## Infraestructura Local
+
+- Todos los Dockerfiles de aplicacion usan multi-stage build.
+- Cada contexto de build tiene `.dockerignore` para reducir tamano de imagen y evitar subir secretos o artefactos locales.
+- `docker-compose.yml` define red interna, volumenes persistentes y healthchecks para servicios criticos.
+- `.env.example` contiene placeholders y valores locales no sensibles; `.env.local` esta ignorado por Git mediante `.gitignore`.
 
 ## Seguridad
 
 - No hay secretos reales versionados para el despliegue local.
 - `.env.local` queda fuera de Git.
 - Kubernetes recibe secretos mediante `scripts/minikube-local.ps1`.
-- Las contrasenas de usuarios se almacenan con hashing adaptativo.
-- La autenticacion usa tokens JWT firmados.
+- Las contrasenas de usuarios se almacenan con hashing adaptativo mediante `passlib`.
+- La autenticacion usa tokens JWT firmados. El token de sesion viaja en cookie `HttpOnly` y los microservicios validan la firma con `JWT_SECRET_KEY`.
+- Los endpoints administrativos de archivos y contenido (`/api/files/upload`, `/api/files/assets/*`, `/api/files/documents/*`, `/api/files/content/cards/*`) requieren rol `staff` o `superuser`.
+- Los pagos requieren usuario autenticado. Un usuario normal solo puede crear o consultar pagos cuyo `user_id` coincida con el `sub` del JWT; `staff` y `superuser` pueden operar pagos de otros usuarios.
+- La agenda valida en servidor dias permitidos del congreso, formato y orden de horas, cupos no negativos y URLs virtuales `http/https`.
 - Cualquier credencial real que haya sido expuesta previamente debe revocarse fuera del repositorio.
+
+### Matriz de acceso
+
+| Rol | Permisos principales |
+| --- | --- |
+| `superuser` | Administracion completa de usuarios staff, comites, agenda, archivos/contenido y pagos. |
+| `staff` | Gestion operativa de agenda, archivos/contenido y pagos autorizados. |
+| `university_community` / `external` | Consulta publica, preinscripcion a sesiones propias y pagos propios. |

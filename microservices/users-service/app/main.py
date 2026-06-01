@@ -61,7 +61,7 @@ app.add_middleware(
 app.include_router(router, tags=["Users"])
 app.include_router(committees_router)
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 access_logger = logging.getLogger("coniiti.access")
 
 
@@ -103,7 +103,7 @@ def health():
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
         return {"status": "ok", "service": "users-service", "database": "connected"}
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=503, detail="Conexión con base de datos fallida")
 
 

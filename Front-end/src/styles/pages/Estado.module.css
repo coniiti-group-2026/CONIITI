@@ -59,7 +59,7 @@
 
 .summaryBand {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
     width: min(1180px, 100%);
     margin: 0 auto 1rem;
@@ -103,12 +103,13 @@
 
 .cardHead {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.65rem;
     margin-bottom: 1rem;
 }
 
 .cardHead svg {
+    flex: 0 0 auto;
     width: 24px;
     height: 24px;
 }
@@ -125,6 +126,14 @@
     margin: 0;
     color: var(--color-primary);
     font-size: 1.1rem;
+}
+
+.cardHead p {
+    overflow-wrap: anywhere;
+    margin: 0.25rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 700;
 }
 
 .card dl {
@@ -146,6 +155,15 @@
 .card dd {
     margin: 0;
     color: var(--color-text);
+    font-weight: 700;
+    text-align: right;
+}
+
+.error {
+    overflow-wrap: anywhere;
+    margin: 0.9rem 0 0;
+    color: #b91c1c;
+    font-size: 0.9rem;
     font-weight: 700;
 }
 

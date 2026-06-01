@@ -40,7 +40,7 @@ initialize_database()
 
 app = FastAPI(title="Notifications Service", version="1.0.0")
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 access_logger = logging.getLogger("coniiti.access")
 
 
@@ -82,7 +82,7 @@ def health_check():
     try:
         total_events = db.query(NotificationEvent).count()
         return {"status": "ok", "service": "notifications", "stored_events": total_events}
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=503, detail="Conexión con base de datos fallida")
     finally:
         db.close()
