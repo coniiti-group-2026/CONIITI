@@ -78,7 +78,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 access_logger = logging.getLogger("coniiti.access")
 
 

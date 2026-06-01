@@ -150,6 +150,8 @@ Estado general desde la aplicacion:
 http://localhost/estado
 ```
 
+La pagina de estado consulta Auth, Users, Agenda, Files, Payments, Analytics y Notifications. Para cada servicio muestra disponibilidad, codigo HTTP, latencia y ultima verificacion; el resumen superior muestra disponibilidad global y latencia promedio.
+
 Comandos utiles en Kubernetes:
 
 ```powershell
@@ -161,7 +163,11 @@ kubectl describe pod <NOMBRE_DEL_POD>
 kubectl get events --sort-by=.lastTimestamp
 ```
 
-Los servicios FastAPI emiten logs JSON con `service`, `request_id`, `method`, `path`, `status_code` y `duration_ms`.
+Los servicios FastAPI emiten logs JSON con `service`, `request_id`, `method`, `path`, `status_code` y `duration_ms`. La convencion completa esta documentada en `docs/observabilidad.md`.
+
+## Matriz de Cumplimiento
+
+La matriz final de cumplimiento esta en `docs/matriz_cumplimiento.md`. Incluye requisito, evidencia en archivo/ruta y estado: `Cumple`, `Local` o `No aplica por alcance`.
 
 ## Pruebas
 

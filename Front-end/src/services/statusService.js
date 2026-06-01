@@ -13,7 +13,7 @@ export const HEALTH_TARGETS = [
     { id: 'notifications', label: 'Notifications', path: '/notifications/health' },
 ];
 
-async function checkTarget(target) {
+async function checkTarget(target, checkedAt) {
     const startedAt = performance.now();
 
     try {
@@ -28,6 +28,7 @@ async function checkTarget(target) {
             ok: response.ok,
             statusCode: response.status,
             latencyMs,
+            checkedAt,
             payload,
         };
     } catch (error) {
@@ -36,11 +37,13 @@ async function checkTarget(target) {
             ok: false,
             statusCode: null,
             latencyMs: Math.round(performance.now() - startedAt),
+            checkedAt,
             error: error.message,
         };
     }
 }
 
 export async function checkSystemStatus() {
-    return Promise.all(HEALTH_TARGETS.map(checkTarget));
+    const checkedAt = new Date().toISOString();
+    return Promise.all(HEALTH_TARGETS.map((target) => checkTarget(target, checkedAt)));
 }
