@@ -36,7 +36,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 access_logger = logging.getLogger("coniiti.access")
 
 

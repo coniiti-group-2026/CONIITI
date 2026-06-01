@@ -40,7 +40,7 @@ initialize_database()
 
 app = FastAPI(title="Notifications Service", version="1.0.0")
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 access_logger = logging.getLogger("coniiti.access")
 
 

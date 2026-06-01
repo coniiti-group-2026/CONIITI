@@ -5,6 +5,11 @@ import { checkSystemStatus } from '../services/statusService';
 import styles from '../styles/pages/Estado.module.css';
 
 
+function formatTimestamp(value) {
+    if (!value) return '--:--';
+    return new Date(value).toLocaleTimeString();
+}
+
 export default function Estado() {
     const [checks, setChecks] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -13,14 +18,21 @@ export default function Estado() {
     const summary = useMemo(() => {
         const total = checks.length;
         const healthy = checks.filter((check) => check.ok).length;
-        return { total, healthy };
+        const latencies = checks
+            .map((check) => check.latencyMs)
+            .filter((latency) => Number.isFinite(latency));
+        const averageLatencyMs = latencies.length
+            ? Math.round(latencies.reduce((totalLatency, latency) => totalLatency + latency, 0) / latencies.length)
+            : null;
+
+        return { total, healthy, averageLatencyMs };
     }, [checks]);
 
     const loadStatus = async () => {
         setLoading(true);
         const results = await checkSystemStatus();
         setChecks(results);
-        setLastUpdated(new Date());
+        setLastUpdated(results[0]?.checkedAt ?? new Date().toISOString());
         setLoading(false);
     };
 
@@ -29,7 +41,7 @@ export default function Estado() {
         checkSystemStatus().then((results) => {
             if (!cancelled) {
                 setChecks(results);
-                setLastUpdated(new Date());
+                setLastUpdated(results[0]?.checkedAt ?? new Date().toISOString());
                 setLoading(false);
             }
         });
@@ -59,7 +71,11 @@ export default function Estado() {
                     <span>servicios disponibles</span>
                 </div>
                 <div>
-                    <strong>{lastUpdated ? lastUpdated.toLocaleTimeString() : '--:--'}</strong>
+                    <strong>{summary.averageLatencyMs ?? '--'}{summary.averageLatencyMs !== null ? ' ms' : ''}</strong>
+                    <span>latencia promedio</span>
+                </div>
+                <div>
+                    <strong>{formatTimestamp(lastUpdated)}</strong>
                     <span>ultima verificacion</span>
                 </div>
             </section>
@@ -72,7 +88,10 @@ export default function Estado() {
                         <article key={check.id} className={`${styles.card} ${check.ok ? styles.ok : styles.down}`}>
                             <div className={styles.cardHead}>
                                 {check.ok ? <FiCheckCircle /> : <FiXCircle />}
-                                <h2>{check.label}</h2>
+                                <div>
+                                    <h2>{check.label}</h2>
+                                    <p>{check.path}</p>
+                                </div>
                             </div>
                             <dl>
                                 <div>
@@ -87,7 +106,12 @@ export default function Estado() {
                                     <dt>Estado</dt>
                                     <dd>{check.ok ? 'Disponible' : 'No disponible'}</dd>
                                 </div>
+                                <div>
+                                    <dt>Verificado</dt>
+                                    <dd>{formatTimestamp(check.checkedAt)}</dd>
+                                </div>
                             </dl>
+                            {check.error && <p className={styles.error}>{check.error}</p>}
                         </article>
                     ))
                 )}
