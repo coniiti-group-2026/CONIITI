@@ -26,4 +26,16 @@ describe('Pagina de estado', () => {
     expect(screen.getByText('Auth')).toBeInTheDocument();
     expect(screen.getByText('Notifications')).toBeInTheDocument();
   });
+
+  it('muestra servicios no disponibles cuando falla la API de estado', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('Network error'))));
+
+    render(<Estado />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/no disponible/i).length).toBeGreaterThan(0);
+    });
+
+    expect(screen.getAllByText(/sin respuesta/i).length).toBeGreaterThan(0);
+  });
 });

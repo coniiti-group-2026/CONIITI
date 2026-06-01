@@ -119,7 +119,7 @@ def health_check():
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
         return {"status": "ok", "database": "connected"}
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=503, detail="Conexión con base de datos fallida")
 
 @app.get("/")

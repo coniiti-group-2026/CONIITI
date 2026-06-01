@@ -2,7 +2,7 @@ import os
 import uuid
 from dataclasses import dataclass
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import HTTPException, Request, status
 from jose import JWTError, jwt
 
 

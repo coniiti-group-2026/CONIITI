@@ -73,7 +73,7 @@ async def health_check():
     try:
         await database.command("ping")
         return {"status": "ok", "service": "analytics-service", "database": "connected"}
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=503, detail="Conexión con base de datos fallida")
 
 
