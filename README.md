@@ -33,8 +33,14 @@ git --version
 
 El repositorio incluye `.env.example` con placeholders. Para una demo local puedes omitir `.env.local` y el script usara defaults seguros de desarrollo. Para usar valores propios:
 
+En Windows (PowerShell):
 ```powershell
 Copy-Item .env.example .env.local
+```
+
+En Linux / macOS (Bash):
+```bash
+cp .env.example .env.local
 ```
 
 Edita `.env.local` solo en tu maquina y reemplaza cualquier valor `replace-with-*`. Ese archivo esta ignorado por Git y no debe contener credenciales reales de produccion. El script de Minikube puede funcionar sin `.env.local`, usando valores locales de desarrollo.
@@ -89,8 +95,15 @@ Minikube es el entorno de pruebas local tipo staging. Simula el despliegue conti
 
 El comando unico de despliegue local/staging local es:
 
+En Windows (PowerShell):
 ```powershell
 .\scripts\minikube-local.ps1 all
+```
+
+En Linux / macOS (Bash):
+```bash
+chmod +x scripts/*.sh
+./scripts/minikube-local.sh all
 ```
 
 Ese flujo ejecuta:
@@ -101,20 +114,19 @@ minikube start --driver=docker --cpus=2 --memory=3072 --disk-size=20g
 
 Luego conecta Docker al daemon de Minikube, construye las imagenes locales, crea Secrets de Kubernetes desde `.env.local` o defaults locales, aplica infraestructura, microservicios e ingress, valida rollouts y expone Traefik por `localhost` con port-forward.
 
-Acciones disponibles:
+Acciones disponibles (reemplaza `.ps1` por `.sh` y `\` por `/` en Linux / macOS):
 
+Windows:
 ```powershell
-.\scripts\minikube-local.ps1 start
-.\scripts\minikube-local.ps1 build
-.\scripts\minikube-local.ps1 secrets
-.\scripts\minikube-local.ps1 deploy
-.\scripts\minikube-local.ps1 status
-.\scripts\minikube-local.ps1 open
-.\scripts\minikube-local.ps1 stop-forward
-.\scripts\minikube-local.ps1 clean
-.\scripts\minikube-local.ps1 reset
-.\scripts\minikube-local.ps1 all
+.\scripts\minikube-local.ps1 <accion>
 ```
+
+Linux / macOS:
+```bash
+./scripts/minikube-local.sh <accion>
+```
+
+Donde `<accion>` puede ser: `start`, `build`, `secrets`, `deploy`, `status`, `open`, `stop-forward`, `clean`, `reset`, `all`.
 
 `open` imprime una URL como `http://127.0.0.1:8080` y deja un `kubectl port-forward` en segundo plano. `stop-forward` cierra ese tunel local. `clean` elimina los recursos CONIITI aplicados al cluster local, incluyendo PVCs definidos en los manifiestos.
 
@@ -124,7 +136,7 @@ El pipeline `.github/workflows/ci.yml` no publica a un proveedor externo. Esa de
 
 1. En cada `push` o `pull_request`, GitHub Actions valida lint, pruebas frontend/backend, auditoria npm, builds Docker y sintaxis de Compose/Kubernetes.
 2. Si la validacion pasa, cualquier integrante puede ejecutar `docker compose up --build` para levantar todo el ecosistema local.
-3. Para una simulacion mas cercana a staging, `.\scripts\minikube-local.ps1 all` construye las imagenes, crea Secrets, aplica manifests de Kubernetes, valida rollouts y expone la aplicacion por port-forward.
+3. Para una simulacion mas cercana a staging, `.\scripts\minikube-local.ps1 all` (o `./scripts/minikube-local.sh all` en Linux) construye las imagenes, crea Secrets, aplica manifests de Kubernetes, valida rollouts y expone la aplicacion por port-forward.
 4. Los `.dockerignore` de cada contexto evitan copiar dependencias locales, caches, tests, archivos `.env`, bases SQLite y logs dentro de las imagenes.
 
 Este flujo reemplaza el CD remoto por un despliegue continuo local, auditable y reproducible con herramientas de contenedores y orquestacion vistas en clase.
@@ -196,6 +208,7 @@ ruff check microservices
 
 Suite backend completa:
 
+En Windows (PowerShell):
 ```powershell
 foreach ($service in Get-ChildItem microservices -Directory) {
   Push-Location $service.FullName
@@ -204,6 +217,16 @@ foreach ($service in Get-ChildItem microservices -Directory) {
   python -m pytest -q
   Pop-Location
 }
+```
+
+En Linux / macOS (Bash):
+```bash
+for service in microservices/*/; do
+  pushd "$service"
+  python3 -m pip install -r requirements.txt pytest
+  PYTHONPATH=. python3 -m pytest -q
+  popd
+done
 ```
 
 CI local de infraestructura:
@@ -225,7 +248,7 @@ El workflow `.github/workflows/ci.yml` valida lint, pruebas, build frontend, aud
 
 - No hay secretos reales versionados para el despliegue local.
 - `.env.local` queda fuera de Git.
-- Kubernetes recibe secretos mediante `scripts/minikube-local.ps1`.
+- Kubernetes recibe secretos mediante `scripts/minikube-local.ps1` o `scripts/minikube-local.sh`.
 - Las contrasenas de usuarios se almacenan con hashing adaptativo mediante `passlib`.
 - La autenticacion usa tokens JWT firmados. El token de sesion viaja en cookie `HttpOnly` y los microservicios validan la firma con `JWT_SECRET_KEY`.
 - Los endpoints administrativos de archivos y contenido (`/api/files/upload`, `/api/files/assets/*`, `/api/files/documents/*`, `/api/files/content/cards/*`) requieren rol `staff` o `superuser`.
