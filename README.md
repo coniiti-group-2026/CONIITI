@@ -1,6 +1,6 @@
 # CONIITI
 
-Guia de ejecucion local para la plataforma de Gestion de Eventos y Comites. La entrega no despliega a staging ni produccion: todo queda reproducible en local con Docker Compose y Minikube usando Docker como driver.
+Guia de ejecucion local para la plataforma de Gestion de Eventos y Comites. Por alcance economico, la entrega no despliega a un staging remoto ni a produccion. En su lugar implementa un flujo reproducible de validacion continua y despliegue continuo local usando Docker Compose y Minikube con Docker como driver.
 
 ## Requisitos
 
@@ -41,7 +41,7 @@ Edita `.env.local` solo en tu maquina y reemplaza cualquier valor `replace-with-
 
 ## Opcion 1: Docker Compose
 
-Desde la raiz del proyecto:
+Desde la raiz del proyecto, este comando construye imagenes, crea la red interna, monta volumenes persistentes y levanta gateway, frontend, bases de datos, mensajeria y microservicios:
 
 ```powershell
 docker compose up --build
@@ -75,6 +75,8 @@ docker compose config --quiet
 docker compose down
 ```
 
+`docker compose ps` muestra la disponibilidad declarada por los `healthcheck` de Postgres, MongoDB, RabbitMQ, microservicios FastAPI y frontend. La aplicacion tambien expone una vista agregada en `http://localhost/estado`.
+
 Para borrar tambien volumenes locales:
 
 ```powershell
@@ -83,7 +85,9 @@ docker compose down -v
 
 ## Opcion 2: Minikube Local
 
-El comando unico de la entrega es:
+Minikube es el entorno de pruebas local tipo staging. Simula el despliegue continuo sin costos de nube: usa imagenes construidas localmente, Secrets de Kubernetes generados desde `.env.local` o defaults de desarrollo, manifests versionados y validacion de rollouts.
+
+El comando unico de despliegue local/staging local es:
 
 ```powershell
 .\scripts\minikube-local.ps1 all
@@ -113,6 +117,17 @@ Acciones disponibles:
 ```
 
 `open` imprime una URL como `http://127.0.0.1:8080` y deja un `kubectl port-forward` en segundo plano. `stop-forward` cierra ese tunel local. `clean` elimina los recursos CONIITI aplicados al cluster local, incluyendo PVCs definidos en los manifiestos.
+
+## CD Local Simulado
+
+El pipeline `.github/workflows/ci.yml` no publica a un proveedor externo. Esa decision evita costos de infraestructura, credenciales cloud y dependencias fuera del alcance academico. La intencion DevOps se cubre asi:
+
+1. En cada `push` o `pull_request`, GitHub Actions valida lint, pruebas frontend/backend, auditoria npm, builds Docker y sintaxis de Compose/Kubernetes.
+2. Si la validacion pasa, cualquier integrante puede ejecutar `docker compose up --build` para levantar todo el ecosistema local.
+3. Para una simulacion mas cercana a staging, `.\scripts\minikube-local.ps1 all` construye las imagenes, crea Secrets, aplica manifests de Kubernetes, valida rollouts y expone la aplicacion por port-forward.
+4. Los `.dockerignore` de cada contexto evitan copiar dependencias locales, caches, tests, archivos `.env`, bases SQLite y logs dentro de las imagenes.
+
+Este flujo reemplaza el CD remoto por un despliegue continuo local, auditable y reproducible con herramientas de contenedores y orquestacion vistas en clase.
 
 ## Arquitectura Local
 
@@ -192,6 +207,13 @@ docker compose config --quiet
 ```
 
 El workflow `.github/workflows/ci.yml` valida lint, pruebas, build frontend, auditoria npm, lint backend con Ruff, pruebas en todos los microservicios, builds Docker y sintaxis YAML. No realiza despliegue remoto por decision de alcance.
+
+## Infraestructura Local
+
+- Todos los Dockerfiles de aplicacion usan multi-stage build.
+- Cada contexto de build tiene `.dockerignore` para reducir tamano de imagen y evitar subir secretos o artefactos locales.
+- `docker-compose.yml` define red interna, volumenes persistentes y healthchecks para servicios criticos.
+- `.env.example` contiene placeholders y valores locales no sensibles; `.env.local` esta ignorado por Git mediante `.gitignore`.
 
 ## Seguridad
 
