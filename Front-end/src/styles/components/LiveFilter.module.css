@@ -117,8 +117,8 @@
 .searchWrapper {
     position: relative;
     margin-left: 0;
-    width: 100%;
-    min-width: 180px;
+    width: 260px;
+    min-width: 260px;
 }
 
 .searchIcon {
