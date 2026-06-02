@@ -13,14 +13,14 @@
 | Validacion y sanitizacion de entradas en servidor | `microservices/auth-service/app/schemas/`, `microservices/users-service/app/schemas/`, `microservices/agenda-service/app/schemas/agenda.py`, `microservices/files-service/app/schemas.py`, `microservices/payments-service/app/schemas/` | Cumple |
 | Dockerfile multi-stage para componentes de aplicacion | `Front-end/Dockerfile`, `microservices/*/Dockerfile` | Cumple |
 | Orquestacion local con un solo comando | `docker-compose.yml`, comando `docker compose up --build` documentado en `README.md` | Cumple |
-| Aislamiento de configuracion por variables de entorno | `.env.example`, `.gitignore`, `docker-compose.yml`, `scripts/minikube-local.ps1` | Cumple |
-| Evitar secretos sensibles en codigo fuente | `.env.example`, `.gitignore`, `README.md`, `scripts/minikube-local.ps1` | Cumple |
+| Aislamiento de configuracion por variables de entorno | `.env.example`, `.gitignore`, `docker-compose.yml`, `scripts/minikube-local.ps1` / `scripts/minikube-local.sh` | Cumple |
+| Evitar secretos sensibles en codigo fuente | `.env.example`, `.gitignore`, `README.md`, `scripts/minikube-local.ps1` / `scripts/minikube-local.sh` | Cumple |
 | Suite de pruebas frontend | `Front-end/src/__test__/`, `Front-end/package.json` | Cumple |
 | Suite de pruebas backend por microservicio | `microservices/*/tests/`, `.github/workflows/ci.yml` | Cumple |
 | Linter backend con Ruff | `pyproject.toml`, `.github/workflows/ci.yml` | Cumple |
 | Integracion continua con lint, pruebas, auditoria, Docker y manifiestos | `.github/workflows/ci.yml` | Cumple |
 | Despliegue continuo remoto a staging | `README.md`, seccion `CD Local Simulado` | No aplica por alcance economico |
-| Despliegue continuo local tipo staging | `scripts/minikube-local.ps1`, `Kubernetes/`, `README.md`, `.github/workflows/ci.yml` | Local |
+| Despliegue continuo local tipo staging | `scripts/minikube-local.ps1` / `scripts/minikube-local.sh`, `Kubernetes/`, `README.md`, `.github/workflows/ci.yml` | Local |
 | Autenticacion con JWT firmado | `microservices/auth-service/app/utils/jwt.py`, `microservices/users-service/app/utils/security.py`, `microservices/agenda-service/app/utils/security.py`, `microservices/files-service/app/utils/security.py`, `microservices/payments-service/app/utils/security.py` | Cumple |
 | Hash adaptativo de contrasenas | `microservices/auth-service/app/utils/jwt.py`, `microservices/auth-service/requirements.txt` | Cumple |
 | Control de acceso por roles | `Front-end/src/components/ProtectedRoute.jsx`, `microservices/users-service/app/utils/security.py`, `microservices/agenda-service/app/utils/security.py`, `microservices/files-service/app/utils/security.py`, `microservices/payments-service/app/utils/security.py` | Cumple |
